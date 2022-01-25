@@ -1,0 +1,23 @@
+version: '3'
+services:
+  coordinator:
+    image: cbdc-testing-coordinator
+    environment:
+      - HTTP_PORT=9000
+      - HTTPS_WITHOUT_CLIENT_CERT_PORT=8444
+      - HTTPS_PORT=8443
+    volumes:
+      - ./docker-config/id_rsa:/root/.ssh/id_rsa:ro
+      - ./docker-config/aws-credentials:/root/.aws/credentials:ro
+      - ./docker-data:/app/data
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "8443:8443"
+      - "8444:8444"
+    networks:
+      - cbdc-test
+
+networks:
+  cbdc-test:
+    driver: bridge

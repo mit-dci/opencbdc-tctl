@@ -1,0 +1,7 @@
+cmd/agent/agent
+cmd/coordinator/coordinator
+cmd/coordinator/data
+cmd/agent/data
+frontend/node_modules
+./docker-data
+./docker-config

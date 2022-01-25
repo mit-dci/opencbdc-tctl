@@ -1,0 +1,10 @@
+cmd/agent/agent
+cmd/coordinator/coordinator
+cmd/coordinator/data
+cmd/agent/data
+cmd/testaws
+docker-data
+docker-deploy.sh
+docker-compose-local.yml
+cmd/testperf
+docker-config

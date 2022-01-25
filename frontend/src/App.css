@@ -1,0 +1,92 @@
+body {
+  font-family: 'Courier New', Courier, monospace;
+  color: #00aa00;
+  background-color: black;
+  font-size: 9pt;
+  line-height: 9pt;
+}
+
+button.btn, .form-control {
+  font-size: 9pt;
+}
+
+.form-control {
+  height: calc(1.5em + 2px);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 14pt;
+}
+
+h2 {
+  font-size: 12pt;
+}
+
+h3 {
+  font-size: 11pt;
+}
+
+h4, h5, h6 {
+  font-size: 10pt;
+}
+
+button.btn, button.btn:hover {
+  color: #00aa00;
+  border: 2px solid #00bb00;
+  font-weight:  bold;
+  cursor: pointer;
+  background: none;
+  border-radius: 0px;
+  margin: 10px 0px;
+}.
+
+button.btn:hover, button.btn.btn-secondary.active {
+  color: #00ff00;
+  background-color: #004400;
+}
+
+.btn-secondary:not(:disabled):not(.disabled).active {
+  color: #00ff00;
+  background-color: #004400;
+  border: 2px solid #00bb00;
+  box-shadow: none;
+}
+
+.card {
+  background: none;
+  border-radius: 0px;
+  border: 2px solid #00bb00;
+}
+
+.card-header {
+  border-bottom: 2px solid #00bb00;
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+table.table {
+  color:  #00aa00;
+}
+
+table.table > thead > tr > th
+{
+  border-top: 1px solid #00bb00;
+}
+
+table.table > thead > tr > th,  table.table > tbody > tr > td {
+  border-bottom: 1px solid #00bb00;
+}
+
+select.form-control, input.form-control {
+  color: #00aa00;
+  border: 2px solid #00bb00;
+  border-radius: 0px;
+  background: none;
+  padding: 0px 10px;
+  margin: 0px;
+  line-height: 1;
+}
