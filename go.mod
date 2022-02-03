@@ -3,9 +3,11 @@ module github.com/mit-dci/cbdc-test-controller
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.5.0
+	github.com/aws/aws-sdk-go-v2 v1.13.0
 	github.com/aws/aws-sdk-go-v2/config v1.2.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.2.0
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/batch v1.14.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.7.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.7.0
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.2.2
