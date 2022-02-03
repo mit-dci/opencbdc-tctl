@@ -226,6 +226,16 @@ func (srv *HttpServer) AuthorizeHandler(
 ) {
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(200)
+
+	postForm := ""
+	if len(srv.users) == 0 {
+		postForm = `<h2>Authorize first user</h2><p>Since your system does not have any configured users yet, you can add the first one from this unauthenticated endpoint. Browse to the .crt file you created to add it to the list of authenticated users.</p>
+		<form enctype="multipart/form-data" action="/firstTimeAuth" method="post">
+		<input type="file" name="firstTimeCert" />
+		<button type="submit">Authorize</button>
+		</form>`
+	}
+
 	_, err := w.Write([]byte(`
       <html>
          <head>
@@ -273,7 +283,8 @@ func (srv *HttpServer) AuthorizeHandler(
             </table>
             <p>Execute the following script in a bash shell (<a href="#" onclick="copyScript()">Copy</a>):</p>
             <textarea id="script" style="background-color: #e0e0e0; color: black;" cols=80 rows=12></textarea>
-         </body>
+			` + postForm +
+		`</body>
       </html>`))
 	if err != nil {
 		logging.Errorf("Error writing output: %v", err)
@@ -456,6 +467,7 @@ func (srv *HttpServer) Run() error {
 	r.HandleFunc("/health", srv.HealthHandler)
 	r.HandleFunc("/", srv.HttpsRedirect)
 	r.HandleFunc("/ws/{token}", srv.wsWithTokenHandler)
+	r.HandleFunc("/firstTimeAuth", srv.firstTimeAddUserHandler)
 
 	go func() {
 		err := http.ListenAndServeTLS(
