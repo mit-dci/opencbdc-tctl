@@ -21,6 +21,9 @@ type AwsManager struct {
 	vcpuLimit             map[string]int32
 	s3Clients             map[string]*s3.Client
 	s3ClientsLock         sync.Mutex
+	seeds                 []*ShardSeed
+	forceRefreshSeeds     chan bool
+	seedLock              sync.Mutex
 }
 
 // NewAwsManager creates a new AwsManager instance
@@ -31,9 +34,12 @@ func NewAwsManager() *AwsManager {
 		vcpuLimit:             map[string]int32{},
 		Enabled:               true,
 		runningInstancesLock:  sync.Mutex{},
+		seedLock:              sync.Mutex{},
 		runningInstances:      make([]*AwsInstance, 0),
 		forceRefreshTemplates: make(chan bool, 1),
 		forceRefreshSubnets:   make(chan bool, 1),
+		seeds:                 make([]*ShardSeed, 0),
+		forceRefreshSeeds:     make(chan bool, 1),
 	}
 	// Run initialization in a separate goroutine
 	go func() {
@@ -78,10 +84,12 @@ func NewAwsManager() *AwsManager {
 			}
 		}
 
-		// Load the launch templates, subnets and limits for the first time
+		// Load the launch templates, subnets, seeds and limits for the first
+		// time
 		am.refreshLaunchTemplates()
 		am.refreshSubnets()
 		am.refreshLimits()
+		am.refreshSeeds()
 	}()
 
 	// Start a loop that refreshes the launch templates periodically

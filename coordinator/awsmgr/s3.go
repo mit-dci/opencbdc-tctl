@@ -21,6 +21,18 @@ import (
 	"github.com/mit-dci/cbdc-test-controller/logging"
 )
 
+// getS3Default returns an S3 client for use in the default region.
+func (am *AwsManager) getS3Default() (*s3.Client, error) {
+	defaultRegion := os.Getenv("AWS_DEFAULT_REGION")
+	if defaultRegion == "" {
+		logging.Warnf(
+			"Environment AWS_DEFAULT_REGION is not set, falling back to us-east-1",
+		)
+		defaultRegion = "us-east-1"
+	}
+	return am.getS3(defaultRegion)
+}
+
 // getS3 returns an S3 client for the given region. Since s3 clients are thread
 // safe, we cache these clients per region and reuse them if they were
 // previously created.

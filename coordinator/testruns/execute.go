@@ -18,9 +18,16 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 	tr.ControllerCommit = t.commitHash
 	t.PersistTestRun(tr)
 
-	err := t.CompileBinaries(tr)
+	err := t.CheckPreseed(tr)
+	if err != nil {
+		t.FailTestRun(tr, fmt.Errorf("Preseeding failed: %v", err))
+		return
+	}
+
+	err = t.CompileBinaries(tr)
 	if err != nil {
 		t.FailTestRun(tr, fmt.Errorf("Compilation failed: %v", err))
+		return
 	}
 
 	binariesInS3, err := t.UploadBinaries(tr)
@@ -29,6 +36,7 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 			tr,
 			fmt.Errorf("Failed to upload binaries to S3: %v", err),
 		)
+		return
 	}
 
 	if t.HasAWSRoles(tr) {

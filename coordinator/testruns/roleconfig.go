@@ -163,8 +163,7 @@ func (t *TestRunManager) writePreseedConfigVariables(
 	if tr.PreseedShards {
 		if _, err := cfg.Write(
 			[]byte(
-				"\nseed_privkey=\"a0f36553548b3a66c003413140d" +
-					"7b59e43464ca11af66f25a6e746be501596b7\"\n",
+				"\nseed_privkey=\"" + seed_privkey + "\"\n",
 			),
 		); err != nil {
 			return err

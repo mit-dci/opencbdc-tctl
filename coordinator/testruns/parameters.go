@@ -7,6 +7,9 @@ import (
 	"github.com/mit-dci/cbdc-test-controller/common"
 )
 
+// seed_privkey is used by the loadgens for spending the seeded outputs
+var seed_privkey = "a0f36553548b3a66c003413140d7b59e43464ca11af66f25a6e746be501596b7"
+
 // SubstituteParameters will replace placeholders in commands, command line
 // parameters, with values based on the role's configuration or index in a
 // cluster
@@ -46,7 +49,11 @@ func (t *TestRunManager) SubstituteParameters(
 			fmt.Sprintf("%d", tr.SampleCount),
 		)
 		p = strings.ReplaceAll(p, "%SIGN_TXS%", "1") // Always sign
-		p = strings.ReplaceAll(p, "%THREADS%", fmt.Sprintf("%d", tr.LoadGenThreads))
+		p = strings.ReplaceAll(
+			p,
+			"%THREADS%",
+			fmt.Sprintf("%d", tr.LoadGenThreads),
+		)
 
 		newParams = append(newParams, p)
 	}

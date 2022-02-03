@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/cbdc-test-controller/coordinator/awsmgr"
 	"github.com/mit-dci/cbdc-test-controller/logging"
 	"github.com/mit-dci/cbdc-test-controller/wire"
 )
@@ -220,6 +221,65 @@ func (t *TestRunManager) PreseedShards(
 		return errors.New("Failed to seed shards: " + jointErr)
 	}
 	t.UpdateStatus(tr, common.TestRunStatusRunning, "Done pre-seeding shards")
+
+	return nil
+}
+
+func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
+	if !tr.PreseedShards {
+		return nil
+	}
+
+	seedMode := 0
+	numShards := len(
+		t.GetAllRolesSorted(tr, common.SystemRoleShard),
+	) / tr.ShardReplicationFactor
+	if t.Is2PC(tr.Architecture) {
+		seedMode = 1
+		numShards = len(
+			t.GetAllRolesSorted(tr, common.SystemRoleShardTwoPhase),
+		) / tr.ShardReplicationFactor
+	}
+	wantSeed := awsmgr.ShardSeed{
+		Outputs:  int(tr.PreseedCount),
+		SeedMode: seedMode,
+		Shards:   numShards,
+	}
+	hasSeed, err := t.awsm.HasSeed(wantSeed, false)
+	if err != nil {
+		return fmt.Errorf("error checking preseed existence: %v", err)
+	}
+
+	if !hasSeed {
+		t.UpdateStatus(tr, common.TestRunStatusRunning, "Generating preseed")
+		hasSeed, err := t.awsm.HasSeed(wantSeed, true)
+		if err != nil {
+			return fmt.Errorf("error checking preseed existence: %v", err)
+		}
+		if !hasSeed {
+			err := t.awsm.GenerateSeed(wantSeed)
+			if err != nil {
+				return fmt.Errorf("error generating preseed: %v", err)
+			}
+		}
+	}
+
+	for {
+		t.UpdateStatus(
+			tr,
+			common.TestRunStatusRunning,
+			"Waiting for preseed generation to complete",
+		)
+		hasSeed, err := t.awsm.HasSeed(wantSeed, false)
+		if err != nil {
+			return fmt.Errorf("error checking preseed existence: %v", err)
+		}
+		if hasSeed {
+			break
+		}
+
+		time.Sleep(time.Second * 5)
+	}
 
 	return nil
 }

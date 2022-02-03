@@ -50,5 +50,6 @@ func (h *HttpServer) initialStateHandler(
 		"sweepPlotConfig": h.getSweepPlotConfig(),
 		"testRunFields":   h.testRunFieldList(),
 		"perfGraphs":      h.performancePlotTypes(),
+		"shardSeeds":      h.awsm.GetAvailableSeeds(),
 	})
 }
