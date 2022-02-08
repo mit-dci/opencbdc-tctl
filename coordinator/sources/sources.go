@@ -290,7 +290,7 @@ func (s *SourcesManager) updateCommitHistory() error {
 		"git",
 		"fetch",
 		"origin",
-		"+refs/pull/*/head:refs/remotes/origin/pr/*",
+		"+refs/pull/*/head:refs/remotes/origin/pr-head/*",
 	)
 	cmd.Dir = sourcesDir()
 	out, err = cmd.CombinedOutput()
@@ -298,22 +298,38 @@ func (s *SourcesManager) updateCommitHistory() error {
 		return fmt.Errorf("Failed to fetch PRs: %v\n\n%s", err, string(out))
 	}
 
-	prs := map[int]string{}
-
-	cmd = exec.Command("git", "show-ref")
+	cmd = exec.Command(
+		"git",
+		"ls-remote",
+		"origin",
+	)
 	cmd.Dir = sourcesDir()
 	out, err = cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("Failed to list refs: %v", err)
+		return fmt.Errorf(
+			"Failed to fetch remote PRs: %v\n\n%s",
+			err,
+			string(out),
+		)
 	}
+	logging.Infof("ls-remote:\n\n%s", string(out))
+	prs := map[int]bool{}
+	prHeadCommits := map[int]string{}
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
-		parts := strings.Split(line, " ")
+		parts := strings.Split(line, "\t")
 		if len(parts) == 2 {
-			if strings.HasPrefix(parts[1], "refs/remotes/origin/pr/") {
-				pr, err := strconv.Atoi(parts[1][23:])
+			if strings.HasPrefix(parts[1], "refs/pull/") {
+				prString := strings.Replace(parts[1], "refs/pull/", "", 1)
+				prString = strings.Split(prString, "/")[0]
+				pr, err := strconv.Atoi(prString)
 				if err == nil {
-					prs[pr] = parts[0]
+					if strings.HasSuffix(parts[1], "/merge") {
+						prs[pr] = true
+						logging.Infof("Detected open PR #%d", pr)
+					} else if strings.HasSuffix(parts[1], "/head") {
+						prHeadCommits[pr] = parts[0]
+					}
 				}
 			}
 		}
@@ -321,14 +337,14 @@ func (s *SourcesManager) updateCommitHistory() error {
 
 	prGitLogs := make([]GitLogRecord, 0)
 	// Remove PRs that are merged or too old
-	for pr, hash := range prs {
+	for pr := range prs {
 		cmd = exec.Command(
 			"git",
 			"log",
 			"-n",
 			"1",
 			`--pretty=format:{%n  $$$subject$$$: $$$%s$$$, $$$authored_date$$$: $$$%aD$$$%n }`,
-			hash,
+			prHeadCommits[pr],
 		)
 		cmd.Dir = sourcesDir()
 		out, err = cmd.CombinedOutput()
@@ -355,37 +371,12 @@ func (s *SourcesManager) updateCommitHistory() error {
 		)
 		if err == nil {
 			if authored.After(time.Now().Add(-90 * 24 * time.Hour)) {
-				cmd = exec.Command("git", "branch", "--contains", hash)
-				cmd.Dir = sourcesDir()
-				out, err = cmd.CombinedOutput()
-				if err != nil {
-					logging.Warnf(
-						"git branch contains for PR %d failed: %v",
-						pr,
-						err,
-					)
-					return err
-				}
-				branches := strings.Split(string(out), "\n")
-				inTrunk := false
-				for _, branch := range branches {
-					if strings.HasSuffix(
-						strings.TrimRight(branch, " "),
-						os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
-					) {
-						inTrunk = true
-						break
-					}
-				}
-				if inTrunk {
-					continue
-				}
 				// Yes we want this one!
 				prGitLogs = append(prGitLogs, GitLogRecord{
 					Authored:   authored,
 					Committed:  authored,
 					Subject:    fmt.Sprintf("PR #%d - %s", pr, prData.Subject),
-					CommitHash: hash,
+					CommitHash: prHeadCommits[pr],
 				})
 			}
 		} else {
