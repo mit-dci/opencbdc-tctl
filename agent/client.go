@@ -106,6 +106,9 @@ func (a *Agent) handleMsg(msg wire.Msg) (wire.Msg, error) {
 		reply, err = &wire.AckMsg{}, nil
 	case *wire.AckMsg:
 		reply, err = nil, nil
+	case *wire.ErrorMsg:
+		logging.Errorf("Received error from controller: %v", t.Error)
+		reply, err = nil, nil
 	default:
 		reply, err = nil, fmt.Errorf("unknown message type %T", t)
 	}
