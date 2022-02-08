@@ -220,7 +220,8 @@ func (c *Coordinator) SendToAgent(
 	return a.sendMsg(msg)
 }
 
-// RegisterCommandStatusCallback will register a listener for all update messages
+// RegisterCommandStatusCallback will register a listener for all update
+// messages
 // that pertain to the command specified by commandID, running on the agent
 // specified by agentID and will deliver those updates to replyChan
 func (c *Coordinator) RegisterCommandStatusCallback(
@@ -276,6 +277,12 @@ func (c *Coordinator) handleConn(agent *ConnectedAgent) {
 		// ErrorMsg in stead
 		if err != nil {
 			returnMsg = &wire.ErrorMsg{Error: err.Error()}
+			logging.Warnf(
+				"Error handling message [%T] from agent %d: %v",
+				msg,
+				agent.ID,
+				err.Error(),
+			)
 		}
 		if returnMsg != nil {
 			// Set the YourID on the message header to the ID of the incoming
@@ -363,7 +370,8 @@ func (c *Coordinator) handleMsg(
 
 		if sentReply {
 			// If we sent this update to one of our listeners, we have to apply
-			// the new listener array from which either command-response listeners
+			// the new listener array from which either command-response
+			// listeners
 			// that got a reply were removed, or command-status listeners for
 			// commands that finished are removed
 			agent.listeners = newListeners
