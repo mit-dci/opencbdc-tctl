@@ -218,13 +218,6 @@ func (t *TestRunManager) writeShardConfigAtomizer(
 	}
 
 	shardClusters := len(shards) / tr.ShardReplicationFactor
-	if (shardClusters * tr.ShardReplicationFactor) != len(shards) {
-		return fmt.Errorf(
-			"number of shards [%d] should be a multiple of replication factor [%d]",
-			len(shards),
-			tr.ShardReplicationFactor,
-		)
-	}
 
 	// Determine the prefix range for each of the shards
 	// and write it to the configuration file

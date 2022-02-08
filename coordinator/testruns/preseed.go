@@ -241,9 +241,10 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 		) / tr.ShardReplicationFactor
 	}
 	wantSeed := awsmgr.ShardSeed{
-		Outputs:  int(tr.PreseedCount),
-		SeedMode: seedMode,
-		Shards:   numShards,
+		Outputs:    int(tr.PreseedCount),
+		SeedMode:   seedMode,
+		Shards:     numShards,
+		CommitHash: tr.CommitHash,
 	}
 	hasSeed, err := t.awsm.HasSeed(wantSeed, false)
 	if err != nil {
@@ -264,7 +265,11 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 		}
 	}
 
+	start := time.Now()
 	for {
+		if time.Since(start).Minutes() > 15 {
+			return fmt.Errorf("Shard preseeding timed out")
+		}
 		t.UpdateStatus(
 			tr,
 			common.TestRunStatusRunning,

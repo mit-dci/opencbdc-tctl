@@ -21,9 +21,10 @@ import (
 var seed_witcomm = "6098c01c7a1a8f67a5e83ff49aa5488de5a3c867b81526e18040f5d6ec398446"
 
 type ShardSeed struct {
-	SeedMode   int `json:"mode"`
-	Shards     int `json:"shards"`
-	Outputs    int `json:"outputs"`
+	CommitHash string `json:"commitHash"`
+	SeedMode   int    `json:"mode"`
+	Shards     int    `json:"shards"`
+	Outputs    int    `json:"outputs"`
 	batchJobID string
 }
 
@@ -199,12 +200,16 @@ func (am *AwsManager) refreshSeeds() error {
 			}
 
 			parts := strings.Split(s, "_")
-			if len(parts) < 3 {
+			if len(parts) < 4 {
 				continue
 			}
 			parts = parts[2:] // lob off "shard_preseed_"
 			if mode == 1 {
 				parts = parts[1:] // lob off 2pc_
+			}
+
+			if len(parts) < 4 { // outputs_start_end_commit
+				continue
 			}
 
 			if parts[1] == "0" { // only consider the first in the series
@@ -217,10 +222,12 @@ func (am *AwsManager) refreshSeeds() error {
 				if err != nil {
 					continue
 				}
+				commitHash := parts[3]
 				seeds = append(seeds, &ShardSeed{
-					SeedMode: mode,
-					Outputs:  numOutputs,
-					Shards:   numShards,
+					SeedMode:   mode,
+					Outputs:    numOutputs,
+					Shards:     numShards,
+					CommitHash: commitHash,
 				})
 			}
 		}
@@ -238,7 +245,7 @@ func (s *ShardSeed) Equals(s2 *ShardSeed) bool {
 		return false
 	}
 	if s.Outputs == s2.Outputs && s.SeedMode == s2.SeedMode &&
-		s.Shards == s2.Shards {
+		s.Shards == s2.Shards && s.CommitHash == s2.CommitHash {
 		return true
 	}
 	return false

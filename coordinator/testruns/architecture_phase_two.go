@@ -58,7 +58,8 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	}()
 
 	// This section waits for either one of the roles to fail (case 1), or the
-	// user to manually terminate the run (case 3), or load gens end successfully
+	// user to manually terminate the run (case 3), or load gens end
+	// successfully
 	// (case 2 - success case)
 	select {
 	case fail := <-failures:
@@ -118,7 +119,10 @@ func (t *TestRunManager) CreateStartSequencePhaseTwo(
 	leaderTicketMachines := make([]*common.TestRunRole, 0)
 	for i := 0; i < len(ticketMachines); i++ {
 		if i%tr.ShardReplicationFactor == 0 {
-			leaderTicketMachines = append(leaderTicketMachines, ticketMachines[i])
+			leaderTicketMachines = append(
+				leaderTicketMachines,
+				ticketMachines[i],
+			)
 		} else {
 			followerTicketMachines = append(followerTicketMachines, ticketMachines[i])
 		}
@@ -183,7 +187,10 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 		return nil, fmt.Errorf("at least one ticket machine is required")
 	}
 
-	ret = append(ret, fmt.Sprintf("--ticket_machine_count=%d", len(ticket_machines)))
+	ret = append(
+		ret,
+		fmt.Sprintf("--ticket_machine_count=%d", len(ticket_machines)),
+	)
 
 	for i, s := range ticket_machines {
 		a, err := t.coord.GetAgent(
@@ -192,7 +199,14 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		ret = append(ret, fmt.Sprintf("--ticket_machine%d_endpoint=%s:5000", i, a.SystemInfo.PrivateIPs[0]))
+		ret = append(
+			ret,
+			fmt.Sprintf(
+				"--ticket_machine%d_endpoint=%s:5000",
+				i,
+				a.SystemInfo.PrivateIPs[0],
+			),
+		)
 	}
 
 	shards := t.GetAllRolesSorted(tr, common.SystemRoleRuntimeLockingShard)
@@ -201,18 +215,14 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 	}
 
 	shardClusters := len(shards) / tr.ShardReplicationFactor
-	if (shardClusters * tr.ShardReplicationFactor) != len(shards) {
-		return nil, fmt.Errorf(
-			"number of shards [%d] should be a multiple of replication factor [%d]",
-			len(shards),
-			tr.ShardReplicationFactor,
-		)
-	}
 
 	ret = append(ret, fmt.Sprintf("--shard_count=%d", shardClusters))
 
 	for i := 0; i < shardClusters; i++ {
-		ret = append(ret, fmt.Sprintf("--shard%d_count=%d", i, tr.ShardReplicationFactor))
+		ret = append(
+			ret,
+			fmt.Sprintf("--shard%d_count=%d", i, tr.ShardReplicationFactor),
+		)
 
 		for j := 0; j < tr.ShardReplicationFactor; j++ {
 			s := shards[(i*tr.ShardReplicationFactor)+j]
@@ -223,7 +233,15 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
-			ret = append(ret, fmt.Sprintf("--shard%d%d_endpoint=%s:5000", i, j, a.SystemInfo.PrivateIPs[0]))
+			ret = append(
+				ret,
+				fmt.Sprintf(
+					"--shard%d%d_endpoint=%s:5000",
+					i,
+					j,
+					a.SystemInfo.PrivateIPs[0],
+				),
+			)
 		}
 	}
 
@@ -241,7 +259,14 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		ret = append(ret, fmt.Sprintf("--agent%d_endpoint=%s:5000", i, a.SystemInfo.PrivateIPs[0]))
+		ret = append(
+			ret,
+			fmt.Sprintf(
+				"--agent%d_endpoint=%s:5000",
+				i,
+				a.SystemInfo.PrivateIPs[0],
+			),
+		)
 	}
 
 	return ret, nil

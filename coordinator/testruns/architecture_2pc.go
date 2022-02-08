@@ -232,13 +232,6 @@ func (t *TestRunManager) writeShardConfigTwoPhase(
 	}
 
 	shardClusters := len(shards) / tr.ShardReplicationFactor
-	if (shardClusters * tr.ShardReplicationFactor) != len(shards) {
-		return fmt.Errorf(
-			"number of shards [%d] should be a multiple of replication factor [%d]",
-			len(shards),
-			tr.ShardReplicationFactor,
-		)
-	}
 
 	// Write the number of shard clusters to the config file
 	if _, err := cfg.Write([]byte(fmt.Sprintf("shard_count=%d\n", shardClusters))); err != nil {
