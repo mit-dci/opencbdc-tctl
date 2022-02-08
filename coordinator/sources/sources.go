@@ -394,6 +394,51 @@ func (s *SourcesManager) updateCommitHistory() error {
 	return nil
 }
 
+// FindMostRecentCommitChangingSeeder finds the most recent commit of or before
+// the given commit hash that changes the seeder logic. Used to not have to re-
+// seed the shards with every commit if the seeder logic hasn't changed.
+func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
+	commitHash string,
+) (string, error) {
+	cmd := exec.Command(
+		"git",
+		"checkout",
+		commitHash,
+	)
+	cmd.Dir = sourcesDir()
+	err := cmd.Run()
+	if err != nil {
+		return "", err
+	}
+
+	cmd = exec.Command(
+		"git",
+		"log",
+		"-1",
+		"--pretty=format:%H",
+		"tools/shard-seeder/shard-seeder.cpp",
+	)
+	cmd.Dir = sourcesDir()
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf(
+			"Failed to find seeder change commit: %v\n\n%s",
+			err,
+			string(out),
+		)
+	}
+	commitHash = strings.TrimSpace(string(out))
+
+	cmd = exec.Command(
+		"git",
+		"checkout",
+		os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
+	)
+	cmd.Dir = sourcesDir()
+	err = cmd.Run()
+	return commitHash, err
+}
+
 func (s *SourcesManager) cloneSources() error {
 	s.sourcesLock.Lock()
 	defer s.sourcesLock.Unlock()

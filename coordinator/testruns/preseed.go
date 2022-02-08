@@ -62,13 +62,14 @@ func (t *TestRunManager) PreseedShards(
 		agentID := r.AgentID
 
 		// Get the correct source file based on the utxo count and the shard
-		// range
+		// range and seeder commithash
 		sourcePath := fmt.Sprintf(
-			"shard-preseeds/%s%d_%d_%d.tar",
+			"shard-preseeds/%s%d_%d_%d_%s.tar",
 			filePrefix,
 			utxoCount,
 			shardStart,
 			shardEnd,
+			tr.SeederHash,
 		)
 		// The target path can be determined (for the 2pc shards this is the
 		// case) by the cluster and node index of the shard role
@@ -240,11 +241,16 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 			t.GetAllRolesSorted(tr, common.SystemRoleShardTwoPhase),
 		) / tr.ShardReplicationFactor
 	}
+	var err error
+	tr.SeederHash, err = t.src.FindMostRecentCommitChangingSeeder(tr.CommitHash)
+	if err != nil {
+		return fmt.Errorf("Failed determining seeder hash: %v", err)
+	}
 	wantSeed := awsmgr.ShardSeed{
 		Outputs:    int(tr.PreseedCount),
 		SeedMode:   seedMode,
 		Shards:     numShards,
-		CommitHash: tr.CommitHash,
+		CommitHash: tr.SeederHash,
 	}
 	hasSeed, err := t.awsm.HasSeed(wantSeed, false)
 	if err != nil {

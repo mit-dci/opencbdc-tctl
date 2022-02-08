@@ -87,6 +87,7 @@ type TestRun struct {
 	PerformanceDataAvailable bool               `json:"performanceDataAvailable"`
 	ControllerCommit         string             `json:"controllerCommitHash"`
 	Result                   *TestResult        `json:"result"`
+	SeederHash               string             `json:"seederHash"`
 	TerminateChan            chan bool          `json:"-"`
 	RetrySpawnChan           chan bool          `json:"-"`
 	PendingResultDownloads   []S3Download       `json:"-"`

@@ -51,6 +51,10 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed) error {
 						Value: aws.String(fmt.Sprintf("%d", seed.Shards)),
 					},
 					{
+						Name:  aws.String("SEED_COMMIT"),
+						Value: aws.String(seed.CommitHash),
+					},
+					{
 						Name:  aws.String("SEED_OUTPUTS"),
 						Value: aws.String(fmt.Sprintf("%d", seed.Outputs)),
 					},
