@@ -99,8 +99,14 @@ func (s *SourcesManager) EnsureSourcesUpdated() error {
 	var err error
 	if _, err = os.Stat(sourcesDir()); os.IsNotExist(err) {
 		err = s.cloneSources()
+		if err != nil {
+			err = fmt.Errorf("Error cloning sources: %v", err)
+		}
 	} else {
 		err = s.updateSources()
+		if err != nil {
+			err = fmt.Errorf("Error updating sources: %v", err)
+		}
 	}
 	if err != nil {
 		return err
@@ -251,7 +257,11 @@ func (s *SourcesManager) updateCommitHistory() error {
 	cmd.Dir = sourcesDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"error updating commit history: %v\n%s",
+			err,
+			string(out),
+		)
 	}
 	outString := string(out[:len(out)-1])
 	outString = strings.ReplaceAll(outString, "\"", "\\\"")
@@ -275,8 +285,6 @@ func (s *SourcesManager) updateCommitHistory() error {
 		newGitLog[i].AuthoredString = ""
 		newGitLog[i].CommittedString = ""
 	}
-
-	s.gitLog = newGitLog[:40]
 
 	cmd = exec.Command(
 		"git",
@@ -311,6 +319,7 @@ func (s *SourcesManager) updateCommitHistory() error {
 		}
 	}
 
+	prGitLogs := make([]GitLogRecord, 0)
 	// Remove PRs that are merged or too old
 	for pr, hash := range prs {
 		cmd = exec.Command(
@@ -358,21 +367,21 @@ func (s *SourcesManager) updateCommitHistory() error {
 					return err
 				}
 				branches := strings.Split(string(out), "\n")
-				inMaster := false
+				inTrunk := false
 				for _, branch := range branches {
 					if strings.HasSuffix(
 						strings.TrimRight(branch, " "),
-						"master",
+						os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
 					) {
-						inMaster = true
+						inTrunk = true
 						break
 					}
 				}
-				if inMaster {
+				if inTrunk {
 					continue
 				}
 				// Yes we want this one!
-				newGitLog = append(newGitLog, GitLogRecord{
+				prGitLogs = append(prGitLogs, GitLogRecord{
 					Authored:   authored,
 					Committed:  authored,
 					Subject:    fmt.Sprintf("PR #%d - %s", pr, prData.Subject),
@@ -384,32 +393,12 @@ func (s *SourcesManager) updateCommitHistory() error {
 		}
 	}
 
-	s.gitLog = newGitLog
-	sort.Slice(s.gitLog, func(i, j int) bool {
-		return s.gitLog[j].Authored.Before(s.gitLog[i].Authored)
+	sort.Slice(prGitLogs, func(i, j int) bool {
+		return prGitLogs[j].Authored.Before(prGitLogs[i].Authored)
 	})
-
-	// Shift PRs to the top
-	prCount := 0
-	for i := len(s.gitLog) - 1; i >= prCount; i-- {
-		if strings.HasPrefix(s.gitLog[i].Subject, "PR #") {
-			found := s.gitLog[i]
-			s.gitLog = append(
-				[]GitLogRecord{found},
-				append(s.gitLog[:i], s.gitLog[i+1:]...)...)
-			i++
-			prCount++
-		}
-	}
-
-	// Now show the first three non-PR commits on top and we're done
-	prCommits := make([]GitLogRecord, prCount)
-	nonPRCommits := make([]GitLogRecord, len(s.gitLog)-prCount)
-	copy(prCommits, s.gitLog[:prCount])
-	copy(nonPRCommits, s.gitLog[prCount:])
 	s.gitLog = append(
-		nonPRCommits[0:3],
-		append(prCommits, nonPRCommits[3:]...)...)
+		append(append([]GitLogRecord{}, newGitLog[:3]...), prGitLogs...),
+		newGitLog[3:]...)
 
 	return nil
 }
@@ -420,7 +409,7 @@ func (s *SourcesManager) cloneSources() error {
 	cmd := exec.Command(
 		"git",
 		"clone",
-		"git@github.com:mit-dci/cbdc-universe0",
+		os.Getenv("TRANSACTION_PROCESSOR_REPO_URL"),
 		sourcesDirName(),
 	)
 	cmd.Dir = sourcesParentDir()
@@ -444,7 +433,11 @@ func (s *SourcesManager) cloneSources() error {
 func (s *SourcesManager) updateSources() error {
 	s.sourcesLock.Lock()
 	defer s.sourcesLock.Unlock()
-	cmd := exec.Command("git", "checkout", "master")
+	cmd := exec.Command(
+		"git",
+		"checkout",
+		os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
+	)
 	cmd.Dir = sourcesDir()
 	err := cmd.Run()
 	if err != nil {
@@ -460,13 +453,17 @@ func (s *SourcesManager) updateSources() error {
 }
 
 func (s *SourcesManager) GetGitLog(offset, limit int) ([]GitLogRecord, error) {
+	if len(s.gitLog) == 0 {
+		return []GitLogRecord{}, nil
+	}
 	if offset >= len(s.gitLog) {
 		return []GitLogRecord{}, ErrGitLogOutOfBounds
 	}
 	end := offset + limit
-	if end >= len(s.gitLog) {
-		end = len(s.gitLog) - 1
+	if end > len(s.gitLog) {
+		end = len(s.gitLog)
 	}
+
 	return s.gitLog[offset:end], nil
 }
 
