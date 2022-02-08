@@ -87,6 +87,7 @@ lats = []
 
 output_files = [f for f in listdir('outputs') if isfile(join("outputs", f))]
 
+archiver_based = False
 two_phase = False
 for output_file in output_files:
     if 'tx_samples' in output_file:
@@ -175,10 +176,8 @@ if two_phase:
             current_bin += 1
         bin_depths[current_bin] += val[1]
     bin_depths /= np.sum(bin_depths)
-    print(len(tps))
     tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1})
 
-print(tps_lines)
 if archiver_based:
     for output_file in output_files:
         if output_file.find('tp_samples') > -1:
@@ -442,7 +441,7 @@ plt.close('all')
 # The first percentile on linux comes out to NaN, so put all the data we want
 # after the first index.
 buckets = [0.001, 0.001, 0.01, 0.1, 1, 25, 50, 75, 99, 99.9, 99.99, 99.999]
-tp_percentiles = np.percentile(tps, buckets[1:])
+tp_percentiles = np.percentile(tps_lines[0]["tps"], buckets[1:])
 
 if two_phase:
     try:
