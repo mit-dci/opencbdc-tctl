@@ -242,10 +242,7 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 		) / tr.ShardReplicationFactor
 	}
 	var err error
-	tr.SeederHash, err = t.src.FindMostRecentCommitChangingSeeder(tr.CommitHash)
-	if err != nil {
-		return fmt.Errorf("Failed determining seeder hash: %v", err)
-	}
+
 	wantSeed := awsmgr.ShardSeed{
 		Outputs:    int(tr.PreseedCount),
 		SeedMode:   seedMode,

@@ -459,22 +459,31 @@ func (t *TestRunManager) RedownloadTestOutputsFromS3(tr *common.TestRun) error {
 }
 
 // UploadBinaries upload binaries for this testrun to S3
-func (t *TestRunManager) UploadBinaries(tr *common.TestRun) (string, error) {
+func (t *TestRunManager) UploadBinaries(
+	tr *common.TestRun,
+	seeder bool,
+) (string, error) {
 
+	hash := tr.CommitHash
+	debug := tr.RunPerf || tr.Debug
+	if seeder {
+		hash = tr.SeederHash
+		debug = false
+	}
 	sourcePath, err := sources.BinariesArchivePath(
-		tr.CommitHash,
-		tr.RunPerf || tr.Debug,
+		hash,
+		debug,
 	)
 	if err != nil {
 		return "", err
 	}
 
-	binariesInS3 := fmt.Sprintf("binaries/%s.tar.gz", tr.CommitHash)
-	if tr.RunPerf || tr.Debug {
+	binariesInS3 := fmt.Sprintf("binaries/%s.tar.gz", hash)
+	if debug {
 		// We need a separate archive for debug binaries since they perform
 		// much worse. We can't run debugging or perf on a binary set with
 		// optimizations because the stacktraces won't make much sense.
-		binariesInS3 = fmt.Sprintf("binaries/%s-debug.tar.gz", tr.CommitHash)
+		binariesInS3 = fmt.Sprintf("binaries/%s-debug.tar.gz", hash)
 	}
 	err = t.awsm.UploadToS3IfNotExists(common.S3Upload{
 		SourcePath:   sourcePath,

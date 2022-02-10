@@ -37,17 +37,36 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 		return
 	}
 
-	err := t.CompileBinaries(tr)
+	err := t.CompileBinaries(tr, false)
 	if err != nil {
 		t.FailTestRun(tr, fmt.Errorf("Compilation failed: %v", err))
 		return
 	}
 
-	binariesInS3, err := t.UploadBinaries(tr)
+	binariesInS3, err := t.UploadBinaries(tr, false)
 	if err != nil {
 		t.FailTestRun(
 			tr,
 			fmt.Errorf("Failed to upload binaries to S3: %v", err),
+		)
+		return
+	}
+
+	tr.SeederHash, err = t.src.FindMostRecentCommitChangingSeeder(tr.CommitHash)
+	if err != nil {
+		t.FailTestRun(tr, fmt.Errorf("Failed determining seeder hash: %v", err))
+	}
+	err = t.CompileBinaries(tr, true)
+	if err != nil {
+		t.FailTestRun(tr, fmt.Errorf("Seeder compilation failed: %v", err))
+		return
+	}
+
+	_, err = t.UploadBinaries(tr, true)
+	if err != nil {
+		t.FailTestRun(
+			tr,
+			fmt.Errorf("Failed to upload seeder binaries to S3: %v", err),
 		)
 		return
 	}
