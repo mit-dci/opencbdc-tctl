@@ -377,6 +377,18 @@ func (srv *HttpServer) ReloadCerts() {
 	}
 	srv.roots = roots
 	srv.users = users
+
+	certPath := filepath.Join(common.DataDir(), "certs/server.crt")
+	if _, err := os.Stat(certPath); os.IsNotExist(
+		err,
+	) {
+		logging.Infof(
+			"No HTTPS certificate found in [%s] - generating self-signed one",
+			certPath,
+		)
+		writeSelfSignedCert()
+	}
+
 	srv.certificate, err = tls.LoadX509KeyPair(
 		filepath.Join(common.DataDir(), "certs/server.crt"),
 		filepath.Join(common.DataDir(), "certs/server.key"),
