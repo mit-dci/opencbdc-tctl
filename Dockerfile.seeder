@@ -2,4 +2,5 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y awscli && rm -rf /var/lib/apt/lists/*
 COPY seeder/seedtos3.sh /root/seedtos3.sh
+RUN chmod +x /root/seedtos3.sh
 ENTRYPOINT ["/root/seedtos3.sh"]
