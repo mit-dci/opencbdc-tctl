@@ -20,8 +20,15 @@ func writeSelfSignedCert() error {
 	if err != nil {
 		return fmt.Errorf("failed to generate key: %v", err)
 	}
+	max := new(big.Int)
+	max.Exp(big.NewInt(2), big.NewInt(256), nil).Sub(max, big.NewInt(1))
+	serial, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return fmt.Errorf("failed to generate random serial number: %v", err)
+	}
+
 	template := x509.Certificate{
-		SerialNumber: big.NewInt(1),
+		SerialNumber: serial,
 		Subject: pkix.Name{
 			Country:            []string{"US"},
 			OrganizationalUnit: []string{"Dev"},
