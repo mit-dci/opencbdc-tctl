@@ -1,6 +1,6 @@
 # Introduction
 
-This repository includes the system used for benchmarking [opencbdc-tx](https://github.com/mit-dci/opencbdc-tx): the core transaction processor for a hypothetical, general purpose central bank digital currency (GPCBDC). It can be used to re-run the benchmarks that were the inputs to the evaluation section of the [research paper](/)
+This repository includes the system used for benchmarking [opencbdc-tx](https://github.com/mit-dci/opencbdc-tx): the core transaction processor for a hypothetical, general purpose central bank digital currency (GPCBDC). It can be used to re-run the benchmarks that were the inputs to the evaluation section of the [research paper](https://dci.mit.edu/opencbdc)
 
 OpenCBDC Test Controller was developed to enable large-scale multi-machine benchmarks in a realistic network environment, with geo-replicated instances. The foundation is running short-lived tests that spin up infrastructure, run the test, copy instrumentation data and then shut down. The OpenCBDC Test Controller is currently tailored to running inside an [Amazon Web Services (AWS)](https://aws.amazon.com) cloud infrastructure.
 
@@ -158,9 +158,9 @@ The unauthenticated endpoint contains the websocket endpoint - because [Safari d
 
 The unauthenticated endpoint further contains an `/auth` route that will explain the user how to generate a client-side certificate. Without this certificate you cannot access the main HTTPS frontend. Once you have generated your client-side private key and certificate and imported it into your browser, you have to provide the certificate to someone with access to the system. They can add your certificate to the list of authorized users - from which moment you can access the HTTPS portion of the frontend.
 
-# Local dev environment (Docker)
+# Developing and debugging the coordinator locally (Docker)
 
-For testing the system in a local environment, using [Docker](https://www.docker.com) is preferable. This allows you to run the coordinator in a container.
+For testing the system in a local environment, using [Docker](https://www.docker.com) is preferable. This allows you to run the coordinator in a container. However, even though the container runs locally, it would still rely on infrastructure components deployed in AWS using [opencbdc-terraform](/).
 
 Here's how you build this system in a container:
 
@@ -177,18 +177,7 @@ mkdir -p docker-data/certs/users
 mkdir docker-config
 ```
 
-Generate a self-signed SSL certificate for the server in the `docker-data/certs` folder:
-
-```bash
-cd docker-data/certs
-openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -keyout server.key -out server.crt
-# (Follow the console instructions of OpenSSL)
-cd ../..
-```
-
-Now, generate or copy an SSH key that has access to the GIT repository containing the opencbdc-tx code and place the private key in `docker-config/id_rsa`
-
-Next, generate an AWS credentials file and ensure it has the header `[default]` (so not `[12345678_AdminAccess]` or something similar). Place it in `docker-config/aws-credentials`.
+Next, generate an AWS credentials file that has access to the AWS account where you deployed the necessary infrastructure for the OpenCBDC Test Controller using the [opencbdc-terraform](/), and ensure it has the header `[default]` (so not `[12345678_AdminAccess]` or something similar). Place it in `docker-config/aws-credentials`.
 
 Now, you can start up the system with
 
@@ -198,14 +187,6 @@ docker-compose up -d
 
 The coordinator should now be accessible via https://localhost:8444/auth.
 
-Generate a certificate using the instructions on the page.
-
-Import the private key in your browser using the password provided by the console output.
-
-Place the certificate in `docker-data/certs/users`
-
-Restart the controller using `docker-compose restart coordinator`.
-
-Now you should be able to access the UI via https://localhost:8443/ - and pick the freshly imported client certificate to authenticate yourself.
+Generate a certificate using the instructions on the page. Import the private key in your browser using the password provided by the console output, and then add the certificate in the UI as the first user. The confirmation page will show you a link to open the test controller's main UI at https://localhost:8443/ - make sure to pick the freshly imported client certificate to authenticate yourself.
 
 
