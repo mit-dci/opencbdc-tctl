@@ -319,10 +319,17 @@ func (srv *HttpServer) AuthorizeScriptHandler(
 }
 
 func (srv *HttpServer) ReloadCerts() {
+	// Ensure the certs folder exists
+	err := os.MkdirAll(filepath.Join(
+		common.DataDir(),
+		"certs/users"), 0755)
+	if err != nil && !os.IsExist(err) {
+		logging.Warnf("Error creating user certs folder: %v", err)
+	}
 
 	roots := x509.NewCertPool()
 	users := []*SystemUser{}
-	err := filepath.Walk(
+	err = filepath.Walk(
 		filepath.Join(common.DataDir(), "certs/users"),
 		func(path string, info os.FileInfo, err error) error {
 			if strings.HasSuffix(path, ".crt") {

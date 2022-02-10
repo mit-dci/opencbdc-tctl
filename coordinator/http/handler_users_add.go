@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/mit-dci/opencbdc-tct/common"
@@ -48,12 +47,6 @@ func (srv *HttpServer) addUser(
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Join(
-		common.DataDir(),
-		"certs/users"), 0755)
-	if err != nil && !os.IsExist(err) {
-		logging.Warnf("Error creating user certs folder: %v", err)
-	}
 	err = ioutil.WriteFile(
 		filepath.Join(
 			common.DataDir(),
