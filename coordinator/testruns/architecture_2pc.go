@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 // Is2PC returns wheter the given architectureID is a two-phase commit

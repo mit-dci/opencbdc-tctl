@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 func (t *TestRunManager) GenerateConfig(tr *common.TestRun) ([]byte, error) {

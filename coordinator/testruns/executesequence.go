@@ -3,7 +3,7 @@ package testruns
 import (
 	"fmt"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 // executeStartSequence executes a pregenerated sequence of commands to start

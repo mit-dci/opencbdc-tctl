@@ -1,4 +1,4 @@
-module github.com/mit-dci/cbdc-test-controller
+module github.com/mit-dci/opencbdc-tct
 
 go 1.16
 

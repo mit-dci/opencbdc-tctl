@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // TestRun describes the main type for administering and scheduling tests. The

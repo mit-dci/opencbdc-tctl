@@ -17,8 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // getS3Default returns an S3 client for use in the default region.

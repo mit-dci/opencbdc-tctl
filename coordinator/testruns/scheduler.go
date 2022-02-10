@@ -6,10 +6,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/awsmgr"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // ScheduleTestRun will add the given testrun to the set of queued testruns.

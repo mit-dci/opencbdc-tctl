@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // RunningInstances returns the currently running instances in EC2

@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
-	"github.com/mit-dci/cbdc-test-controller/wire"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tct/wire"
 )
 
 // handleDeployFile handles the DeployFileRequestMsg which contains (part of)

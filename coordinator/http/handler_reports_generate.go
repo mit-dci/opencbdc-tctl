@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 func (h *HttpServer) generateReportHandler(

@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/logging"
-	"github.com/mit-dci/cbdc-test-controller/wire"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tct/wire"
 )
 
 // RunningCommandsForAgent returns a list of commands that are currently running

@@ -165,8 +165,8 @@ For testing the system in a local environment, using [Docker](https://www.docker
 Here's how you build this system in a container:
 
 ```bash
-git clone git@github.com:mit-dci/cbdc-test-controller
-cd cbdc-test-controller
+git clone git@github.com:mit-dci/opencbdc-tct
+cd opencbdc-tct
 ./docker-build.sh
 ```
 

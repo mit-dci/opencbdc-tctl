@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
 )
 
 // WriteLog writes a statement to a testrun's log file and sends it over the

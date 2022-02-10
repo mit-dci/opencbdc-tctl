@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 var frontendRunCache = sync.Map{}

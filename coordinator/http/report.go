@@ -15,8 +15,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 type reportDefinition struct {
@@ -321,7 +321,7 @@ func (h *HttpServer) generateConfigTable(input string) string {
 			if prop[0] == "controllerCommitHash" {
 				if len(prop[1]) > 7 {
 					prop[1] = fmt.Sprintf(
-						`<a target="_blank" href="https://github.com/mit-dci/cbdc-test-controller/tree/%s">%s</a>`,
+						`<a target="_blank" href="https://github.com/mit-dci/opencbdc-tct/tree/%s">%s</a>`,
 						prop[1],
 						prop[1][:7],
 					)

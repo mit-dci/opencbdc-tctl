@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // PersistTestRun stores the test run data in the persisted state. At present,

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"math"
 
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // TestRunNormalizedConfig is a flat representation of a testrun's configuration
@@ -176,10 +176,17 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		),
 	)
 	trc.ShardCPU = int(
-		getFloatValueForAnyKey(cpu, SystemRoleShard, SystemRoleShardTwoPhase, SystemRoleRuntimeLockingShard),
+		getFloatValueForAnyKey(
+			cpu,
+			SystemRoleShard,
+			SystemRoleShardTwoPhase,
+			SystemRoleRuntimeLockingShard,
+		),
 	)
 	trc.WatchtowerCPU = int(getFloatValueForAnyKey(cpu, SystemRoleWatchtower))
-	trc.CoordinatorCPU = int(getFloatValueForAnyKey(cpu, SystemRoleCoordinator, SystemRoleAgent))
+	trc.CoordinatorCPU = int(
+		getFloatValueForAnyKey(cpu, SystemRoleCoordinator, SystemRoleAgent),
+	)
 	trc.AtomizerRAM = int(
 		getFloatValueForAnyKey(
 			ram,
@@ -215,7 +222,11 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		getFloatValueForAnyKey(ram, SystemRoleWatchtower) / 1024,
 	)
 	trc.CoordinatorRAM = int(
-		getFloatValueForAnyKey(ram, SystemRoleCoordinator, SystemRoleAgent) / 1024,
+		getFloatValueForAnyKey(
+			ram,
+			SystemRoleCoordinator,
+			SystemRoleAgent,
+		) / 1024,
 	)
 
 	// Set the role counts
@@ -243,7 +254,11 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		SystemRoleRuntimeLockingShard,
 	)
 	trc.WatchtowerCount = getIntValueForAnyKey(count, SystemRoleWatchtower)
-	trc.CoordinatorCount = getIntValueForAnyKey(count, SystemRoleCoordinator, SystemRoleAgent)
+	trc.CoordinatorCount = getIntValueForAnyKey(
+		count,
+		SystemRoleCoordinator,
+		SystemRoleAgent,
+	)
 
 	// Set the multiregion property
 	trc.MultiRegion = len(regions) > 1

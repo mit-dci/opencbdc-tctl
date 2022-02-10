@@ -11,10 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/sources"
-	"github.com/mit-dci/cbdc-test-controller/logging"
-	"github.com/mit-dci/cbdc-test-controller/wire"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tct/wire"
 )
 
 // copyFiles describes which files to copy from the given system role upon

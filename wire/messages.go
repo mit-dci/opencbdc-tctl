@@ -1,6 +1,6 @@
 package wire
 
-import "github.com/mit-dci/cbdc-test-controller/common"
+import "github.com/mit-dci/opencbdc-tct/common"
 
 // HelloMsg is sent from agent to controller upon first connection. It
 // identifies which version the agent is running and provides the initial system

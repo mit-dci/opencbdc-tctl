@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/agent"
-	"github.com/mit-dci/cbdc-test-controller/agent/scripts"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/agent"
+	"github.com/mit-dci/opencbdc-tct/agent/scripts"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // These two variables are set while building, see the Dockerfile.agent
@@ -58,10 +58,14 @@ func main() {
 		port = 8000
 	}
 	if os.Getenv("S3_INTERFACE_ENDPOINT") == "" {
-		logging.Infof("S3_INTERFACE_ENDPOINT not set, S3 will default to public endpoints")
+		logging.Infof(
+			"S3_INTERFACE_ENDPOINT not set, S3 will default to public endpoints",
+		)
 	}
 	if os.Getenv("S3_INTERFACE_REGION") == "" {
-		logging.Infof("S3_INTERFACE_REGION not set, S3 will default to public endpoints")
+		logging.Infof(
+			"S3_INTERFACE_REGION not set, S3 will default to public endpoints",
+		)
 	}
 
 	// Connect the agent to the coordinator

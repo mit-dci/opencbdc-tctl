@@ -6,11 +6,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/agents"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/awsmgr"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/coordinator/agents"
+	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
 )
 
 // Increase this if the test result calculation changed - this forces

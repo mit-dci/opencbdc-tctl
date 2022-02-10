@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 func (t *TestRunManager) IsPhaseTwo(architectureID string) bool {

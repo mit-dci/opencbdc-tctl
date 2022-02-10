@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/wire"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/wire"
 )
 
-// environmentExists checks if the directory where the environment lives based on
+// environmentExists checks if the directory where the environment lives based
+// on
 // the ID, exists
 func environmentExists(environmentID []byte) bool {
 	if _, err := os.Stat(environmentDir(environmentID)); os.IsNotExist(err) {

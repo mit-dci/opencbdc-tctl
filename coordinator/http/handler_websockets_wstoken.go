@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 func (srv *HttpServer) wsTokenHandler(w http.ResponseWriter, r *http.Request) {

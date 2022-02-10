@@ -18,13 +18,13 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/agents"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/awsmgr"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/sources"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/testruns"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/coordinator/agents"
+	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tct/coordinator/testruns"
+	"github.com/mit-dci/opencbdc-tct/logging"
 	"github.com/rs/cors"
 )
 
@@ -270,7 +270,7 @@ func (srv *HttpServer) AuthorizeHandler(
          </head>
          <body onload="updateScript()">
             <h1>Authorization procedure</h1>
-            <p>In order to get access to the CBDC Test Controller, you will have to generate your own client-side certificate and send the certificate to the administrator of the CDBC Test Controller.</p>
+            <p>In order to get access to the OpenCBDC Test Controller, you will have to generate your own client-side certificate and send the certificate to the administrator of the CDBC Test Controller.</p>
             <p>Fill out the following details, and execute the script at the bottom on your machine to generate a certificate.</p>
             <table>
                <tr><td>Full name:</td><td><input onchange="updateScript()" type="text" id="fullName" placeholder="(ex: John Doe)" /></td></tr>

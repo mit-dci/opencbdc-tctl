@@ -3,7 +3,7 @@ package testruns
 import (
 	"sort"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 // GetAllRolesSorted extracts all roles of a particular type from the set of

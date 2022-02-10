@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // Receive is a utilty function to read one message from a chan of wire messages

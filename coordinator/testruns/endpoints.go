@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 // PortIncrement is a type that specifies the offset from the default port

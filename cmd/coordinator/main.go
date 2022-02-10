@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/agents"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/awsmgr"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/http"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/scripts"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/sources"
-	"github.com/mit-dci/cbdc-test-controller/coordinator/testruns"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tct/coordinator/agents"
+	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tct/coordinator/http"
+	"github.com/mit-dci/opencbdc-tct/coordinator/scripts"
+	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tct/coordinator/testruns"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 var GitCommit string
@@ -26,10 +26,14 @@ func main() {
 	ev := make(chan coordinator.Event, 10000)
 
 	if os.Getenv("S3_INTERFACE_ENDPOINT") == "" {
-		logging.Infof("S3_INTERFACE_ENDPOINT not set, S3 will default to public endpoints")
+		logging.Infof(
+			"S3_INTERFACE_ENDPOINT not set, S3 will default to public endpoints",
+		)
 	}
 	if os.Getenv("S3_INTERFACE_REGION") == "" {
-		logging.Infof("S3_INTERFACE_REGION not set, S3 will default to public endpoints")
+		logging.Infof(
+			"S3_INTERFACE_REGION not set, S3 will default to public endpoints",
+		)
 	}
 
 	logging.Infof("Creating coordinator")

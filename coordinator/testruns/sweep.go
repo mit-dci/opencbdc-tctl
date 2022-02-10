@@ -3,7 +3,7 @@ package testruns
 import (
 	"sort"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
+	"github.com/mit-dci/opencbdc-tct/common"
 )
 
 // ContinueSweep will identify the next test run in a one-at-a-time test sweep

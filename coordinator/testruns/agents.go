@@ -1,6 +1,6 @@
 package testruns
 
-import "github.com/mit-dci/cbdc-test-controller/common"
+import "github.com/mit-dci/opencbdc-tct/common"
 
 // SnapshotAgents will take a copy of the current status of the connected agents
 // such that we preserve them for later inspection.

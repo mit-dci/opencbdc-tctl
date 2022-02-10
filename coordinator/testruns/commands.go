@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/coordinator"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/coordinator"
 )
 
 // runningCommand is used to store a reference to all active commands' IDs and

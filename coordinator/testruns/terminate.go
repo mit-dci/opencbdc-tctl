@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
 )
 
 // ShouldTerminate does a non-blocking read on the TerminateChan of the given

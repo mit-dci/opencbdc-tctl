@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/mit-dci/cbdc-test-controller/common"
-	"github.com/mit-dci/cbdc-test-controller/logging"
-	"github.com/mit-dci/cbdc-test-controller/wire"
+	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tct/wire"
 )
 
 // handleDeployFileFromS3 handles a DeployFileFromS3RequestMsg. This instructs
@@ -95,10 +95,14 @@ func (a *Agent) handleDeployFileFromS3(
 	return ret, nil
 }
 
-// handleUploadFileToS3 handles the UploadFileToS3RequestMsg. This is the coordinator
-// instructing the agent to upload a file from its file system to an S3 bucket. This
-// is mostly used for uploading test run outputs and performance data at the end of
-// a test run, as well as command outputs once commands have executed succesfully
+// handleUploadFileToS3 handles the UploadFileToS3RequestMsg. This is the
+// coordinator
+// instructing the agent to upload a file from its file system to an S3 bucket.
+// This
+// is mostly used for uploading test run outputs and performance data at the end
+// of
+// a test run, as well as command outputs once commands have executed
+// succesfully
 func (a *Agent) handleUploadFileToS3(
 	msg *wire.UploadFileToS3RequestMsg,
 ) (wire.Msg, error) {
@@ -127,7 +131,8 @@ func (a *Agent) handleUploadFileToS3(
 	return ret, nil
 }
 
-// uploadFileToS3 handles the actual uploading of the files to the given S3 bucket
+// uploadFileToS3 handles the actual uploading of the files to the given S3
+// bucket
 // this is used by the message handler as well as the command execution logic
 func (a *Agent) uploadFileToS3(
 	src string,
