@@ -167,13 +167,10 @@ Here's how you build this system in a container:
 ```bash
 git clone git@github.com:mit-dci/opencbdc-tct
 cd opencbdc-tct
-./docker-build.sh
 ```
 
-Now, you prepare two folders:
-
+Now, you prepare the config folder:
 ```
-mkdir -p docker-data/certs/users
 mkdir docker-config
 ```
 
@@ -184,6 +181,8 @@ Now, you can start up the system with
 ```bash
 docker-compose up -d
 ```
+
+Note that this will also trigger building the container
 
 The coordinator should now be accessible via https://localhost:8444/auth.
 
