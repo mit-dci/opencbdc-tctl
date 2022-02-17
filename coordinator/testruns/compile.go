@@ -3,7 +3,7 @@ package testruns
 import (
 	"fmt"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 func (t *TestRunManager) CompileBinaries(

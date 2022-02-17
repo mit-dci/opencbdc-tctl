@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/mit-dci/opencbdc-tct/logging"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/logging"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // RunClient is the main loop for an agent

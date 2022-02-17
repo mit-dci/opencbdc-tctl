@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/coordinator"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
 )
 
 // UpdateStatus will set the status property of the testrun, append the new

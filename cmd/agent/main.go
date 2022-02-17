@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/agent"
-	"github.com/mit-dci/opencbdc-tct/agent/scripts"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/agent"
+	"github.com/mit-dci/opencbdc-tctl/agent/scripts"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 // These two variables are set while building, see the Dockerfile.agent

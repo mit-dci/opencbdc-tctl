@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/beevik/ntp"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 // SyncTime fetches the latest time from an NTP server and then tries to set the

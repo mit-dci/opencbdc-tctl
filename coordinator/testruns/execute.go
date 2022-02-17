@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 // ExecuteTestRun is the main function that executes a test run

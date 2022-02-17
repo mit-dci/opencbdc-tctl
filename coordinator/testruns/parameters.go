@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 // seed_privkey is used by the loadgens for spending the seeded outputs

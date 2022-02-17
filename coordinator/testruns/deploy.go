@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // DeployConfig is a convenience method to send a DeployFileRequestMsg to all

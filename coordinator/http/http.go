@@ -18,13 +18,13 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/coordinator"
-	"github.com/mit-dci/opencbdc-tct/coordinator/agents"
-	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
-	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
-	"github.com/mit-dci/opencbdc-tct/coordinator/testruns"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/agents"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/testruns"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 	"github.com/rs/cors"
 )
 

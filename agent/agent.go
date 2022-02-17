@@ -5,8 +5,8 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/mit-dci/opencbdc-tct/logging"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/logging"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // Agent is the main class for the agent binary

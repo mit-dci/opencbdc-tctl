@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/mit-dci/opencbdc-tct/coordinator"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 func (h *HttpServer) redownloadOutputsHandler(

@@ -1,4 +1,4 @@
-module github.com/mit-dci/opencbdc-tct
+module github.com/mit-dci/opencbdc-tctl
 
 go 1.16
 

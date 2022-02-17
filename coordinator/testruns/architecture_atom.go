@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 func (t *TestRunManager) IsAtomizer(architectureID string) bool {

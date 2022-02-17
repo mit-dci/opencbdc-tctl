@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 func writeSelfSignedCert() error {
@@ -35,7 +35,7 @@ func writeSelfSignedCert() error {
 			Province:           []string{"MA"},
 			Locality:           []string{"Boston"},
 			Organization:       []string{"OpenCBDC Test Controller"},
-			CommonName:         "opencbdc-tct.dev.local",
+			CommonName:         "opencbdc-tctl.dev.local",
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(time.Hour * 24 * 3650),

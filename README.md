@@ -165,8 +165,8 @@ For testing the system in a local environment, using [Docker](https://www.docker
 Here's how you build this system in a container:
 
 ```bash
-git clone git@github.com:mit-dci/opencbdc-tct
-cd opencbdc-tct
+git clone git@github.com:mit-dci/opencbdc-tctl
+cd opencbdc-tctl
 ```
 
 Now, you prepare the config folder:

@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.coordinator
-    image: opencbdc-tct-coordinator
+    image: opencbdc-tctl-coordinator
     environment:
       - HTTPS_WITHOUT_CLIENT_CERT_PORT=8444
       - HTTPS_PORT=8443
@@ -22,8 +22,8 @@ services:
       - "8443:8443"
       - "8444:8444"
     networks:
-      - opencbdc-tct
+      - opencbdc-tctl
 
 networks:
-  opencbdc-tct:
+  opencbdc-tctl:
     driver: bridge

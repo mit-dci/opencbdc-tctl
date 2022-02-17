@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/coordinator"
-	"github.com/mit-dci/opencbdc-tct/coordinator/agents"
-	"github.com/mit-dci/opencbdc-tct/coordinator/awsmgr"
-	"github.com/mit-dci/opencbdc-tct/coordinator/http"
-	"github.com/mit-dci/opencbdc-tct/coordinator/scripts"
-	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
-	"github.com/mit-dci/opencbdc-tct/coordinator/testruns"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/agents"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/awsmgr"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/http"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/scripts"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/testruns"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 var GitCommit string

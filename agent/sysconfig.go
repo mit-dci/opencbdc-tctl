@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // GetPublicIP uses an external site to retrieve the agent's public IP address

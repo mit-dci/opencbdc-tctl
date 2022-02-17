@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/coordinator"
-	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // AgentsManager contains easy functions to interact with a connected agent

@@ -3,7 +3,7 @@ package http
 import (
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 type SweepData struct {

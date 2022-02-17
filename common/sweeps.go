@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 func FindMissingSweepRuns(trs []*TestRun, sweepID string) []*TestRun {

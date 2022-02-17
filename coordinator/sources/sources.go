@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/logging"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 var ErrGitLogOutOfBounds = errors.New("Requested out-of-bounds git log")

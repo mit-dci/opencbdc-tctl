@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 // GenerateMatrix generates a matrix of results from all testruns. Note that

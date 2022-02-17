@@ -3,7 +3,7 @@ package http
 import (
 	"reflect"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 type frontendTestRunField struct {

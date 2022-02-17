@@ -3,7 +3,7 @@ package coordinator
 import (
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
+	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
 // Event describes real-time updates sent by the coordinator to the

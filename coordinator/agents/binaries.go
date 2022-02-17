@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // PrepareAgentWithBinariesForCommit is a convenience method that instructs

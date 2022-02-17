@@ -11,10 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mit-dci/opencbdc-tct/common"
-	"github.com/mit-dci/opencbdc-tct/coordinator/sources"
-	"github.com/mit-dci/opencbdc-tct/logging"
-	"github.com/mit-dci/opencbdc-tct/wire"
+	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/coordinator/sources"
+	"github.com/mit-dci/opencbdc-tctl/logging"
+	"github.com/mit-dci/opencbdc-tctl/wire"
 )
 
 // copyFiles describes which files to copy from the given system role upon
