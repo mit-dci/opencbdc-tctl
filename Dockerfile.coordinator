@@ -1,4 +1,8 @@
-FROM public.ecr.aws/b8p3w3q2/node:14 as nodebuild
+ARG NODE_BUILD_IMAGE=node:14
+ARG GOLANG_BUILD_IMAGE=golang:1.16
+ARG APP_IMAGE=ubuntu:20.04
+
+FROM $NODE_BUILD_IMAGE as nodebuild
 RUN mkdir /tmp/build
 COPY frontend/package.json /tmp/build/package.json
 COPY frontend/package-lock.json /tmp/build/package-lock.json
@@ -10,7 +14,7 @@ RUN mkdir /tmp/output
 RUN npm install && npm run build
 RUN mv build /tmp/output/
 
-FROM public.ecr.aws/b8p3w3q2/golang:1.16 as build-env
+FROM $GOLANG_BUILD_IMAGE as build-env
 RUN mkdir /src
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
@@ -23,7 +27,7 @@ ARG GIT_DATE=00000000
 RUN go build -ldflags "-X main.GitCommit=$GIT_COMMIT -X main.BuildDate=$GIT_DATE" -o coordinator
 
 # final stage
-FROM public.ecr.aws/b8p3w3q2/ubuntu:20.04
+FROM $APP_IMAGE
 RUN apt-get update && DEBIAN_FRONTEND=non-interactive apt-get -y install git python3-pip cmake wget libgtest-dev lcov git libtool automake clang-tidy build-essential
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
