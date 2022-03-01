@@ -35,7 +35,7 @@ Here's how we would schedule this test as a user. Firstly, we select the option 
 
 ![Screenshot schedule test run](docs/03-schedule-test-01.png)
 
-In the `Parameters` section of this screen, you can see a great number of parameters that the system can be configured with. The default values are the values used for the scalability benchmarks in the paper, so we can leave them untouched for now. Other benchmarks from the paper such as the ones demonstrating the effect of increased double spends, different UTXO set sizes, the effects of having many inputs or many outputs in transactions, can be reproduced with some of these parameters altered. The exact purpose for each parameter is shown when hovering over the parameter name (TODO!).
+In the `Parameters` section of this screen, you can see a great number of parameters that the system can be configured with. For the `Code commit` parameter, you should select the one labeled `Initial Commit` as this mirrors the code used to produce the results of the paper. For everything else, default values are the values used for the scalability benchmarks in the paper, so we can leave them untouched for now. Other benchmarks from the paper such as the ones demonstrating the effect of increased double spends, different UTXO set sizes, the effects of having many inputs or many outputs in transactions, can be reproduced with some of these parameters altered. The exact purpose for each parameter is shown when hovering over the parameter name (TODO!).
 
 In the next section, titled `Roles` we will have to decide on the roles we want to run, which instance type (launch template) to use for them, and where to run them geographically. For reproducing the paper plot point, we will compose the system as follows:
 
@@ -156,7 +156,9 @@ The REST endpoint run on the authenticated HTTPS endpoint that needs client-side
 
 The unauthenticated endpoint contains the websocket endpoint - because [Safari does not support websockets with client-certificate](). The user obtains a token from the authenticated endpoint (with its client certificate) and can connect to the websocket endpoint by providing that token. Tokens are only valid for 5 seconds and are one-time use.
 
-The unauthenticated endpoint further contains an `/auth` route that will explain the user how to generate a client-side certificate. Without this certificate you cannot access the main HTTPS frontend. Once you have generated your client-side private key and certificate and imported it into your browser, you have to provide the certificate to someone with access to the system. They can add your certificate to the list of authorized users - from which moment you can access the HTTPS portion of the frontend.
+The unauthenticated endpoint further contains an `/auth` route that will explain the user how to generate a client-side certificate. Without this certificate you cannot access the main HTTPS frontend. Once you have generated your client-side private key and certificate and imported it into your browser there are two possible scenarios for adding it to the system. If you are accessing a freshly provisioned environment where no certificates have ever been uploaded, you will be prompted at the `/auth` endpoint to upload one. If one or more certificates already exists within the test controller, you have to provide the certificate to someone with access to the system. They can add your certificate to the list of authorized users - from which moment you can access the HTTPS portion of the frontend.
+
+![Authorize First User Prompt](docs/17-authorize-first-user.png)
 
 # Developing and debugging the coordinator locally (Docker)
 
@@ -187,5 +189,3 @@ Note that this will also trigger building the container
 The coordinator should now be accessible via https://localhost:8444/auth.
 
 Generate a certificate using the instructions on the page. Import the private key in your browser using the password provided by the console output, and then add the certificate in the UI as the first user. The confirmation page will show you a link to open the test controller's main UI at https://localhost:8443/ - make sure to pick the freshly imported client certificate to authenticate yourself.
-
-
