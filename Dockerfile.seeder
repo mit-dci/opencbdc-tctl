@@ -1,4 +1,5 @@
-ARG APP_IMAGE
+ARG APP_IMAGE=ubuntu:20.04
+
 FROM $APP_IMAGE
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y awscli && rm -rf /var/lib/apt/lists/*
