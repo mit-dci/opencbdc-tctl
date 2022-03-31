@@ -23,47 +23,49 @@ type TestRun struct {
 	Started                  time.Time          `json:"started"`
 	Completed                time.Time          `json:"completed"`
 	Status                   TestRunStatus      `json:"status"`
-	CommitHash               string             `json:"commitHash"               feFieldTitle:"Code commit"                 feFieldType:"commit"`
-	Architecture             string             `json:"architectureID"           feFieldTitle:"Architecture"                feFieldType:"arch"`
-	BatchSize                int                `json:"batchSize"                feFieldTitle:"Batch size"                  feFieldType:"int"`
-	SampleCount              int                `json:"sampleCount"              feFieldTitle:"Sample count"                feFieldType:"int"`
-	ShardReplicationFactor   int                `json:"shardReplicationFactor"   feFieldTitle:"Shard Replication Factor"    feFieldType:"int"`
-	STXOCacheDepth           int                `json:"stxoCacheDepth"           feFieldTitle:"STXO Cache Depth"            feFieldType:"int"`
-	WindowSize               int                `json:"windowSize"               feFieldTitle:"Window size"                 feFieldType:"int"`
-	TargetBlockInterval      int                `json:"targetBlockInterval"      feFieldTitle:"Target Block Interval"       feFieldType:"int"`
-	ElectionTimeoutUpper     int                `json:"electionTimeoutUpper"     feFieldTitle:"Election timeout upper"      feFieldType:"int"`
-	ElectionTimeoutLower     int                `json:"electionTimeoutLower"     feFieldTitle:"Election timeout lower"      feFieldType:"int"`
-	Heartbeat                int                `json:"heartbeat"                feFieldTitle:"Heartbeat"                   feFieldType:"int"`
-	RaftMaxBatch             int                `json:"raftMaxBatch"             feFieldTitle:"RAFT Max Batch"              feFieldType:"int"`
-	SnapshotDistance         int                `json:"snapshotDistance"         feFieldTitle:"Snapshot Distance"           feFieldType:"int"`
-	LoadGenOutputCount       int                `json:"loadGenOutputCount"       feFieldTitle:"Loadgen Output Count"        feFieldType:"int"`
-	LoadGenInputCount        int                `json:"loadGenInputCount"        feFieldTitle:"Loadgen Input Count"         feFieldType:"int"`
-	LoadGenThreads           int                `json:"loadGenThreads"           feFieldTitle:"Loadgen Threads"             feFieldType:"int"`
-	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                 feFieldType:"int"`
-	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                    feFieldType:"bool"`
-	PerfSampleRate           int                `json:"perfSampleRate"           feFieldTitle:"Perf sample rate"            feFieldType:"int"`
-	TrimSamplesAtStart       int                `json:"trimSamplesAtStart"       feFieldTitle:"Trim samples at start"       feFieldType:"int"`
-	TrimZeroesAtStart        bool               `json:"trimZeroesAtStart"        feFieldTitle:"Trim zeroes at start"        feFieldType:"bool"`
-	TrimZeroesAtEnd          bool               `json:"trimZeroesAtEnd"          feFieldTitle:"Trim zeroes at end"          feFieldType:"bool"`
-	AtomizerLogLevel         string             `json:"atomizerLogLevel"         feFieldTitle:"Atomizer Log Level"          feFieldType:"loglevel"`
-	ArchiverLogLevel         string             `json:"archiverLogLevel"         feFieldTitle:"Archiver Log Level"          feFieldType:"loglevel"`
-	SentinelLogLevel         string             `json:"sentinelLogLevel"         feFieldTitle:"Sentinel Log Level"          feFieldType:"loglevel"`
-	ShardLogLevel            string             `json:"shardLogLevel"            feFieldTitle:"Shard Log Level"             feFieldType:"loglevel"`
-	CoordinatorLogLevel      string             `json:"coordinatorLogLevel"      feFieldTitle:"Coordinator Log Level"       feFieldType:"loglevel"`
-	WatchtowerLogLevel       string             `json:"watchtowerLogLevel"       feFieldTitle:"Watchtower Log Level"        feFieldType:"loglevel"`
-	WatchtowerBlockCacheSize int                `json:"watchtowerBlockCacheSize" feFieldTitle:"Watchtower Block Cache Size" feFieldType:"int"`
-	WatchtowerErrorCacheSize int                `json:"watchtowerErrorCacheSize" feFieldTitle:"Watchtower Error Cache Size" feFieldType:"int"`
-	InvalidTxRate            float64            `json:"invalidTxRate"            feFieldTitle:"Invalid TX Rate"             feFieldType:"float"`
-	FixedTxRate              float64            `json:"fixedTxRate"              feFieldTitle:"Fixed TX Rate"               feFieldType:"float"`
-	PreseedCount             int64              `json:"preseedCount"             feFieldTitle:"Number of preseeded outputs" feFieldType:"int"`
-	PreseedShards            bool               `json:"preseedShards"            feFieldTitle:"Preseed outputs on shards"   feFieldType:"bool"`
-	KeepTimedOutAgents       bool               `json:"keepTimedOutAgents"       feFieldTitle:"Keep timed out agents"       feFieldType:"bool"`
-	SkipCleanUp              bool               `json:"skipCleanup"              feFieldTitle:"Skip cleanup after test"     feFieldType:"bool"`
-	RetryOnFailure           bool               `json:"retryOnFailure"           feFieldTitle:"Retry on failures"           feFieldType:"bool"`
-	MaxRetries               int                `json:"maxRetries"               feFieldTitle:"Maximum number of retries"   feFieldType:"int"`
-	Repeat                   int                `json:"repeat"                   feFieldTitle:"Repeat test X times"         feFieldType:"int"`
-	Debug                    bool               `json:"debug"                    feFieldTitle:"Run in debugger"             feFieldType:"bool"`
-	RecordNetworkTraffic     bool               `json:"recordNetworkTraffic"     feFieldTitle:"Record network traffic"      feFieldType:"bool"`
+	CommitHash               string             `json:"commitHash"               feFieldTitle:"Code commit"                     feFieldType:"commit"`
+	Architecture             string             `json:"architectureID"           feFieldTitle:"Architecture"                    feFieldType:"arch"`
+	BatchSize                int                `json:"batchSize"                feFieldTitle:"Batch size"                      feFieldType:"int"`
+	SampleCount              int                `json:"sampleCount"              feFieldTitle:"Sample count"                    feFieldType:"int"`
+	ShardReplicationFactor   int                `json:"shardReplicationFactor"   feFieldTitle:"Shard Replication Factor"        feFieldType:"int"`
+	STXOCacheDepth           int                `json:"stxoCacheDepth"           feFieldTitle:"STXO Cache Depth"                feFieldType:"int"`
+	WindowSize               int                `json:"windowSize"               feFieldTitle:"Window size"                     feFieldType:"int"`
+	TargetBlockInterval      int                `json:"targetBlockInterval"      feFieldTitle:"Target Block Interval"           feFieldType:"int"`
+	ElectionTimeoutUpper     int                `json:"electionTimeoutUpper"     feFieldTitle:"Election timeout upper"          feFieldType:"int"`
+	ElectionTimeoutLower     int                `json:"electionTimeoutLower"     feFieldTitle:"Election timeout lower"          feFieldType:"int"`
+	Heartbeat                int                `json:"heartbeat"                feFieldTitle:"Heartbeat"                       feFieldType:"int"`
+	RaftMaxBatch             int                `json:"raftMaxBatch"             feFieldTitle:"RAFT Max Batch"                  feFieldType:"int"`
+	SnapshotDistance         int                `json:"snapshotDistance"         feFieldTitle:"Snapshot Distance"               feFieldType:"int"`
+	LoadGenOutputCount       int                `json:"loadGenOutputCount"       feFieldTitle:"Loadgen Output Count"            feFieldType:"int"`
+	LoadGenInputCount        int                `json:"loadGenInputCount"        feFieldTitle:"Loadgen Input Count"             feFieldType:"int"`
+	LoadGenThreads           int                `json:"loadGenThreads"           feFieldTitle:"Loadgen Threads"                 feFieldType:"int"`
+	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
+	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
+	PerfSampleRate           int                `json:"perfSampleRate"           feFieldTitle:"Perf sample rate"                feFieldType:"int"`
+	TrimSamplesAtStart       int                `json:"trimSamplesAtStart"       feFieldTitle:"Trim samples at start"           feFieldType:"int"`
+	TrimZeroesAtStart        bool               `json:"trimZeroesAtStart"        feFieldTitle:"Trim zeroes at start"            feFieldType:"bool"`
+	TrimZeroesAtEnd          bool               `json:"trimZeroesAtEnd"          feFieldTitle:"Trim zeroes at end"              feFieldType:"bool"`
+	AtomizerLogLevel         string             `json:"atomizerLogLevel"         feFieldTitle:"Atomizer Log Level"              feFieldType:"loglevel"`
+	ArchiverLogLevel         string             `json:"archiverLogLevel"         feFieldTitle:"Archiver Log Level"              feFieldType:"loglevel"`
+	SentinelLogLevel         string             `json:"sentinelLogLevel"         feFieldTitle:"Sentinel Log Level"              feFieldType:"loglevel"`
+	ShardLogLevel            string             `json:"shardLogLevel"            feFieldTitle:"Shard Log Level"                 feFieldType:"loglevel"`
+	CoordinatorLogLevel      string             `json:"coordinatorLogLevel"      feFieldTitle:"Coordinator Log Level"           feFieldType:"loglevel"`
+	WatchtowerLogLevel       string             `json:"watchtowerLogLevel"       feFieldTitle:"Watchtower Log Level"            feFieldType:"loglevel"`
+	WatchtowerBlockCacheSize int                `json:"watchtowerBlockCacheSize" feFieldTitle:"Watchtower Block Cache Size"     feFieldType:"int"`
+	WatchtowerErrorCacheSize int                `json:"watchtowerErrorCacheSize" feFieldTitle:"Watchtower Error Cache Size"     feFieldType:"int"`
+	InvalidTxRate            float64            `json:"invalidTxRate"            feFieldTitle:"Invalid TX Rate"                 feFieldType:"float"`
+	FixedTxRate              float64            `json:"fixedTxRate"              feFieldTitle:"Fixed TX Rate"                   feFieldType:"float"`
+	PreseedCount             int64              `json:"preseedCount"             feFieldTitle:"Number of preseeded outputs"     feFieldType:"int"`
+	PreseedShards            bool               `json:"preseedShards"            feFieldTitle:"Preseed outputs on shards"       feFieldType:"bool"`
+	KeepTimedOutAgents       bool               `json:"keepTimedOutAgents"       feFieldTitle:"Keep timed out agents"           feFieldType:"bool"`
+	SkipCleanUp              bool               `json:"skipCleanup"              feFieldTitle:"Skip cleanup after test"         feFieldType:"bool"`
+	RetryOnFailure           bool               `json:"retryOnFailure"           feFieldTitle:"Retry on failures"               feFieldType:"bool"`
+	MaxRetries               int                `json:"maxRetries"               feFieldTitle:"Maximum number of retries"       feFieldType:"int"`
+	Repeat                   int                `json:"repeat"                   feFieldTitle:"Repeat test X times"             feFieldType:"int"`
+	Debug                    bool               `json:"debug"                    feFieldTitle:"Run in debugger"                 feFieldType:"bool"`
+	SentinelAttestations     int                `json:"sentinelAttestations"     feFieldTitle:"Number of sentinel attestations" feFieldType:"int"`
+	AuditInterval            int                `json:"auditInterval"            feFieldTitle:"Audit Interval (blocks)"         feFieldType:"int"`
+	RecordNetworkTraffic     bool               `json:"recordNetworkTraffic"     feFieldTitle:"Record network traffic"          feFieldType:"bool"`
 	DontRunBefore            time.Time          `json:"notBefore"`
 	Sweep                    string             `json:"sweep"`
 	SweepID                  string             `json:"sweepID"`

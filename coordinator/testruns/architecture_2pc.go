@@ -38,6 +38,10 @@ func (t *TestRunManager) RunBinariesTwoPhase(
 		failures,
 	)
 	if err != nil {
+		cuerr := t.CleanupCommands(tr, allCmds, envs)
+		if cuerr != nil {
+			return cuerr
+		}
 		return err
 	}
 	if terminated { // Terminated yields true if the user aborted the testrun
@@ -71,27 +75,7 @@ func (t *TestRunManager) RunBinariesTwoPhase(
 	case <-time.After(5 * time.Minute):
 	}
 
-	// Break all commands that are still running - if one command fails or only
-	// the archiver has succesfully completed, we still need to terminate all
-	// the other commands using a interrupt or kill signal. This would trigger
-	// the finishing of all stdout/err buffers and terminating any performance
-	// profiling running alongside the commands
-	err = t.BreakAndTerminateAllCmds(tr, allCmds)
-	if err != nil {
-		return err
-	}
-
-	// Time for the commands to break and commit perf results
-	time.Sleep(5 * time.Second)
-
-	// Trigger the agents to upload the performance data for all commands
-	// to S3
-	err = t.GetPerformanceProfiles(tr, allCmds, envs)
-	if err != nil {
-		return err
-	}
-
-	err = t.GetLogFiles(tr, allCmds, envs)
+	err = t.CleanupCommands(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
@@ -135,6 +119,9 @@ func (t *TestRunManager) GenerateConfigTwoPhase(
 		return nil, err
 	}
 	if _, err = cfg.Write([]byte("2pc=1\n")); err != nil {
+		return nil, err
+	}
+	if err = t.writeSentinelKeys(&cfg, tr); err != nil {
 		return nil, err
 	}
 	return cfg.Bytes(), nil

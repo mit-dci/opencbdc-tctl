@@ -3,6 +3,7 @@ package testruns
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
 )
@@ -302,4 +303,36 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 	if tr.SweepOneAtATime {
 		t.ContinueSweep(tr, tr.SweepID)
 	}
+}
+
+func (t *TestRunManager) CleanupCommands(
+	tr *common.TestRun,
+	allCmds []runningCommand,
+	envs map[int32][]byte,
+) error {
+	// Break all commands that are still running - if one command fails or only
+	// the archiver has succesfully completed, we still need to terminate all
+	// the other commands using a interrupt or kill signal. This would trigger
+	// the finishing of all stdout/err buffers and terminating any performance
+	// profiling running alongside the commands
+	err := t.BreakAndTerminateAllCmds(tr, allCmds)
+	if err != nil {
+		return err
+	}
+
+	// Time for the commands to break and commit perf results
+	time.Sleep(time.Second * 5)
+
+	// Trigger the agents to upload the performance data for all commands
+	// to S3
+	err = t.GetPerformanceProfiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
+
+	err = t.GetLogFiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
+	return nil
 }

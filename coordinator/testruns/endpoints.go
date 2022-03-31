@@ -37,14 +37,17 @@ const PortIncrementClientPort PortIncrement = 2
 // peers. Since we are not running two system roles on the same machine these
 // ports can safely overlap
 var portNums = map[common.SystemRole]int{
-	common.SystemRoleRaftAtomizer:     5001,
-	common.SystemRoleCoordinator:      5001,
-	common.SystemRoleShard:            5002,
-	common.SystemRoleShardTwoPhase:    5002,
-	common.SystemRoleSentinel:         5003,
-	common.SystemRoleSentinelTwoPhase: 5003,
-	common.SystemRoleArchiver:         5004,
-	common.SystemRoleWatchtower:       5005,
+	common.SystemRoleRaftAtomizer:        5001,
+	common.SystemRoleCoordinator:         5001,
+	common.SystemRoleShard:               5002,
+	common.SystemRoleShardTwoPhase:       5002,
+	common.SystemRoleSentinel:            5003,
+	common.SystemRoleSentinelTwoPhase:    5003,
+	common.SystemRoleArchiver:            5004,
+	common.SystemRoleWatchtower:          5005,
+	common.SystemRoleAgent:               5000,
+	common.SystemRoleRuntimeLockingShard: 5000,
+	common.SystemRoleTicketMachine:       5000,
 }
 
 // GetRoleEndpoint will return the IP and port at which a particular role in our

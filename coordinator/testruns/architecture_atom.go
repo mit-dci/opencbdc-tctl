@@ -2,12 +2,14 @@ package testruns
 
 import (
 	"bytes"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
@@ -39,6 +41,10 @@ func (t *TestRunManager) RunBinariesAtomizer(
 		return nil
 	}
 	if err != nil {
+		cuerr := t.CleanupCommands(tr, allCmds, envs)
+		if cuerr != nil {
+			return cuerr
+		}
 		return err
 	}
 	// allCmds now holds all of the running commands for this test run.
@@ -75,27 +81,7 @@ func (t *TestRunManager) RunBinariesAtomizer(
 	case <-tr.TerminateChan:
 	}
 
-	// Break all commands that are still running - if one command fails or only
-	// the archiver has succesfully completed, we still need to terminate all
-	// the other commands using a interrupt or kill signal. This would trigger
-	// the finishing of all stdout/err buffers and terminating any performance
-	// profiling running alongside the commands
-	err = t.BreakAndTerminateAllCmds(tr, allCmds)
-	if err != nil {
-		return err
-	}
-
-	// Time for the commands to break and commit perf results
-	time.Sleep(time.Second * 5)
-
-	// Trigger the agents to upload the performance data for all commands
-	// to S3
-	err = t.GetPerformanceProfiles(tr, allCmds, envs)
-	if err != nil {
-		return err
-	}
-
-	err = t.GetLogFiles(tr, allCmds, envs)
+	err = t.CleanupCommands(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
@@ -146,11 +132,45 @@ func (t *TestRunManager) GenerateConfigAtomizer(
 	if err = t.writePreseedConfigVariables(&cfg, tr); err != nil {
 		return nil, err
 	}
+	if err = t.writeSentinelKeys(&cfg, tr); err != nil {
+		return nil, err
+	}
 	if err = t.writeArchiverConfig(&cfg, tr); err != nil {
 		return nil, err
 	}
 
 	return cfg.Bytes(), nil
+}
+
+// writeSentinelKeys adds a private and public key for each sentinel to the
+// config file to be used for signing attestations
+func (t *TestRunManager) writeSentinelKeys(
+	cfg io.Writer,
+	tr *common.TestRun,
+) error {
+	var sents []*common.TestRunRole
+	if t.IsAtomizer(tr.Architecture) {
+		sents = t.GetAllRolesSorted(tr, common.SystemRoleSentinel)
+	} else if t.Is2PC(tr.Architecture) {
+		sents = t.GetAllRolesSorted(tr, common.SystemRoleSentinelTwoPhase)
+	}
+	for i := range sents {
+		privKey := make([]byte, 32)
+		_, err := rand.Read(privKey)
+		if err != nil {
+			return err
+		}
+
+		if _, err := cfg.Write([]byte(fmt.Sprintf("sentinel%d_private_key=\"%x\"\n", i, privKey))); err != nil {
+			return err
+		}
+		_, pub := btcec.PrivKeyFromBytes(btcec.S256(), privKey)
+		if _, err := cfg.Write([]byte(fmt.Sprintf("sentinel%d_public_key=\"%x\"\n", i, pub.X.Bytes()))); err != nil {
+			return err
+		}
+
+	}
+	return nil
 }
 
 // writeArchiverConfig adds a database folder name for each archiver to the
@@ -242,11 +262,14 @@ func (t *TestRunManager) CreateStartSequenceAtomizer(
 
 	// Next, start the atomizers - leader last
 	allRaftAtomizers := t.GetAllRolesSorted(tr, common.SystemRoleRaftAtomizer)
+	if len(allRaftAtomizers) > 1 {
+		startSequence = append(startSequence, startSequenceEntry{
+			roles:       allRaftAtomizers[1:],
+			timeout:     roleStartTimeout,
+			waitForPort: []PortIncrement{PortIncrementRaftPort},
+		})
+	}
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       allRaftAtomizers[1:],
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementRaftPort},
-	}, startSequenceEntry{
 		roles:       []*common.TestRunRole{allRaftAtomizers[0]},
 		timeout:     roleStartTimeout,
 		waitForPort: []PortIncrement{PortIncrementDefaultPort},

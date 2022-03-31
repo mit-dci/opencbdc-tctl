@@ -30,6 +30,10 @@ var roleBinaries = map[common.SystemRole]string{
 	common.SystemRoleSentinelTwoPhase:      "sources/build/src/sentinel_2pc/sentineld-2pc",
 	common.SystemRoleAtomizerCliWatchtower: "sources/build/tools/bench/atomizer-cli-watchtower",
 	common.SystemRoleTwoPhaseGen:           "sources/build/tools/bench/twophase-gen",
+	common.SystemRoleAgent:                 "sources/build/src/phase_two/agent/agentd",
+	common.SystemRoleRuntimeLockingShard:   "sources/build/src/phase_two/runtime_locking_shard/runtime_locking_shardd",
+	common.SystemRoleTicketMachine:         "sources/build/src/phase_two/ticket_machine/ticket_machined",
+	common.SystemRolePhaseTwoGen:           "sources/build/tools/bench/phasetwo_bench",
 }
 
 // roleParameters is a map from the system role to the parameters we have to
@@ -63,6 +67,16 @@ var roleParameters = map[common.SystemRole][]string{
 	},
 	common.SystemRoleTwoPhaseGen:      []string{"%CFG%", "%IDX%"},
 	common.SystemRoleSentinelTwoPhase: []string{"%CFG%", "%IDX%"},
+	common.SystemRoleAgent:            []string{"--component_id=%IDX%"},
+	common.SystemRoleRuntimeLockingShard: []string{
+		"--component_id=%SHARDIDX%",
+		"--node_id=%SHARDNODEIDX%",
+	},
+	common.SystemRoleTicketMachine: []string{"--component_id=%IDX%"},
+	common.SystemRolePhaseTwoGen: []string{
+		"--component_id=%IDX%",
+		"%THREADS%",
+	},
 }
 
 // StartRoleBinaries is a convenience method to start a set of test run roles
@@ -300,6 +314,8 @@ func (t *TestRunManager) RunBinaries(
 		return t.RunBinariesAtomizer(tr, envs, cmd, failures)
 	} else if t.Is2PC(tr.Architecture) {
 		return t.RunBinariesTwoPhase(tr, envs, cmd, failures)
+	} else if t.IsPhaseTwo(tr.Architecture) {
+		return t.RunBinariesPhaseTwo(tr, envs, cmd, failures)
 	}
 	return fmt.Errorf("unknown architecture: [%s]", tr.Architecture)
 }
