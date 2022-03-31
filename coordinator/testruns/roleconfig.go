@@ -1,6 +1,7 @@
 package testruns
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"time"
@@ -14,9 +15,21 @@ func (t *TestRunManager) GenerateConfig(tr *common.TestRun) ([]byte, error) {
 		return t.GenerateConfigTwoPhase(tr)
 	} else if t.IsAtomizer(tr.Architecture) {
 		return t.GenerateConfigAtomizer(tr)
+	} else {
+		params, err := t.GenerateParams(tr)
+		if err != nil {
+			return nil, err
+		}
+		tr.Params = params
+		var cfg bytes.Buffer
+		for _, param := range params {
+			_, err := cfg.WriteString(fmt.Sprintf("%s\n", param))
+			if err != nil {
+				return nil, err
+			}
+		}
+		return cfg.Bytes(), nil
 	}
-
-	return []byte{}, fmt.Errorf("unknown architecture %s", tr.Architecture)
 }
 
 // writeTestRunConfigVariables writes generic testrun-level configuration
@@ -54,7 +67,27 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 	); err != nil {
 		return err
 	}
+	if _, err := cfg.Write(
+		[]byte(
+			fmt.Sprintf(
+				"audit_interval=%d\n",
+				tr.AuditInterval,
+			),
+		),
+	); err != nil {
+		return err
+	}
 
+	if _, err := cfg.Write(
+		[]byte(
+			fmt.Sprintf(
+				"attestation_threshold=%d\n",
+				tr.SentinelAttestations,
+			),
+		),
+	); err != nil {
+		return err
+	}
 	if _, err := cfg.Write(
 		[]byte(
 			fmt.Sprintf("target_block_interval=%d\n", tr.TargetBlockInterval),

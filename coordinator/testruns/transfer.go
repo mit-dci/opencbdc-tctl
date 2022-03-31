@@ -52,6 +52,9 @@ var copyFiles = map[common.SystemRole][]string{
 	common.SystemRoleTwoPhaseGen: {
 		"tx_samples_%IDX%.txt",
 	},
+	common.SystemRolePhaseTwoGen: {
+		"tx_samples_%IDX%.txt",
+	},
 }
 
 // CopyOutputs will use the `copyFiles` map to instruct the agents to upload all

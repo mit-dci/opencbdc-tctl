@@ -17,6 +17,10 @@ const SystemRoleShardTwoPhase SystemRole = "shard-2pc"
 const SystemRoleSentinelTwoPhase SystemRole = "sentinel-2pc"
 const SystemRoleCoordinator SystemRole = "coordinator"
 const SystemRoleTwoPhaseGen SystemRole = "twophase-gen"
+const SystemRoleAgent SystemRole = "agent"
+const SystemRoleRuntimeLockingShard SystemRole = "runtime_locking_shard"
+const SystemRoleTicketMachine SystemRole = "ticket_machine"
+const SystemRolePhaseTwoGen SystemRole = "phasetwo_bench"
 
 type SystemArchitectureRole struct {
 	Role       SystemRole `json:"role"`
@@ -98,7 +102,6 @@ var AvailableArchitectures = []SystemArchitecture{
 			TrimSamplesAtStart:       5,
 			TrimZeroesAtStart:        true,
 			TrimZeroesAtEnd:          true,
-			CoordinatorLogLevel:      "WARN",
 			AtomizerLogLevel:         "WARN",
 			SentinelLogLevel:         "WARN",
 			ArchiverLogLevel:         "WARN",
@@ -115,6 +118,8 @@ var AvailableArchitectures = []SystemArchitecture{
 			WatchtowerBlockCacheSize: 100,
 			WatchtowerErrorCacheSize: 10000000,
 			MaxRetries:               1,
+			SentinelAttestations:     1,
+			AuditInterval:            400,
 		},
 	},
 	{
@@ -175,6 +180,73 @@ var AvailableArchitectures = []SystemArchitecture{
 			TrimZeroesAtStart:        true,
 			TrimZeroesAtEnd:          true,
 			CoordinatorLogLevel:      "WARN",
+			SentinelLogLevel:         "WARN",
+			ShardLogLevel:            "WARN",
+			Debug:                    false,
+			RunPerf:                  false,
+			BatchDelay:               1,
+			InvalidTxRate:            0,
+			SkipCleanUp:              false,
+			KeepTimedOutAgents:       false,
+			Repeat:                   1,
+			RetryOnFailure:           false,
+			WatchtowerBlockCacheSize: 100,
+			WatchtowerErrorCacheSize: 10000000,
+			MaxRetries:               1,
+			SentinelAttestations:     1,
+			AuditInterval:            60,
+		},
+	},
+	{
+		ID:   "phase-two",
+		Name: "Phase Two Programmability",
+		Roles: []SystemArchitectureRole{
+			{
+				Role:       SystemRoleAgent,
+				Title:      "Agent",
+				ShortTitle: "Agent",
+			},
+			{
+				Role:       SystemRoleRuntimeLockingShard,
+				Title:      "Shard",
+				ShortTitle: "Shard",
+			},
+			{
+				Role:       SystemRoleTicketMachine,
+				Title:      "Ticket Machine",
+				ShortTitle: "Ticketer",
+			},
+			{
+				Role:       SystemRolePhaseTwoGen,
+				Title:      "Generator",
+				ShortTitle: "Gen",
+			},
+		},
+		DefaultTest: &TestRun{
+			// TODO for Phase 2
+			Roles:                    make([]*TestRunRole, 0),
+			SweepRoles:               make([]*TestRunRole, 0),
+			STXOCacheDepth:           0,
+			BatchSize:                100000,
+			WindowSize:               100000,
+			TargetBlockInterval:      250,
+			ElectionTimeoutUpper:     1000,
+			ElectionTimeoutLower:     500,
+			Heartbeat:                250,
+			RaftMaxBatch:             100000,
+			SnapshotDistance:         0,
+			ShardReplicationFactor:   3,
+			Architecture:             "phase-two",
+			SampleCount:              315,
+			LoadGenOutputCount:       2,
+			LoadGenInputCount:        2,
+			FixedTxRate:              1,
+			PreseedCount:             100000000,
+			PreseedShards:            false,
+			TrimSamplesAtStart:       5,
+			TrimZeroesAtStart:        true,
+			TrimZeroesAtEnd:          true,
+			CoordinatorLogLevel:      "WARN",
 			AtomizerLogLevel:         "WARN",
 			SentinelLogLevel:         "WARN",
 			ArchiverLogLevel:         "WARN",
@@ -191,6 +263,8 @@ var AvailableArchitectures = []SystemArchitecture{
 			WatchtowerBlockCacheSize: 100,
 			WatchtowerErrorCacheSize: 10000000,
 			MaxRetries:               1,
+			SentinelAttestations:     1,
+			AuditInterval:            60,
 		},
 	},
 }

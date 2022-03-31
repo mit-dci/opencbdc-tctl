@@ -58,6 +58,7 @@ type TestRunNormalizedConfig struct {
 	ControllerCommitHash   string  `json:"controllerCommitHash"`
 	PreseedCount           int64   `json:"preseedCount"`
 	PreseedShards          bool    `json:"preseedShards"`
+	LoadGenThreads         int     `json:"loadGenThreads"`
 }
 
 // Calculates a hash over the normalized config by hashing the serialized JSON
@@ -163,6 +164,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			cpu,
 			SystemRoleAtomizerCliWatchtower,
 			SystemRoleTwoPhaseGen,
+			SystemRolePhaseTwoGen,
 		),
 	)
 	trc.SentinelCPU = int(
@@ -177,11 +179,12 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			cpu,
 			SystemRoleShard,
 			SystemRoleShardTwoPhase,
+			SystemRoleRuntimeLockingShard,
 		),
 	)
 	trc.WatchtowerCPU = int(getFloatValueForAnyKey(cpu, SystemRoleWatchtower))
 	trc.CoordinatorCPU = int(
-		getFloatValueForAnyKey(cpu, SystemRoleCoordinator),
+		getFloatValueForAnyKey(cpu, SystemRoleCoordinator, SystemRoleAgent),
 	)
 	trc.AtomizerRAM = int(
 		getFloatValueForAnyKey(
@@ -194,6 +197,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			ram,
 			SystemRoleAtomizerCliWatchtower,
 			SystemRoleTwoPhaseGen,
+			SystemRolePhaseTwoGen,
 		) / 1024,
 	)
 	trc.SentinelRAM = int(
@@ -208,6 +212,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			ram,
 			SystemRoleShard,
 			SystemRoleShardTwoPhase,
+			SystemRoleRuntimeLockingShard,
 		) / 1024,
 	)
 	trc.WatchtowerRAM = int(
@@ -217,6 +222,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		getFloatValueForAnyKey(
 			ram,
 			SystemRoleCoordinator,
+			SystemRoleAgent,
 		) / 1024,
 	)
 
@@ -229,6 +235,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		count,
 		SystemRoleAtomizerCliWatchtower,
 		SystemRoleTwoPhaseGen,
+		SystemRolePhaseTwoGen,
 	)
 	trc.SentinelCount = getIntValueForAnyKey(
 		count,
@@ -239,11 +246,13 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		count,
 		SystemRoleShard,
 		SystemRoleShardTwoPhase,
+		SystemRoleRuntimeLockingShard,
 	)
 	trc.WatchtowerCount = getIntValueForAnyKey(count, SystemRoleWatchtower)
 	trc.CoordinatorCount = getIntValueForAnyKey(
 		count,
 		SystemRoleCoordinator,
+		SystemRoleAgent,
 	)
 
 	// Set the multiregion property
