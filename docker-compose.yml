@@ -1,0 +1,29 @@
+version: '3'
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    image: opencbdc-tctl-coordinator
+    environment:
+      - HTTPS_WITHOUT_CLIENT_CERT_PORT=8444
+      - HTTPS_PORT=8443
+      - AWS_REGION=us-east-1
+      - TRANSACTION_PROCESSOR_REPO_URL=https://github.com/mit-dci/opencbdc-tx
+      - TRANSACTION_PROCESSOR_MAIN_BRANCH=trunk
+      - BINARIES_S3_BUCKET=XXXXXXXXXX-us-east-1-binaries
+      - UHS_SEEDER_BATCH_JOB=uhs_seed_generator
+    volumes:
+      - ./docker-config/id_rsa:/root/.ssh/id_rsa:ro
+      - ./docker-config/aws-credentials:/root/.aws/credentials:ro
+      - ./docker-data:/app/data
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+      - "8444:8444"
+    networks:
+      - opencbdc-tctl
+
+networks:
+  opencbdc-tctl:
+    driver: bridge

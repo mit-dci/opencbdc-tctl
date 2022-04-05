@@ -1,0 +1,22 @@
+ARG GOLANG_BUILD_IMAGE=golang:1.16
+ARG APP_BASE_IMAGE=ubuntu:20.04
+
+FROM $GOLANG_BUILD_IMAGE as build-env
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y libpcap-dev
+RUN mkdir /src
+COPY go.mod /src/go.mod
+COPY go.sum /src/go.sum
+WORKDIR /src
+RUN go mod download
+COPY . /src
+WORKDIR /src/cmd/agent
+ARG GIT_COMMIT=dev
+ARG GIT_DATE=00000000
+RUN go build -ldflags "-X main.GitCommit=$GIT_COMMIT -X main.BuildDate=$GIT_DATE" -o agent
+
+# final stage
+FROM $APP_BASE_IMAGE
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y libpcap-dev build-essential libsfml-dev iproute2 wget cmake python3-pip libgtest-dev lcov git libtool automake clang-tidy
+WORKDIR /app
+COPY --from=build-env /src/cmd/agent/agent /app/
+CMD ./agent
