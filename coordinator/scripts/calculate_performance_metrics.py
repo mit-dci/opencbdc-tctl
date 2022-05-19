@@ -10,7 +10,7 @@ from matplotlib.pyplot import figure
 
 # Ensure this matches the variable PerformanceDataVersion at the
 # top of coordinator/testruns/testruns.go
-version = 3
+version = 4
 
 one_sec = 10**9
 
@@ -240,8 +240,13 @@ def plot_network_buffers(cmdID, perfdata):
         x.append((sample['start']-zero_time) / one_sec)
         samplerow = []
         for buf in sample['network_buffers']:
+            key = None
             if 'remote' in buf and 'localport' in buf:
                 key = '{}_{}'.format(buf['remote'], buf['localport'])
+            elif 'remote_ip' in buf and 'localport' in buf:
+                key = '{}_{}'.format(buf['remote_ip'], buf['localport'])
+
+            if key is not None:
                 if key not in samplerow:
                     if key not in y:
                         y[key] = {'s':np.zeros(len(x)-1),'r':np.zeros(len(x)-1)}

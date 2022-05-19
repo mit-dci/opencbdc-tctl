@@ -417,25 +417,27 @@ func (t *TestRunManager) GetLogFiles(
 func (t *TestRunManager) RedownloadTestOutputsFromS3(tr *common.TestRun) error {
 	downloads := make([]common.S3Download, 0)
 	prefix := fmt.Sprintf("testruns/%s/", tr.ID)
-	objects, err := t.awsm.ListObjectsInS3(
-		os.Getenv("AWS_REGION"),
-		os.Getenv("OUTPUTS_S3_BUCKET"),
-		prefix,
-	)
-	if err != nil {
-		return err
-	}
 
-	for _, o := range objects {
-		downloads = append(downloads, common.S3Download{
-			Retries:      10,
-			SourceRegion: os.Getenv("AWS_REGION"),
-			SourceBucket: os.Getenv("OUTPUTS_S3_BUCKET"),
-			SourcePath:   o,
-			TargetPath:   filepath.Join(common.DataDir(), o),
-		})
-	}
+	for _, bucket := range []string{os.Getenv("OUTPUTS_S3_BUCKET"), os.Getenv("BINARIES_S3_BUCKET")} {
+		objects, err := t.awsm.ListObjectsInS3(
+			os.Getenv("AWS_REGION"),
+			bucket,
+			prefix,
+		)
+		if err != nil {
+			return err
+		}
 
+		for _, o := range objects {
+			downloads = append(downloads, common.S3Download{
+				Retries:      10,
+				SourceRegion: os.Getenv("AWS_REGION"),
+				SourceBucket: bucket,
+				SourcePath:   o,
+				TargetPath:   filepath.Join(common.DataDir(), o),
+			})
+		}
+	}
 	logging.Infof(
 		"Re-downloading %d outputs from S3 for testrun %s",
 		len(downloads),
@@ -503,11 +505,25 @@ func (t *TestRunManager) UploadConfig(cfg []byte, tr *common.TestRun) error {
 		)
 	}
 
+	path := fmt.Sprintf("testruns/%s/outputs/config.cfg", tr.ID)
+
+	dl := common.S3Download{
+		TargetPath:   filepath.Join(common.DataDir(), path),
+		SourceRegion: os.Getenv("AWS_REGION"),
+		SourceBucket: os.Getenv("BINARIES_S3_BUCKET"),
+		SourcePath:   path,
+		Retries:      10,
+	}
+
+	tr.PendingResultDownloads = append(
+		tr.PendingResultDownloads,
+		dl)
+
 	return t.awsm.UploadToS3(common.S3Upload{
 		SourcePath:   file.Name(),
 		TargetRegion: os.Getenv("AWS_REGION"),
 		TargetBucket: os.Getenv("BINARIES_S3_BUCKET"),
-		TargetPath:   fmt.Sprintf("testruns/%s/outputs/config.cfg", tr.ID),
+		TargetPath:   path,
 	})
 }
 

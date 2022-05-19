@@ -12,7 +12,7 @@ import Selector from '../../components/Selector';
 
 const PerformanceData = (props) => {
     const selectedArchitecture = useSelector(state => state.architectures.architectures.find((a) => a.id === (props.testRun?.architectureID || 'default')));
-    const perfStatsVersion = 3;
+    const perfStatsVersion = 4;
     const perfGraphs = useSelector(state => state.testruns.perfGraphs);
     const [perfAgent, setPerfAgent] = useState('');
     const [perfAgent2, setPerfAgent2] = useState('');
