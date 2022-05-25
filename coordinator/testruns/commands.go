@@ -30,10 +30,10 @@ var roleBinaries = map[common.SystemRole]string{
 	common.SystemRoleSentinelTwoPhase:      "sources/build/src/sentinel_2pc/sentineld-2pc",
 	common.SystemRoleAtomizerCliWatchtower: "sources/build/tools/bench/atomizer-cli-watchtower",
 	common.SystemRoleTwoPhaseGen:           "sources/build/tools/bench/twophase-gen",
-	common.SystemRoleAgent:                 "sources/build/src/phase_two/agent/agentd",
-	common.SystemRoleRuntimeLockingShard:   "sources/build/src/phase_two/runtime_locking_shard/runtime_locking_shardd",
-	common.SystemRoleTicketMachine:         "sources/build/src/phase_two/ticket_machine/ticket_machined",
-	common.SystemRolePhaseTwoGen:           "sources/build/tools/bench/phasetwo_bench",
+	common.SystemRoleAgent:                 "python3 sources/build/src/3pc/agent/runners/evm/rpc_proxy.py",
+	common.SystemRoleRuntimeLockingShard:   "sources/build/src/3pc/runtime_locking_shard/runtime_locking_shardd",
+	common.SystemRoleTicketMachine:         "sources/build/src/3pc/ticket_machine/ticket_machined",
+	common.SystemRolePhaseTwoGen:           "sources/build/tools/bench/3pc/evm/evm_bench",
 }
 
 // roleParameters is a map from the system role to the parameters we have to

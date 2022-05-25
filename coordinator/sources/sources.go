@@ -238,6 +238,12 @@ func (s *SourcesManager) Compile(
 		progress <- 90
 	}
 
+	proxy_path := filepath.Join(sourcesDir(), "src", "3pc", "agent", "runners", "evm", "rpc_proxy")
+	if _, err := os.Stat(proxy_path); !os.IsNotExist(err) {
+		dest_proxy_path := filepath.Join(binariesPath, "src", "3pc", "agent", "runners", "evm")
+		common.CopyDir(proxy_path, dest_proxy_path)
+	}
+
 	return common.CreateArchive(binariesPath, path)
 }
 
