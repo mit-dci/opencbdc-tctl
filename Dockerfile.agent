@@ -19,6 +19,6 @@ FROM $APP_BASE_IMAGE
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y libpcap-dev build-essential libsfml-dev iproute2 wget cmake python3-pip libgtest-dev lcov git libtool automake clang-tidy
 WORKDIR /app
 COPY --from=build-env /src/cmd/agent/agent /app/
-COPY requirements.txt requirements.txt
+COPY rpc-proxy-requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 CMD ./agent
