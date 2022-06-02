@@ -18,6 +18,8 @@ import (
 // the output - should be the witness commitment matching the seed_privkey in
 // ../testruns/parameters.go
 var seed_witcomm = "6098c01c7a1a8f67a5e83ff49aa5488de5a3c867b81526e18040f5d6ec398446"
+// TODO centralize this somewhere in stead of having two copies
+var seed_privkey = "a0f36553548b3a66c003413140d7b59e43464ca11af66f25a6e746be501596b7"
 
 type ShardSeed struct {
 	CommitHash string `json:"commitHash"`
@@ -61,6 +63,10 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed) error {
 					{
 						Name:  aws.String("SEED_WITCOMM"),
 						Value: aws.String(seed_witcomm),
+					},
+					{
+						Name:  aws.String("SEED_PRIVATEKEY"),
+						Value: aws.String(seed_privkey),
 					},
 					{
 						Name:  aws.String("SEED_MODE"),
