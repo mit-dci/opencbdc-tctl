@@ -150,11 +150,9 @@ func (t *TestRunManager) PreseedShards(
 				},
 				15*time.Second,
 			)
-
+			
 			if err != nil {
-				errsLock.Lock()
-				errs = append(errs, err)
-				errsLock.Unlock()
+				t.WriteLog(tr, "WARN: Renaming preseed failed, could be because of newer preseeding already having the correct filename. May ignore: %v", err)
 			} else {
 				_, ok := res.(*wire.RenameFileResponseMsg)
 				if !ok {
