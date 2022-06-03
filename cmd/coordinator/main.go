@@ -85,7 +85,7 @@ func main() {
 					log[len(log)-1].CommitHash,
 				)
 			}
-			time.Sleep(time.Minute * 5)
+			time.Sleep(time.Second * 15)
 		}
 	}()
 
