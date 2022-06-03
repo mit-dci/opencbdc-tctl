@@ -39,6 +39,7 @@ type TestRun struct {
 	LoadGenOutputCount       int                `json:"loadGenOutputCount"       feFieldTitle:"Loadgen Output Count"            feFieldType:"int"`
 	LoadGenInputCount        int                `json:"loadGenInputCount"        feFieldTitle:"Loadgen Input Count"             feFieldType:"int"`
 	LoadGenThreads           int                `json:"loadGenThreads"           feFieldTitle:"Loadgen Threads"                 feFieldType:"int"`
+    LoadGenTxType            string             `json:"loadGenTxType"            feFieldTitle:"Loadgen Transaction Type"        feFieldType:"txtype"`
 	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
 	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
 	PerfSampleRate           int                `json:"perfSampleRate"           feFieldTitle:"Perf sample rate"                feFieldType:"int"`

@@ -103,6 +103,20 @@ const ScheduledRunProperty = (props) => {
               }}
             ></CInputCheckbox>
           )}
+          {props.type === "txtype" && (
+            <Selector
+            values={["transfer", "erc20"]}
+            valueFunc={(c) => c}
+            displayFunc={(c) => c}
+            value={props.value}
+            id={props.id}
+            onChange={(e) => {
+              var obj = {};
+              obj[props.id] = e.target.value;
+              dispatch(setScheduledRunProperty(obj));
+            }}
+          />
+          )}
           {props.type === "loglevel" && (
             <Selector
             values={["FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"]}
