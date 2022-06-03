@@ -238,14 +238,29 @@ func (s *SourcesManager) Compile(
 		progress <- 90
 	}
 
-	proxy_path := filepath.Join(sourcesDir(), "src", "3pc", "agent", "runners", "evm", "rpc_proxy")
+	proxy_path := filepath.Join(
+		sourcesDir(),
+		"src",
+		"3pc",
+		"agent",
+		"runners",
+		"evm",
+		"rpc_proxy",
+	)
 	if _, err := os.Stat(proxy_path); !os.IsNotExist(err) {
 		logging.Infof(
 			"[Compile %s-%t]: Copying 3PC/EVM RPC proxy",
 			hash,
 			profilingOrDebugging,
 		)
-		dest_proxy_path := filepath.Join(binariesPath, "src", "3pc", "agent", "runners", "evm")
+		dest_proxy_path := filepath.Join(
+			binariesPath,
+			"src",
+			"3pc",
+			"agent",
+			"runners",
+			"evm",
+		)
 		common.CopyDir(proxy_path, dest_proxy_path)
 	}
 
@@ -337,7 +352,10 @@ func (s *SourcesManager) updateCommitHistory() error {
 				if err == nil {
 					if strings.HasSuffix(parts[1], "/merge") {
 						prs[pr] = true
-						logging.Infof("Detected open PR #%d", pr)
+						logging.Infof(
+							"Detected (at one point) mergeable PR #%d",
+							pr,
+						)
 					} else if strings.HasSuffix(parts[1], "/head") {
 						prHeadCommits[pr] = parts[0]
 					}
@@ -347,8 +365,8 @@ func (s *SourcesManager) updateCommitHistory() error {
 	}
 
 	prGitLogs := make([]GitLogRecord, 0)
-	// Remove PRs that are merged or too old
-	for pr := range prs {
+	for pr := range prHeadCommits {
+		mergeable := prs[pr]
 		cmd = exec.Command(
 			"git",
 			"log",
@@ -381,7 +399,10 @@ func (s *SourcesManager) updateCommitHistory() error {
 			prData.AuthoredString,
 		)
 		if err == nil {
-			if authored.After(time.Now().Add(-90 * 24 * time.Hour)) {
+			// Include non-mergeable (or already merged) PRs that are less than
+			// 48 hours old, and mergeable PRs that are less than 90 days old
+			if authored.After(time.Now().Add(-2*24*time.Hour)) ||
+				(mergeable && authored.After(time.Now().Add(-90*24*time.Hour))) {
 				// Yes we want this one!
 				prGitLogs = append(prGitLogs, GitLogRecord{
 					Authored:   authored,
