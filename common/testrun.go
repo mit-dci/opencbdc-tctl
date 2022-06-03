@@ -49,6 +49,8 @@ type TestRun struct {
 	ArchiverLogLevel         string             `json:"archiverLogLevel"         feFieldTitle:"Archiver Log Level"              feFieldType:"loglevel"`
 	SentinelLogLevel         string             `json:"sentinelLogLevel"         feFieldTitle:"Sentinel Log Level"              feFieldType:"loglevel"`
 	ShardLogLevel            string             `json:"shardLogLevel"            feFieldTitle:"Shard Log Level"                 feFieldType:"loglevel"`
+	AgentLogLevel            string             `json:"agentLogLevel"            feFieldTitle:"Agent Log Level"                 feFieldType:"loglevel"`
+	TicketerLogLevel         string             `json:"ticketerLogLevel"         feFieldTitle:"Ticketer Log Level"              feFieldType:"loglevel"`
 	CoordinatorLogLevel      string             `json:"coordinatorLogLevel"      feFieldTitle:"Coordinator Log Level"           feFieldType:"loglevel"`
 	WatchtowerLogLevel       string             `json:"watchtowerLogLevel"       feFieldTitle:"Watchtower Log Level"            feFieldType:"loglevel"`
 	WatchtowerBlockCacheSize int                `json:"watchtowerBlockCacheSize" feFieldTitle:"Watchtower Block Cache Size"     feFieldType:"int"`

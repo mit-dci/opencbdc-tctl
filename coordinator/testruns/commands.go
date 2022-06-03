@@ -67,12 +67,17 @@ var roleParameters = map[common.SystemRole][]string{
 	},
 	common.SystemRoleTwoPhaseGen:      []string{"%CFG%", "%IDX%"},
 	common.SystemRoleSentinelTwoPhase: []string{"%CFG%", "%IDX%"},
-	common.SystemRoleAgent:            []string{"--component_id=%IDX%"},
+	common.SystemRoleAgent: []string{"--loglevel=%LOGLEVEL%",
+		"--component_id=%IDX%"},
 	common.SystemRoleRuntimeLockingShard: []string{
+		"--loglevel=%LOGLEVEL%",
 		"--component_id=%SHARDIDX%",
 		"--node_id=%SHARDNODEIDX%",
 	},
-	common.SystemRoleTicketMachine: []string{"--component_id=%IDX%"},
+	common.SystemRoleTicketMachine: []string{
+		"--loglevel=%LOGLEVEL%",
+		"--component_id=%IDX%",
+	},
 	common.SystemRolePhaseTwoGen: []string{
 		"--component_id=%IDX%",
 		"%THREADS%",
@@ -115,7 +120,10 @@ func (t *TestRunManager) StartRoleBinaries(
 			// roleParameters with the values based on the testrun and role
 			params := make([]string, 0)
 			if r.Role == common.SystemRoleAgent {
-				params = append(params, "sources/build/src/3pc/agent/runners/evm/rpc_proxy.py")
+				params = append(
+					params,
+					"sources/build/src/3pc/agent/runners/evm/rpc_proxy.py",
+				)
 			}
 			params = append(params, tr.Params...)
 			params = append(

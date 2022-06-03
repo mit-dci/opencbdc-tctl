@@ -229,6 +229,40 @@ func (t *TestRunManager) writeRoleCounts(
 	return nil
 }
 
+// RoleLogLevel determines the configured log level for this role, defaulting to
+// WARN
+func (t *TestRunManager) RoleLogLevel(
+	tr *common.TestRun,
+	r *common.TestRunRole,
+) string {
+	loglevel := "WARN"
+	switch r.Role {
+	case common.SystemRoleRaftAtomizer:
+		loglevel = tr.AtomizerLogLevel
+	case common.SystemRoleShard:
+		fallthrough
+	case common.SystemRoleShardTwoPhase:
+		fallthrough
+	case common.SystemRoleRuntimeLockingShard:
+		loglevel = tr.ShardLogLevel
+	case common.SystemRoleTicketMachine:
+		loglevel = tr.TicketerLogLevel
+	case common.SystemRoleAgent:
+		loglevel = tr.AgentLogLevel
+	case common.SystemRoleSentinel:
+		fallthrough
+	case common.SystemRoleSentinelTwoPhase:
+		loglevel = tr.SentinelLogLevel
+	case common.SystemRoleArchiver:
+		loglevel = tr.ArchiverLogLevel
+	case common.SystemRoleWatchtower:
+		loglevel = tr.WatchtowerLogLevel
+	case common.SystemRoleCoordinator:
+		loglevel = tr.CoordinatorLogLevel
+	}
+	return loglevel
+}
+
 // writeLogLevelConfig writes the role-level error logging level to the config
 // file for all roles in the testrun
 func (t *TestRunManager) writeLogLevelConfig(
@@ -236,27 +270,7 @@ func (t *TestRunManager) writeLogLevelConfig(
 	tr *common.TestRun,
 ) error {
 	for _, r := range tr.Roles {
-		// Determine the configured log level for this role, defaulting to WARN
-		// and write it to the config file
-		loglevel := "WARN"
-		switch r.Role {
-		case common.SystemRoleRaftAtomizer:
-			loglevel = tr.AtomizerLogLevel
-		case common.SystemRoleShard:
-			fallthrough
-		case common.SystemRoleShardTwoPhase:
-			loglevel = tr.ShardLogLevel
-		case common.SystemRoleSentinel:
-			fallthrough
-		case common.SystemRoleSentinelTwoPhase:
-			loglevel = tr.SentinelLogLevel
-		case common.SystemRoleArchiver:
-			loglevel = tr.ArchiverLogLevel
-		case common.SystemRoleWatchtower:
-			loglevel = tr.WatchtowerLogLevel
-		case common.SystemRoleCoordinator:
-			loglevel = tr.CoordinatorLogLevel
-		}
+		loglevel := t.RoleLogLevel(tr, r)
 		if _, err := cfg.Write(
 			[]byte(
 				fmt.Sprintf(

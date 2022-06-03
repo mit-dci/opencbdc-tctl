@@ -54,6 +54,7 @@ func (t *TestRunManager) SubstituteParameters(
 			"%THREADS%",
 			fmt.Sprintf("%d", tr.LoadGenThreads),
 		)
+		p = strings.ReplaceAll(p, "%LOGLEVEL%", t.RoleLogLevel(tr, r))
 
 		newParams = append(newParams, p)
 	}
