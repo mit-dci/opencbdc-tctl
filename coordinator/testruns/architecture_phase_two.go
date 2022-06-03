@@ -20,10 +20,8 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	cmd chan *common.ExecutedCommand,
 	failures chan *common.ExecutedCommand,
 ) error {
-	gensDone := make(chan []runningCommand, 1)
-
 	// Build the sequence of commands to start
-	startSequence := t.CreateStartSequencePhaseTwo(tr, gensDone)
+	startSequence := t.CreateStartSequencePhaseTwo(tr)
 
 	// Execute the sequence of commands to start
 	allCmds, terminated, err := t.executeStartSequence(
@@ -68,9 +66,8 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	select {
 	case fail := <-failures:
 		return t.HandleCommandFailure(tr, allCmds, envs, fail)
-	case waitCmds := <-gensDone:
-		allCmds = append(allCmds, waitCmds...)
 	case <-tr.TerminateChan:
+	case <-time.After(5 * time.Minute):
 	}
 
 	err = t.CleanupCommands(tr, allCmds, envs)
@@ -90,7 +87,6 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 // should be started up.
 func (t *TestRunManager) CreateStartSequencePhaseTwo(
 	tr *common.TestRun,
-	gensDone chan []runningCommand,
 ) []startSequenceEntry {
 	// Determine the start sequence
 	startSequence := make([]startSequenceEntry, 0)
@@ -158,7 +154,6 @@ func (t *TestRunManager) CreateStartSequencePhaseTwo(
 		roles:       t.GetAllRolesSorted(tr, common.SystemRolePhaseTwoGen),
 		timeout:     roleStartTimeout,
 		waitForPort: []PortIncrement{}, // Don't wait for anything - loadgens don't accept incoming
-		doneChan:    gensDone,
 	})
 	return startSequence
 }
@@ -259,6 +254,8 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 			),
 		)
 	}
+
+    ret = append(ret, fmt.Sprintf("--loadgen_txtype=%s", tr.LoadGenTxType))
 
 	return ret, nil
 }
