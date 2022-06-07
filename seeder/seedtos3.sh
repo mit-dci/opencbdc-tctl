@@ -97,8 +97,6 @@ else
     done
 fi
 
-exit 0
-
 for f in *.tar
 do
     aws s3 cp $f "s3://${BINARIES_S3_BUCKET}/shard-preseeds/$f"
