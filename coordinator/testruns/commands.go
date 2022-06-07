@@ -20,7 +20,7 @@ type runningCommand struct {
 // roleBinaries is a map from the system role to the location of the executable
 // to run in the binaries archive
 var roleBinaries = map[common.SystemRole]string{
-	common.SystemRoleArchiver:              "build/src/ush/atomizer/archiver/archiverd",
+	common.SystemRoleArchiver:              "build/src/uhs/atomizer/archiver/archiverd",
 	common.SystemRoleRaftAtomizer:          "build/src/uhs/atomizer/atomizer/atomizer-raftd",
 	common.SystemRoleSentinel:              "build/src/uhs/atomizer/sentinel/sentineld",
 	common.SystemRoleShard:                 "build/src/uhs/atomizer/shard/shardd",
@@ -28,11 +28,11 @@ var roleBinaries = map[common.SystemRole]string{
 	common.SystemRoleWatchtower:            "build/src/uhs/atomizer/watchtower/watchtowerd",
 	common.SystemRoleShardTwoPhase:         "build/src/uhs/twophase/locking_shard/locking-shardd",
 	common.SystemRoleSentinelTwoPhase:      "build/src/uhs/twophase/sentinel_2pc/sentineld-2pc",
-	common.SystemRoleAtomizerCliWatchtower: "build/src/uhs/tools/bench/atomizer-cli-watchtower",
-	common.SystemRoleTwoPhaseGen:           "tools/bench/twophase-gen",
+	common.SystemRoleAtomizerCliWatchtower: "build/tools/bench/atomizer-cli-watchtower",
+	common.SystemRoleTwoPhaseGen:           "build/tools/bench/twophase-gen",
 	common.SystemRoleAgent:                 "python3",
-	common.SystemRoleRuntimeLockingShard:   "build/src/uhs/twophase/locking_shard/locking_shardd",
-	common.SystemRoleTicketMachine:         "/build/src/3pc/ticket_machine/ticket_machined",
+	common.SystemRoleRuntimeLockingShard:   "sources/build/src/3pc/runtime_locking_shard/runtime_locking_shardd",
+	common.SystemRoleTicketMachine:         "sources/build/src/3pc/ticket_machine/ticket_machined",
 	common.SystemRolePhaseTwoGen:           "sources/build/tools/bench/3pc/evm/evm_bench",
 }
 
