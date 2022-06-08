@@ -255,7 +255,12 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 		)
 	}
 
-    ret = append(ret, fmt.Sprintf("--loadgen_txtype=%s", tr.LoadGenTxType))
+	ret = append(
+		ret,
+		fmt.Sprintf("--proxy_count=%d", tr.AgentRPCInstances),
+	)
+
+	ret = append(ret, fmt.Sprintf("--loadgen_txtype=%s", tr.LoadGenTxType))
 
 	return ret, nil
 }

@@ -52,6 +52,9 @@ func (t *TestRunManager) ScheduleTestRun(tr *common.TestRun) {
 	if tr.LoadGenThreads == 0 {
 		tr.LoadGenThreads = 1
 	}
+	if tr.AgentRPCInstances <= 0 {
+		tr.AgentRPCInstances = 1
+	}
 
 	tr.TerminateChan = make(chan bool, 1)
 	tr.RetrySpawnChan = make(chan bool, 1)
