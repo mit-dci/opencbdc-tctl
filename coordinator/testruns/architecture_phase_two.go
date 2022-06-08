@@ -63,11 +63,14 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	// user to manually terminate the run (case 3), or load gens end
 	// successfully
 	// (case 2 - success case)
+
+	timeout := time.Duration(tr.SampleCount) * time.Second
+
 	select {
 	case fail := <-failures:
 		return t.HandleCommandFailure(tr, allCmds, envs, fail)
 	case <-tr.TerminateChan:
-	case <-time.After(5 * time.Minute):
+	case <-time.After(timeout):
 	}
 
 	err = t.CleanupCommands(tr, allCmds, envs)
