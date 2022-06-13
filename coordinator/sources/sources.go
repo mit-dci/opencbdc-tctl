@@ -164,6 +164,13 @@ func (s *SourcesManager) Compile(
 		progress <- 5
 	}
 
+	cmd = exec.Command("git", "submodule", "sync")
+	cmd.Dir = sourcesDir()
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
 	cmd = exec.Command("git", "submodule", "update", "--recursive")
 	cmd.Dir = sourcesDir()
 	err = cmd.Run()
@@ -489,6 +496,13 @@ func (s *SourcesManager) cloneSources() error {
 		)
 	}
 
+	cmd = exec.Command("git", "submodule", "sync")
+	cmd.Dir = sourcesDir()
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
 	cmd = exec.Command("git", "submodule", "update", "--init", "--recursive")
 	cmd.Dir = sourcesDir()
 	err = cmd.Run()
@@ -605,6 +619,14 @@ func (s *SourcesManager) MakeCommitArchive(hash string) error {
 	if err != nil {
 		return err
 	}
+
+	cmd = exec.Command("git", "submodule", "sync")
+	cmd.Dir = sourcesDir()
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
 
 	cmd = exec.Command("git", "submodule", "update", "--recursive")
 	cmd.Dir = sourcesDir()
