@@ -322,6 +322,7 @@ func (s *SourcesManager) updateCommitHistory() error {
 	cmd = exec.Command(
 		"git",
 		"fetch",
+		"--no-recurse-submodules",
 		"origin",
 		"+refs/pull/*/head:refs/remotes/origin/pr-head/*",
 	)
