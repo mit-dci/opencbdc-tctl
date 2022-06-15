@@ -56,6 +56,11 @@ func (t *TestRunManager) executeStartSequence(
 
 		// If needed, wait for the component to respond to a TCP port connection
 		if len(seq.waitForPort) > 0 {
+			// Default to all for all given wait ports in case waitForPortCount
+			// is not specified
+			for len(seq.waitForPortCount) < len(seq.waitForPort) {
+				seq.waitForPortCount = append(seq.waitForPortCount, 0)
+			}
 			for i, p := range seq.waitForPort {
 				err = t.WaitForRolesOnline(
 					tr,
