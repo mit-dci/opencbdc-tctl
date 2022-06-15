@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
@@ -79,32 +80,56 @@ func (t *TestRunManager) WaitForRolesOnline(
 	roles []*common.TestRunRole,
 	portIncrement PortIncrement,
 	timeout time.Duration,
+	minNumRoles int,
 ) error {
-
 	wg := sync.WaitGroup{}
 	errs := make([]error, 0)
 	errLock := sync.Mutex{}
 
+	needOnline := len(roles)
+	if minNumRoles > 0 {
+		needOnline = minNumRoles
+	}
+	var rolesOnline int32
 	for i := range roles {
 		wg.Add(1)
-		go func(rl *common.TestRunRole) {
-			err := t.WaitForRoleOnline(tr, rl, portIncrement, timeout)
-			if err != nil {
-				errLock.Lock()
-				errs = append(errs, err)
-				errLock.Unlock()
+		go func(rl *common.TestRunRole, rolesOnline *int32) {
+
+			start := time.Now()
+			for time.Now().Before(start.Add(timeout)) {
+				err := t.WaitForRoleOnline(
+					tr,
+					rl,
+					portIncrement,
+					time.Second*15,
+				)
+				if err != nil {
+					errLock.Lock()
+					errs = append(errs, err)
+					errLock.Unlock()
+				} else {
+					online := atomic.AddInt32(rolesOnline, 1)
+					t.WriteLog(tr, "%d/%d (out of %d) %s are online on port %d",
+						online, needOnline, len(roles), roles[0].Role, portIncrement)
+					break
+				}
+				if int(atomic.LoadInt32(rolesOnline)) >= minNumRoles {
+					break
+				}
 			}
 			wg.Done()
-		}(roles[i])
+		}(roles[i], &rolesOnline)
 	}
 
 	wg.Wait()
-	if len(errs) > 0 {
-		jointErr := ""
-		for _, e := range errs {
-			jointErr += e.Error() + "\n"
+	if minNumRoles > 0 && int(atomic.LoadInt32(&rolesOnline)) < minNumRoles {
+		if len(errs) > 0 {
+			jointErr := ""
+			for _, e := range errs {
+				jointErr += e.Error() + "\n"
+			}
+			return errors.New("Failed waiting for roles: " + jointErr)
 		}
-		return errors.New("Failed waiting for roles: " + jointErr)
 	}
 	return nil
 }
@@ -131,7 +156,7 @@ func (t *TestRunManager) WaitForRoleOnline(
 
 	// Try connecting to the endpoint until success or timeout
 	start := time.Now()
-	dialTimeout := timeout / 4
+	dialTimeout := time.Second * 2
 	for {
 		if time.Since(start) > timeout {
 			return fmt.Errorf(

@@ -321,55 +321,32 @@ func (t *TestRunManager) CreateStartSequenceTwoPhase(
 		shardTimeout = time.Minute * 5
 	}
 
-	// Divide the set of shard roles into leaders (node index 0) and followers
+	// Start RAFT replicated components all at once now. A random leader is
+	// elected so we monitor for all components to have their RAFT endpoint up,
+	// but only one of each cluster needs to be responding to the RPC endpoint
 	shards := t.GetAllRolesSorted(tr, common.SystemRoleShardTwoPhase)
-	followerShardNodes := make([]*common.TestRunRole, 0)
-	leaderShardNodes := make([]*common.TestRunRole, 0)
-	for i := 0; i < len(shards); i++ {
-		if i%tr.ShardReplicationFactor == 0 {
-			leaderShardNodes = append(leaderShardNodes, shards[i])
-		} else {
-			followerShardNodes = append(followerShardNodes, shards[i])
-		}
-	}
-
-	// First start the follower shards, then the leaders
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       followerShardNodes,
-		timeout:     shardTimeout,
-		waitForPort: []PortIncrement{PortIncrementRaftPort},
-	}, startSequenceEntry{
-		roles:       leaderShardNodes,
-		timeout:     shardTimeout,
-		waitForPort: []PortIncrement{PortIncrementClientPort},
+		roles:   shards,
+		timeout: shardTimeout,
+		waitForPort: []PortIncrement{
+			PortIncrementRaftPort,
+			PortIncrementClientPort,
+		},
+		waitForPortCount: []int{0, len(shards) / tr.ShardReplicationFactor},
 	})
 
-	// Divide the set of coordinator roles into leaders (node index 0) and
-	// followers
 	coordinators := t.GetAllRolesSorted(tr, common.SystemRoleCoordinator)
-	followerCoordinatorNodes := make([]*common.TestRunRole, 0)
-	leaderCoordinatorNodes := make([]*common.TestRunRole, 0)
-
-	for i := 0; i < len(coordinators); i++ {
-		if i%tr.ShardReplicationFactor == 0 {
-			leaderCoordinatorNodes = append(
-				leaderCoordinatorNodes,
-				coordinators[i],
-			)
-		} else {
-			followerCoordinatorNodes = append(followerCoordinatorNodes, coordinators[i])
-		}
-	}
-
-	// First start the follower coordinators, then the leaders
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       followerCoordinatorNodes,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementRaftPort},
-	}, startSequenceEntry{
-		roles:       leaderCoordinatorNodes,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementDefaultPort},
+		roles:   coordinators,
+		timeout: roleStartTimeout,
+		waitForPort: []PortIncrement{
+			PortIncrementRaftPort,
+			PortIncrementDefaultPort,
+		},
+		waitForPortCount: []int{
+			0,
+			len(coordinators) / tr.ShardReplicationFactor,
+		},
 	})
 
 	// Start all sentinels
