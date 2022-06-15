@@ -88,10 +88,25 @@ const websocketMiddleware = storeAPI => next => action => {
                     });
                     break;
                 case "testRunResultAvailable":
+                    let avgThroughput = -1;
+                    if(msg.payload.result?.throughputAvg) {
+                        avgThroughput = msg.payload.result?.throughputAvg
+                    }
+
+                    let tailLatency = -1;
+                    if(msg.payload.result?.latencyPercentiles) {
+                        let ninetyNine = msg.payload.result?.latencyPercentiles.find(p => p.bucket === 99)
+                        if(ninetyNine) {
+                            tailLatency = ninetyNine.value;
+                        }
+                    }
+
                     storeAPI.dispatch({
                         type: TestController.TestRunChanged, payload: {
                             id: msg.payload.testRunID,
                             result: msg.payload.result,
+                            avgThroughput: avgThroughput,
+                            tailLatency: tailLatency,
                             resultUpdated: new Date(),
                         }
                     });
