@@ -2,6 +2,7 @@ import { connect } from '@giantmachines/redux-websocket';
 import client from '../apiclient';
 import { TestController, ReduxWebSocket } from '../actions';
 import { toast } from 'react-toastify';
+import { loadTestRunDetails } from '../slices/testruns';
 
 export const loadWebsocketToken = async (dispatch, getState) => {
     try {
@@ -64,6 +65,9 @@ const websocketMiddleware = storeAPI => next => action => {
                     })
                     if (msg.payload.status === "Completed") {
                         toast.success(`Test run ${msg.payload.testRunID} completed`);
+                        // Trigger reloading all details from the server to fetch the
+                        // completed commands.
+                        storeAPI.dispatch(loadTestRunDetails(msg.payload.testRunID));
                     }
                     if (msg.payload.status === "Failed") {
                         toast.error(`Test run ${msg.payload.testRunID} failed : ${msg.payload.details}`);
