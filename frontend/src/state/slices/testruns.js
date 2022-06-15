@@ -23,7 +23,7 @@ const initialState = {
     savedSweepPlotsSweepID: '',
     sweepPlotParams: { type: 'line' },
     sweepPlots: {},
-    scheduledTestRun: {}
+    scheduledTestRun: {roles:[], sweepRoles:[]}
 };
 
 export const reducer = (state = initialState, action) => {
