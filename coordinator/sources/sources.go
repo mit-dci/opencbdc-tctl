@@ -579,29 +579,6 @@ func (s *SourcesManager) ReadCommitArchive(hash string) ([]byte, error) {
 	return ioutil.ReadFile(path)
 }
 
-func (s *SourcesManager) CompileIfNeeded(
-	hash string,
-	profilingOrDebugging bool,
-	progress chan float64,
-) error {
-	path, err := BinariesArchivePath(hash, profilingOrDebugging)
-	if err != nil {
-		if progress != nil {
-			progress <- 100
-			close(progress)
-		}
-		return err
-	}
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		return s.Compile(hash, profilingOrDebugging, progress)
-	}
-	if progress != nil {
-		progress <- 100
-		close(progress)
-	}
-	return nil
-}
-
 func (s *SourcesManager) MakeCommitArchive(hash string) error {
 	s.sourcesLock.Lock()
 	defer s.sourcesLock.Unlock()

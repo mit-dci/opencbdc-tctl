@@ -40,7 +40,7 @@ func (t *TestRunManager) CompileBinaries(
 		hash = tr.SeederHash
 	}
 
-	err := t.src.CompileIfNeeded(
+	err := t.src.Compile(
 		hash,
 		(tr.RunPerf || tr.Debug) && !seeder,
 		compileProgress,
