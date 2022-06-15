@@ -446,9 +446,14 @@ func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
 		commitHash,
 	)
 	cmd.Dir = sourcesDir()
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf(
+			"Failed to find seeder change commit - [git checkout %s] failed: %v\n\n%s",
+			commitHash,
+			err,
+			string(out),
+		)
 	}
 
 	cmd = exec.Command(
@@ -459,10 +464,10 @@ func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
 		"tools/shard-seeder/shard-seeder.cpp",
 	)
 	cmd.Dir = sourcesDir()
-	out, err := cmd.CombinedOutput()
+	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf(
-			"Failed to find seeder change commit: %v\n\n%s",
+			"Failed to find seeder change commit - failed to execute git log: %v\n\n%s",
 			err,
 			string(out),
 		)
@@ -475,7 +480,15 @@ func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
 		os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
 	)
 	cmd.Dir = sourcesDir()
-	err = cmd.Run()
+	out, err = cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf(
+			"Failed to find seeder change commit - [git checkout %s] failed: %v\n\n%s",
+			os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
+			err,
+			string(out),
+		)
+	}
 	return commitHash, err
 }
 
@@ -522,14 +535,16 @@ func (s *SourcesManager) updateSources() error {
 		os.Getenv("TRANSACTION_PROCESSOR_MAIN_BRANCH"),
 	)
 	cmd.Dir = sourcesDir()
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		logging.Errorf("Error on git checkout: %v", string(out))
 		return err
 	}
 	cmd = exec.Command("git", "pull")
 	cmd.Dir = sourcesDir()
-	err = cmd.Run()
+	out, err = cmd.CombinedOutput()
 	if err != nil {
+		logging.Errorf("Error on git pull: %v", string(out))
 		return err
 	}
 	return nil
@@ -604,7 +619,6 @@ func (s *SourcesManager) MakeCommitArchive(hash string) error {
 	if err != nil {
 		return err
 	}
-
 
 	cmd = exec.Command("git", "submodule", "update", "--recursive")
 	cmd.Dir = sourcesDir()
