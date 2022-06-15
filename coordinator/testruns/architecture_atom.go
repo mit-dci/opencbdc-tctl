@@ -260,19 +260,20 @@ func (t *TestRunManager) CreateStartSequenceAtomizer(
 		},
 	})
 
-	// Next, start the atomizers - leader last
-	allRaftAtomizers := t.GetAllRolesSorted(tr, common.SystemRoleRaftAtomizer)
-	if len(allRaftAtomizers) > 1 {
-		startSequence = append(startSequence, startSequenceEntry{
-			roles:       allRaftAtomizers[1:],
-			timeout:     roleStartTimeout,
-			waitForPort: []PortIncrement{PortIncrementRaftPort},
-		})
-	}
+	// Next, start the atomizers - all at once. Raft elects a random leader
+	// now, so we start all and wait for all RAFT ports to respond, but
+	// wait for online 1 to respond to actual rpc
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       []*common.TestRunRole{allRaftAtomizers[0]},
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementDefaultPort},
+		roles: t.GetAllRolesSorted(
+			tr,
+			common.SystemRoleRaftAtomizer,
+		),
+		timeout: roleStartTimeout,
+		waitForPort: []PortIncrement{
+			PortIncrementRaftPort,
+			PortIncrementDefaultPort,
+		},
+		waitForPortCount: []int{0, 1},
 	})
 
 	// Next, start the archivers

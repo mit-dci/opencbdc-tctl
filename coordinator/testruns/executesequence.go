@@ -56,8 +56,14 @@ func (t *TestRunManager) executeStartSequence(
 
 		// If needed, wait for the component to respond to a TCP port connection
 		if len(seq.waitForPort) > 0 {
-			for _, p := range seq.waitForPort {
-				err = t.WaitForRolesOnline(tr, seq.roles, p, seq.timeout)
+			for i, p := range seq.waitForPort {
+				err = t.WaitForRolesOnline(
+					tr,
+					seq.roles,
+					p,
+					seq.timeout,
+					seq.waitForPortCount[i],
+				)
 				if err != nil {
 					return allCmds, false, err
 				}

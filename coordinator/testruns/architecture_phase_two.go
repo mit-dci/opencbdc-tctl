@@ -96,53 +96,36 @@ func (t *TestRunManager) CreateStartSequencePhaseTwo(
 
 	roleStartTimeout := time.Minute * 1
 
-	// Divide the set of shard roles into leaders (node index 0) and followers
+	// Raft clusters now elect a random leader so we start them all at once
 	ticketMachines := t.GetAllRolesSorted(tr, common.SystemRoleTicketMachine)
-	followerTicketMachines := make([]*common.TestRunRole, 0)
-	leaderTicketMachines := make([]*common.TestRunRole, 0)
-	for i := 0; i < len(ticketMachines); i++ {
-		if i%tr.ShardReplicationFactor == 0 {
-			leaderTicketMachines = append(
-				leaderTicketMachines,
-				ticketMachines[i],
-			)
-		} else {
-			followerTicketMachines = append(followerTicketMachines, ticketMachines[i])
-		}
-	}
 
-	// First start the follower ticket machines, then the leaders
+	// Start all nodes at once, wait for each node to have their RAFT port
+	// available - and for 1 in {rep factor} to have the actual RPC port
+	// available.
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       followerTicketMachines,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementRaftPort},
-	}, startSequenceEntry{
-		roles:       leaderTicketMachines,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementDefaultPort},
+		roles:   ticketMachines,
+		timeout: roleStartTimeout,
+		waitForPort: []PortIncrement{
+			PortIncrementRaftPort,
+			PortIncrementDefaultPort,
+		},
+		waitForPortCount: []int{
+			0,
+			len(ticketMachines) / tr.ShardReplicationFactor,
+		},
 	})
 
-	// Divide the set of shard roles into leaders (node index 0) and followers
 	shards := t.GetAllRolesSorted(tr, common.SystemRoleRuntimeLockingShard)
-	followerShards := make([]*common.TestRunRole, 0)
-	leaderShards := make([]*common.TestRunRole, 0)
-	for i := 0; i < len(shards); i++ {
-		if i%tr.ShardReplicationFactor == 0 {
-			leaderShards = append(leaderShards, shards[i])
-		} else {
-			followerShards = append(followerShards, shards[i])
-		}
-	}
 
 	// Start the shards
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       followerShards,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementRaftPort},
-	}, startSequenceEntry{
-		roles:       leaderShards,
-		timeout:     roleStartTimeout,
-		waitForPort: []PortIncrement{PortIncrementDefaultPort},
+		roles:   shards,
+		timeout: roleStartTimeout,
+		waitForPort: []PortIncrement{
+			PortIncrementRaftPort,
+			PortIncrementDefaultPort,
+		},
+		waitForPortCount: []int{0, len(shards) / tr.ShardReplicationFactor},
 	})
 
 	// Start the agents
