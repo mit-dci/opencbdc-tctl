@@ -447,6 +447,31 @@ func (t *TestRunManager) RedownloadTestOutputsFromS3(tr *common.TestRun) error {
 	return t.awsm.DownloadMultipleFromS3(downloads)
 }
 
+// BinariesExistInS3 checks existence and returns an empty string
+// if not, and the path in S3 if it does.
+func (t *TestRunManager) BinariesExistInS3(
+	tr *common.TestRun,
+	seeder bool,
+) (string, error) {
+	hash := tr.CommitHash
+	debug := tr.RunPerf || tr.Debug
+	if seeder {
+		hash = tr.SeederHash
+		debug = false
+	}
+	binariesInS3 := fmt.Sprintf("binaries/%s.tar.gz", hash)
+	if debug {
+		binariesInS3 = fmt.Sprintf("binaries/%s-debug.tar.gz", hash)
+	}
+	exist, err := t.awsm.FileExistsOnS3(os.Getenv("AWS_REGION"),
+		os.Getenv("BINARIES_S3_BUCKET"),
+		binariesInS3)
+	if !exist || err != nil {
+		return "", err
+	}
+	return binariesInS3, nil
+}
+
 // UploadBinaries upload binaries for this testrun to S3
 func (t *TestRunManager) UploadBinaries(
 	tr *common.TestRun,
@@ -474,16 +499,42 @@ func (t *TestRunManager) UploadBinaries(
 		// optimizations because the stacktraces won't make much sense.
 		binariesInS3 = fmt.Sprintf("binaries/%s-debug.tar.gz", hash)
 	}
+	_, loaded := t.pendingBinaryUploads.LoadOrStore(binariesInS3, true)
+	if loaded {
+		// Upload of this same binary is already in progress, we should wait
+		// until it's complete and then return
+		err := t.WaitForBinaryUploadComplete(binariesInS3)
+		if err == nil {
+			return binariesInS3, nil
+		}
+		return "", err
+	}
+
 	err = t.awsm.UploadToS3IfNotExists(common.S3Upload{
 		SourcePath:   sourcePath,
 		TargetRegion: os.Getenv("AWS_REGION"),
 		TargetBucket: os.Getenv("BINARIES_S3_BUCKET"),
 		TargetPath:   binariesInS3,
 	})
+	t.pendingBinaryUploads.Delete(binariesInS3)
 	if err != nil {
 		return "", err
 	}
 	return binariesInS3, nil
+}
+
+// WaitForBinaryUploadComplete will wait until a certain path's upload is either
+// not in progress or completed
+func (t *TestRunManager) WaitForBinaryUploadComplete(path string) error {
+	start := time.Now()
+	for time.Now().Before(start.Add(time.Minute * 5)) {
+		time.Sleep(time.Second * 1)
+		_, stillUploading := t.pendingBinaryUploads.Load(path)
+		if !stillUploading {
+			return nil
+		}
+	}
+	return errors.New("timeout waiting for upload to complete")
 }
 
 // UploadConfig uploads the contents of the configuration file for the system

@@ -32,6 +32,7 @@ type TestRunManager struct {
 	loadComplete          bool
 	config                *TestManagerConfig
 	resultCalculationChan chan resultCalculation
+	pendingBinaryUploads  sync.Map
 }
 
 func NewTestRunManager(
@@ -47,16 +48,17 @@ func NewTestRunManager(
 			chan resultCalculation,
 			ParallelResultCalculation,
 		),
-		config:             &TestManagerConfig{MaxAgents: 1000},
-		coord:              c,
-		am:                 am,
-		src:                src,
-		ev:                 ev,
-		testRunResultsLock: sync.Mutex{},
-		testRuns:           []*common.TestRun{},
-		testRunsLock:       sync.Mutex{},
-		awsm:               awsm,
-		commitHash:         commitHash,
+		config:               &TestManagerConfig{MaxAgents: 1000},
+		coord:                c,
+		am:                   am,
+		src:                  src,
+		ev:                   ev,
+		testRunResultsLock:   sync.Mutex{},
+		testRuns:             []*common.TestRun{},
+		testRunsLock:         sync.Mutex{},
+		awsm:                 awsm,
+		commitHash:           commitHash,
+		pendingBinaryUploads: sync.Map{},
 	}
 	err := tr.LoadConfig()
 	if err != nil {

@@ -30,38 +30,59 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 		return
 	}
 
-	err := t.CompileBinaries(tr, false)
-	if err != nil {
-		t.FailTestRun(tr, fmt.Errorf("Compilation failed: %v", err))
-		return
-	}
-
-	binariesInS3, err := t.UploadBinaries(tr, false)
+	var binariesInS3 string
+	binariesInS3, err := t.BinariesExistInS3(tr, false)
 	if err != nil {
 		t.FailTestRun(
 			tr,
-			fmt.Errorf("Failed to upload binaries to S3: %v", err),
+			fmt.Errorf("Checking binary existence failed: %v", err),
 		)
 		return
+	}
+	if binariesInS3 == "" {
+		err := t.CompileBinaries(tr, false)
+		if err != nil {
+			t.FailTestRun(tr, fmt.Errorf("Compilation failed: %v", err))
+			return
+		}
+
+		binariesInS3, err = t.UploadBinaries(tr, false)
+		if err != nil {
+			t.FailTestRun(
+				tr,
+				fmt.Errorf("Failed to upload binaries to S3: %v", err),
+			)
+			return
+		}
 	}
 
 	tr.SeederHash, err = t.src.FindMostRecentCommitChangingSeeder(tr.CommitHash)
 	if err != nil {
 		t.FailTestRun(tr, fmt.Errorf("Failed determining seeder hash: %v", err))
 	}
-	err = t.CompileBinaries(tr, true)
-	if err != nil {
-		t.FailTestRun(tr, fmt.Errorf("Seeder compilation failed: %v", err))
-		return
-	}
-
-	_, err = t.UploadBinaries(tr, true)
+	seederBinariesInS3, err := t.BinariesExistInS3(tr, true)
 	if err != nil {
 		t.FailTestRun(
 			tr,
-			fmt.Errorf("Failed to upload seeder binaries to S3: %v", err),
+			fmt.Errorf("Checking seeder binary existence failed: %v", err),
 		)
 		return
+	}
+	if seederBinariesInS3 == "" {
+		err = t.CompileBinaries(tr, true)
+		if err != nil {
+			t.FailTestRun(tr, fmt.Errorf("Seeder compilation failed: %v", err))
+			return
+		}
+
+		_, err = t.UploadBinaries(tr, true)
+		if err != nil {
+			t.FailTestRun(
+				tr,
+				fmt.Errorf("Failed to upload seeder binaries to S3: %v", err),
+			)
+			return
+		}
 	}
 
 	err = t.CheckPreseed(tr)
