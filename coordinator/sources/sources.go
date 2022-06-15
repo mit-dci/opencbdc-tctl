@@ -440,6 +440,8 @@ func (s *SourcesManager) updateCommitHistory() error {
 func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
 	commitHash string,
 ) (string, error) {
+	s.sourcesLock.Lock()
+	defer s.sourcesLock.Unlock()
 	cmd := exec.Command(
 		"git",
 		"checkout",
