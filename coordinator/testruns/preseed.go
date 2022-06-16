@@ -250,7 +250,7 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 
 	start := time.Now()
 	for {
-		if time.Since(start).Minutes() > 15 {
+		if time.Since(start).Minutes() > 65 {
 			return fmt.Errorf(
 				"Shard preseeding timed out - "+
 					"Please check on Batch job with name [SEED_%s] from the AWS console for details",
