@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -497,14 +498,26 @@ func (s *SourcesManager) FindMostRecentCommitChangingSeeder(
 func (s *SourcesManager) cloneSources() error {
 	s.sourcesLock.Lock()
 	defer s.sourcesLock.Unlock()
+
+	gitUrl, err := url.Parse(os.Getenv("TRANSACTION_PROCESSOR_REPO_URL"))
+	if err != nil {
+		return err
+	}
+	if os.Getenv("TRANSACTION_PROCESSOR_REPO_TOKEN") != "" {
+		gitUrl.User = url.UserPassword(
+			os.Getenv("TRANSACTION_PROCESSOR_REPO_TOKEN"),
+			"x-oauth-basic",
+		)
+	}
+
 	cmd := exec.Command(
 		"git",
 		"clone",
-		os.Getenv("TRANSACTION_PROCESSOR_REPO_URL"),
+		gitUrl.String(),
 		sourcesDirName(),
 	)
 	cmd.Dir = sourcesParentDir()
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf(
 			"Failed to clone sources. Do you have the right ssh keys configured? %v",
