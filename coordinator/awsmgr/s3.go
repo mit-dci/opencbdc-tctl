@@ -76,8 +76,8 @@ func (am *AwsManager) ReadFromS3(
 	if err != nil {
 		return nil, err
 	}
-	byteRange := aws.String(fmt.Sprintf("-%d", tail))
-	if *byteRange == "--1" {
+	byteRange := aws.String(fmt.Sprintf("bytes=-%d", tail))
+	if *byteRange == "bytes=--1" {
 		byteRange = nil
 	}
 	res, err := client.GetObject(context.Background(), &s3.GetObjectInput{
