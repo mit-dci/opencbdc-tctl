@@ -80,7 +80,7 @@ var roleParameters = map[common.SystemRole][]string{
 	},
 	common.SystemRolePhaseTwoGen: []string{
 		"--component_id=%IDX%",
-		"--loadgen_threads=%THREADS%",
+		"--loadgen_accounts=%ACCOUNTS%",
 	},
 }
 

@@ -58,7 +58,7 @@ type TestRunNormalizedConfig struct {
 	ControllerCommitHash   string  `json:"controllerCommitHash"`
 	PreseedCount           int64   `json:"preseedCount"`
 	PreseedShards          bool    `json:"preseedShards"`
-	LoadGenThreads         int     `json:"loadGenThreads"`
+	LoadGenAccounts        int     `json:"loadGenAccounts"`
 }
 
 // Calculates a hash over the normalized config by hashing the serialized JSON

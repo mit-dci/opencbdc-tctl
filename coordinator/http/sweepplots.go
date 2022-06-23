@@ -284,10 +284,10 @@ func (h *HttpServer) getSweepPlotConfig() SweepPlotConfig {
 				ShortHand: "Outputs",
 			},
 			{
-				ID:        "loadGenThreads",
-				Eval:      "r['config']['loadGenThreads']",
-				Name:      "Number of threads per load generator",
-				ShortHand: "Load Generator Threads",
+				ID:        "loadGenAccounts",
+				Eval:      "r['config']['loadGenAccounts']",
+				Name:      "Number of accounts per load generator",
+				ShortHand: "Load Generator Accounts",
 			},
 			{
 				ID:        "invalidTxRate",

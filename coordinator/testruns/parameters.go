@@ -51,8 +51,8 @@ func (t *TestRunManager) SubstituteParameters(
 		p = strings.ReplaceAll(p, "%SIGN_TXS%", "1") // Always sign
 		p = strings.ReplaceAll(
 			p,
-			"%THREADS%",
-			fmt.Sprintf("%d", tr.LoadGenThreads),
+			"%ACCOUNTS%",
+			fmt.Sprintf("%d", tr.LoadGenAccounts),
 		)
 		p = strings.ReplaceAll(p, "%LOGLEVEL%", t.RoleLogLevel(tr, r))
 

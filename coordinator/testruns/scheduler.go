@@ -49,8 +49,8 @@ func (t *TestRunManager) ScheduleTestRun(tr *common.TestRun) {
 	if tr.WatchtowerLogLevel == "" {
 		tr.WatchtowerLogLevel = "WARN"
 	}
-	if tr.LoadGenThreads == 0 {
-		tr.LoadGenThreads = 1
+	if tr.LoadGenAccounts == 0 {
+		tr.LoadGenAccounts = 100
 	}
 	if tr.AgentRPCInstances <= 0 {
 		tr.AgentRPCInstances = 1
