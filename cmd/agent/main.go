@@ -68,6 +68,12 @@ func main() {
 		)
 	}
 
+	agent.CheckUlimit()
+	// Change ulimit to increase max number of open files
+	agent.IncreaseULimit()
+
+	agent.CheckUlimit()
+
 	// Connect the agent to the coordinator
 	logging.Infof("Connecting to server %s on port %d...\n", host, port)
 	a, err := agent.NewAgent(version, host, port)
