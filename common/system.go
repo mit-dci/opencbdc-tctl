@@ -240,7 +240,7 @@ var AvailableArchitectures = []SystemArchitecture{
 			SampleCount:              315,
 			LoadGenOutputCount:       2,
 			LoadGenInputCount:        2,
-			LoadGenThreads:           100,
+			LoadGenAccounts:          100,
 			LoadGenTxType:            "transfer",
 			FixedTxRate:              1,
 			PreseedCount:             100000000,
