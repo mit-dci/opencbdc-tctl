@@ -503,9 +503,9 @@ func (s *SourcesManager) cloneSources() error {
 	if err != nil {
 		return err
 	}
-	if os.Getenv("TRANSACTION_PROCESSOR_REPO_TOKEN") != "" {
+	if os.Getenv("TRANSACTION_PROCESSOR_ACCESS_TOKEN") != "" {
 		gitUrl.User = url.UserPassword(
-			os.Getenv("TRANSACTION_PROCESSOR_REPO_TOKEN"),
+			os.Getenv("TRANSACTION_PROCESSOR_ACCESS_TOKEN"),
 			"x-oauth-basic",
 		)
 	}
@@ -520,7 +520,7 @@ func (s *SourcesManager) cloneSources() error {
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf(
-			"Failed to clone sources. Do you have the right ssh keys configured? %v",
+			"Failed to clone sources. Do you have the right token configured? %v",
 			err,
 		)
 	}
