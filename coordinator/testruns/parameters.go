@@ -55,8 +55,34 @@ func (t *TestRunManager) SubstituteParameters(
 			fmt.Sprintf("%d", tr.LoadGenAccounts),
 		)
 		p = strings.ReplaceAll(p, "%LOGLEVEL%", t.RoleLogLevel(tr, r))
-
+		if r.Role == common.SystemRolePhaseTwoGen {
+			p = strings.ReplaceAll(p, "%LGAFFINITY%", t.LoadGenAffinity(tr, r))
+		}
 		newParams = append(newParams, p)
 	}
 	return newParams
+}
+
+func (t *TestRunManager) LoadGenAffinity(
+	tr *common.TestRun,
+	r *common.TestRunRole,
+) string {
+	if !tr.LoadGenAffinity {
+		return ""
+	}
+	affinity := ""
+	region := t.awsm.GetLaunchTemplateRegion(r.AwsLaunchTemplateID)
+	for _, rr := range tr.Roles {
+
+		if rr.Role == common.SystemRoleAgent {
+			roleRegion := t.awsm.GetLaunchTemplateRegion(rr.AwsLaunchTemplateID)
+			if roleRegion == region {
+				if affinity != "" {
+					affinity += ","
+				}
+				affinity += fmt.Sprintf("%d", rr.Index)
+			}
+		}
+	}
+	return affinity
 }

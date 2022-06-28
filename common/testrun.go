@@ -41,6 +41,7 @@ type TestRun struct {
 	LoadGenInputCount        int                `json:"loadGenInputCount"        feFieldTitle:"Loadgen Input Count"             feFieldType:"int"`
 	LoadGenAccounts          int                `json:"loadGenAccounts"          feFieldTitle:"Loadgen Accounts"                feFieldType:"int"`
 	LoadGenTxType            string             `json:"loadGenTxType"            feFieldTitle:"Loadgen Transaction Type"        feFieldType:"txtype"`
+	LoadGenAffinity          bool               `json:"loadGenAffinity"          feFieldTitle:"Enable LoadGen Region Affinity"  feFieldType:"bool"`
 	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
 	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
 	PerfSampleRate           int                `json:"perfSampleRate"           feFieldTitle:"Perf sample rate"                feFieldType:"int"`
