@@ -248,5 +248,9 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 
 	ret = append(ret, fmt.Sprintf("--loadgen_txtype=%s", tr.LoadGenTxType))
 
+	if tr.Telemetry {
+		ret = append(ret, "--telemetry=1")
+	}
+
 	return ret, nil
 }
