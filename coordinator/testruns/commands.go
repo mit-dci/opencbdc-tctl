@@ -139,7 +139,10 @@ func (t *TestRunManager) StartRoleBinaries(
 				r.AgentID,
 				roleBinaries[r.Role],
 				params,
-				[]string{},
+				[]string{
+					fmt.Sprintf("TESTRUN_ID=%s", tr.ID),
+					fmt.Sprintf("TESTRUN_ROLE=%s-%d", r.Role, r.Index),
+				},
 				envs[r.AgentID],
 				"",
 				15000,
