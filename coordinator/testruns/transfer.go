@@ -54,6 +54,13 @@ var copyFiles = map[common.SystemRole][]string{
 	},
 	common.SystemRolePhaseTwoGen: {
 		"tx_samples_%IDX%.txt",
+		"telemetry.txt%%OPT",
+	},
+	common.SystemRoleAgent: {
+		"telemetry.txt%%OPT",
+	},
+	common.SystemRoleRuntimeLockingShard: {
+		"telemetry.txt%%OPT",
 	},
 }
 
