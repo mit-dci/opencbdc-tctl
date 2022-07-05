@@ -96,7 +96,7 @@ const Sweeps = (props) => {
         let roles = {};
         let arch = architectures.find(
           (a) => a.id === (r.architectureID || "default")
-        );
+        ) || {roles:[]};
         for (var role of r.sweepRoles) {
           if (roles[role.role]) {
             roles[role.role] = roles[role.role] + 1;
