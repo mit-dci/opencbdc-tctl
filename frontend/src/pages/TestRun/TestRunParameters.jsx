@@ -20,7 +20,7 @@ const TestRunParameters = (props) => {
               <>
                 <CCol xs={2}>{f.title}:</CCol>
                 <CCol xs={f.type === "commit" ? 10 : 4}>
-                  {["int", "float", "loglevel"].indexOf(f.type) !== -1 && (
+                  {["int", "float", "loglevel", "txtype"].indexOf(f.type) !== -1 && (
                     <b>{props.testRun[f.name]}</b>
                   )}
                   {f.type === "arch" && <b>{props.selectedArchitecture?.name}</b>}
@@ -29,7 +29,7 @@ const TestRunParameters = (props) => {
                   )}
                   {f.type === "commit" && (
                     <b>
-                      Commit {props.commit?.commit.substr(0, 8)}: {props.commit?.subject}
+                      Commit {props.commit ? `${props.commit.commit.substr(0, 8)}: ` : props.testRun[f.name]?.substr(0,8)}{props.commit?.subject}
                     </b>
                   )}
                 </CCol>
