@@ -73,7 +73,7 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	case <-time.After(timeout):
 	}
 
-	err = t.CleanupCommands(tr, allCmds, envs)
+	err = t.CleanupCommandsPhaseTwo(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
@@ -81,6 +81,47 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	// Save the test run & return nil (success)
 	t.PersistTestRun(tr)
 
+	return nil
+}
+
+func (t *TestRunManager) CleanupCommandsPhaseTwo(
+	tr *common.TestRun,
+	allCmds []runningCommand,
+	envs map[int32][]byte,
+) error {
+	// Break commands in the correct sequence: first kill load gens, wait,
+	// then kill agents, wait, then the rest.
+	stopSequence := []common.SystemRole{
+		common.SystemRolePhaseTwoGen,
+		common.SystemRoleAgent,
+		common.SystemRoleRuntimeLockingShard,
+		common.SystemRoleTicketMachine,
+	}
+
+	for _, rl := range stopSequence {
+		t.WriteLog(tr, "Breaking all commands for role %s", string(rl))
+		err := t.BreakAndTerminateAllCmds(
+			tr,
+			t.FilterCommandsByRole(tr, allCmds, rl),
+		)
+		if err != nil {
+			return err
+		}
+		// Time for the commands to break and commit perf results
+		time.Sleep(time.Second * 5)
+	}
+
+	// Trigger the agents to upload the performance data for all commands
+	// to S3
+	err := t.GetPerformanceProfiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
+
+	err = t.GetLogFiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

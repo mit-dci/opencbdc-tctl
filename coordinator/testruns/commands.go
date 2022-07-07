@@ -206,6 +206,26 @@ func (t *TestRunManager) StartRoleBinaries(
 	return cmds, nil
 }
 
+// FilterCommandsByRole filters the allCmds array by only including commands
+// running on agents that have a particular system role
+func (t *TestRunManager) FilterCommandsByRole(
+	tr *common.TestRun,
+	allCmds []runningCommand,
+	role common.SystemRole,
+) []runningCommand {
+	filteredCommands := []runningCommand{}
+	for _, r := range tr.Roles {
+		if r.Role == role {
+			for i, cmd := range allCmds {
+				if cmd.agentID == r.AgentID {
+					filteredCommands = append(filteredCommands, allCmds[i])
+				}
+			}
+		}
+	}
+	return filteredCommands
+}
+
 // BreakAndTerminateAllCmds will instruct the agent runnning a command to send a
 // os.Interrupt signal followed by an os.Kill signal to it, for each of the
 // commands in the runningCommands array.
