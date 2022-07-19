@@ -91,6 +91,16 @@ func (t *TestRunManager) WaitForRolesOnline(
 		needOnline = minNumRoles
 	}
 	var rolesOnline int32
+
+	t.WriteLog(
+		tr,
+		"Waiting for %d of %d %s to be online on port %d",
+		needOnline,
+		len(roles),
+		roles[0].Role,
+		portIncrement,
+	)
+
 	for i := range roles {
 		wg.Add(1)
 		go func(rl *common.TestRunRole, rolesOnline *int32) {
@@ -114,6 +124,17 @@ func (t *TestRunManager) WaitForRolesOnline(
 					break
 				}
 				if int(atomic.LoadInt32(rolesOnline)) >= minNumRoles {
+					t.WriteLog(
+						tr,
+						"%d/%d (out of %d) %s are now online on port %d, breaking out of loop",
+						int(
+							atomic.LoadInt32(rolesOnline),
+						),
+						needOnline,
+						len(roles),
+						roles[0].Role,
+						portIncrement,
+					)
 					break
 				}
 			}
@@ -122,14 +143,23 @@ func (t *TestRunManager) WaitForRolesOnline(
 	}
 
 	wg.Wait()
-	if minNumRoles > 0 && int(atomic.LoadInt32(&rolesOnline)) < minNumRoles {
-		if len(errs) > 0 {
-			jointErr := ""
-			for _, e := range errs {
-				jointErr += e.Error() + "\n"
-			}
-			return errors.New("Failed waiting for roles: " + jointErr)
+
+	t.WriteLog(
+		tr,
+		"Finished waiting for %d of %d %s to be online on port %d",
+		needOnline,
+		len(roles),
+		roles[0].Role,
+		portIncrement,
+	)
+
+	if minNumRoles > 0 && int(atomic.LoadInt32(&rolesOnline)) < minNumRoles &&
+		len(errs) > 0 {
+		jointErr := ""
+		for _, e := range errs {
+			jointErr += e.Error() + "\n"
 		}
+		return errors.New("Failed waiting for roles: " + jointErr)
 	}
 	return nil
 }
