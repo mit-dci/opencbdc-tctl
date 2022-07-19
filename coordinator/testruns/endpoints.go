@@ -123,7 +123,7 @@ func (t *TestRunManager) WaitForRolesOnline(
 						online, needOnline, len(roles), roles[0].Role, portIncrement)
 					break
 				}
-				if int(atomic.LoadInt32(rolesOnline)) >= minNumRoles {
+				if int(atomic.LoadInt32(rolesOnline)) >= needOnline {
 					t.WriteLog(
 						tr,
 						"%d/%d (out of %d) %s are now online on port %d, breaking out of loop",
@@ -153,7 +153,7 @@ func (t *TestRunManager) WaitForRolesOnline(
 		portIncrement,
 	)
 
-	if minNumRoles > 0 && int(atomic.LoadInt32(&rolesOnline)) < minNumRoles &&
+	if int(atomic.LoadInt32(&rolesOnline)) < needOnline &&
 		len(errs) > 0 {
 		jointErr := ""
 		for _, e := range errs {
