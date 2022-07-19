@@ -150,9 +150,13 @@ func (t *TestRunManager) PreseedShards(
 				},
 				15*time.Second,
 			)
-			
+
 			if err != nil {
-				t.WriteLog(tr, "WARN: Renaming preseed failed, could be because of newer preseeding already having the correct filename. May ignore: %v", err)
+				t.WriteLog(
+					tr,
+					"WARN: Renaming preseed failed, could be because of newer preseeding already having the correct filename. May ignore: %v",
+					err,
+				)
 			} else {
 				_, ok := res.(*wire.RenameFileResponseMsg)
 				if !ok {
@@ -205,7 +209,7 @@ func (t *TestRunManager) PreseedShards(
 	return nil
 }
 
-func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
+func (t *TestRunManager) CheckPreseed(tr *common.TestRun, cfg []byte) error {
 	if !tr.PreseedShards {
 		return nil
 	}
@@ -241,7 +245,7 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun) error {
 			return fmt.Errorf("error checking preseed existence: %v", err)
 		}
 		if !hasSeed {
-			err := t.awsm.GenerateSeed(wantSeed)
+			err := t.awsm.GenerateSeed(wantSeed, cfg)
 			if err != nil {
 				return fmt.Errorf("error generating preseed: %v", err)
 			}

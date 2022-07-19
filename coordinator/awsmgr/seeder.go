@@ -2,6 +2,7 @@ package awsmgr
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 // the output - should be the witness commitment matching the seed_privkey in
 // ../testruns/parameters.go
 var seed_witcomm = "6098c01c7a1a8f67a5e83ff49aa5488de5a3c867b81526e18040f5d6ec398446"
+
 // TODO centralize this somewhere in stead of having two copies
 var seed_privkey = "a0f36553548b3a66c003413140d7b59e43464ca11af66f25a6e746be501596b7"
 
@@ -30,7 +32,7 @@ type ShardSeed struct {
 	batchJobID string
 }
 
-func (am *AwsManager) GenerateSeed(seed ShardSeed) error {
+func (am *AwsManager) GenerateSeed(seed ShardSeed, cfg []byte) error {
 	am.seedLock.Lock()
 	defer am.seedLock.Unlock()
 	alreadyHere, err := am.HasSeed(seed, true)
@@ -71,6 +73,12 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed) error {
 					{
 						Name:  aws.String("SEED_MODE"),
 						Value: aws.String(fmt.Sprintf("%d", seed.SeedMode)),
+					},
+					{
+						Name: aws.String("SEED_CONFIG_BASE64"),
+						Value: aws.String(
+							base64.StdEncoding.EncodeToString(cfg),
+						),
 					},
 				},
 			},

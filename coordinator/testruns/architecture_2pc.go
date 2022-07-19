@@ -88,22 +88,23 @@ func (t *TestRunManager) RunBinariesTwoPhase(
 
 // GenerateConfigTwoPhase creates a configuration file to place on all nodes
 // such that the system roles can properly find each other and are configured
-// as was dictacted by the scheduled test definition in the UI
+// as was dictacted by the scheduled test definition in the UI.
 func (t *TestRunManager) GenerateConfigTwoPhase(
 	tr *common.TestRun,
+	dummy bool,
 ) ([]byte, error) {
 	var err error
 	// The cfg buffer will hold the configuration file's contents
 	// after calling all of the below sub methods for generation
 	var cfg bytes.Buffer
 
-	if err = t.writeShardConfigTwoPhase(&cfg, tr); err != nil {
+	if err = t.writeShardConfigTwoPhase(&cfg, tr, dummy); err != nil {
 		return nil, err
 	}
-	if err = t.writeCoordinatorConfigTwoPhase(&cfg, tr); err != nil {
+	if err = t.writeCoordinatorConfigTwoPhase(&cfg, tr, dummy); err != nil {
 		return nil, err
 	}
-	if err = t.writeEndpointConfig(&cfg, tr); err != nil {
+	if err = t.writeEndpointConfig(&cfg, tr, dummy); err != nil {
 		return nil, err
 	}
 	if err = t.writeLogLevelConfig(&cfg, tr); err != nil {
@@ -132,6 +133,7 @@ func (t *TestRunManager) GenerateConfigTwoPhase(
 func (t *TestRunManager) writeCoordinatorConfigTwoPhase(
 	cfg io.Writer,
 	tr *common.TestRun,
+	dummy bool,
 ) error {
 	coordinators := t.GetAllRolesSorted(tr, common.SystemRoleCoordinator)
 	if len(coordinators) == 0 {
@@ -167,8 +169,9 @@ func (t *TestRunManager) writeCoordinatorConfigTwoPhase(
 		}
 
 		for j := 0; j < tr.ShardReplicationFactor; j++ {
-			a, err := t.coord.GetAgent(
+			a, err := t.GetAgentOrDummy(
 				coordinators[j+(i*tr.ShardReplicationFactor)].AgentID,
+				dummy,
 			)
 			if err != nil {
 				return err
@@ -209,6 +212,7 @@ func (t *TestRunManager) writeCoordinatorConfigTwoPhase(
 func (t *TestRunManager) writeShardConfigTwoPhase(
 	cfg io.Writer,
 	tr *common.TestRun,
+	dummy bool,
 ) error {
 	shards := t.GetAllRolesSorted(tr, common.SystemRoleShardTwoPhase)
 	if len(shards) == 0 {
@@ -250,8 +254,9 @@ func (t *TestRunManager) writeShardConfigTwoPhase(
 		// Write the endpoints for all the nodes in this shard cluster to the
 		// config file
 		for j := 0; j < tr.ShardReplicationFactor; j++ {
-			a, err := t.coord.GetAgent(
+			a, err := t.GetAgentOrDummy(
 				shards[j+(i*tr.ShardReplicationFactor)].AgentID,
+				dummy,
 			)
 			if err != nil {
 				return err
