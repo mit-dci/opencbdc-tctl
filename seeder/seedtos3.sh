@@ -32,36 +32,40 @@ if [[ "$USAGE_DIRECTIVES" == *"number of shards"* ]]; then
     OLD=1
 else
     echo "Generating shards with a fancy config file"
-
     rm -rf config.cfg
-    touch config.cfg
-    if [ "$SEED_MODE" = "1" ]; then
-        printf "2pc=1\n" >> config.cfg
-        printf "coordinator_count=1\ncoordinator0_count=1\ncoordinator0_0_endpoint=\"127.0.0.1:80\"\ncoordinator0_0_raft_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        printf "sentinel_count=1\nsentinel0_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        printf "shard_count=$SEED_SHARDS\n" >> config.cfg
-        for (( i=0; i<$SEED_SHARDS; i++ ))
-        do
-            shard_start=$(($i * ${shard_range}))
-            shard_end=$((${shard_start} + ${shard_range} - 1))
-            printf "shard${i}_start=${shard_start}\nshard${i}_end=${shard_end}\nshard${i}_count=1\nshard${i}_0_endpoint=\"127.0.0.1:80\"\nshard${i}_0_raft_endpoint=\"127.0.0.1:80\"\nshard${i}_0_readonly_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        done
+    if [ "$SEED_CONFIG_BASE64" = "" ]; then
+        echo "Generating config file locally - will not work for sentinel attestation code"
+        # Generate it - doesn't work for sentinel attestations
+        touch config.cfg
+        if [ "$SEED_MODE" = "1" ]; then
+            printf "2pc=1\n" >> config.cfg
+            printf "coordinator_count=1\ncoordinator0_count=1\ncoordinator0_0_endpoint=\"127.0.0.1:80\"\ncoordinator0_0_raft_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            printf "sentinel_count=1\nsentinel0_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            printf "shard_count=$SEED_SHARDS\n" >> config.cfg
+            for (( i=0; i<$SEED_SHARDS; i++ ))
+            do
+                shard_start=$(($i * ${shard_range}))
+                shard_end=$((${shard_start} + ${shard_range} - 1))
+                printf "shard${i}_start=${shard_start}\nshard${i}_end=${shard_end}\nshard${i}_count=1\nshard${i}_0_endpoint=\"127.0.0.1:80\"\nshard${i}_0_raft_endpoint=\"127.0.0.1:80\"\nshard${i}_0_readonly_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            done
+        else
+            printf "sentinel_count=1\nsentinel0_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            printf "archiver_count=1\narchiver0_endpoint=\"127.0.0.1:80\"\narchiver0_db=\"db\"\n" >> config.cfg
+            printf "atomizer_count=1\natomizer0_endpoint=\"127.0.0.1:80\"\natomizer0_raft_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            printf "watchtower_count=1\nwatchtower0_endpoint=\"127.0.0.1:80\"\nwatchtower0_internal_endpoint=\"127.0.0.1:80\"\nwatchtower0_client_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
+            printf "shard_count=$SEED_SHARDS\n" >> config.cfg
+            for (( i=0; i<$SEED_SHARDS; i++ ))
+            do
+                shard_start=$(($i * ${shard_range}))
+                shard_end=$((${shard_start} + ${shard_range} - 1))
+                printf "shard${i}_endpoint=\"127.0.0.1:80\"\nshard${i}_start=${shard_start}\nshard${i}_end=${shard_end}\nshard${i}_db=\"db\"\n" >> config.cfg
+            done
+        fi
+        printf "seed_privkey=\"$SEED_PRIVATEKEY\"\nseed_value=$SEED_VALUE\nseed_from=0\nseed_to=$SEED_OUTPUTS\n" >> config.cfg
     else
-        printf "sentinel_count=1\nsentinel0_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        printf "archiver_count=1\narchiver0_endpoint=\"127.0.0.1:80\"\narchiver0_db=\"db\"\n" >> config.cfg
-        printf "atomizer_count=1\natomizer0_endpoint=\"127.0.0.1:80\"\natomizer0_raft_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        printf "watchtower_count=1\nwatchtower0_endpoint=\"127.0.0.1:80\"\nwatchtower0_internal_endpoint=\"127.0.0.1:80\"\nwatchtower0_client_endpoint=\"127.0.0.1:80\"\n" >> config.cfg
-        printf "shard_count=$SEED_SHARDS\n" >> config.cfg
-        for (( i=0; i<$SEED_SHARDS; i++ ))
-        do
-            shard_start=$(($i * ${shard_range}))
-            shard_end=$((${shard_start} + ${shard_range} - 1))
-            printf "shard${i}_endpoint=\"127.0.0.1:80\"\nshard${i}_start=${shard_start}\nshard${i}_end=${shard_end}\nshard${i}_db=\"db\"\n" >> config.cfg
-        done
-
+        echo "Decoding passed config file from SEED_CONFIG_BASE64"
+        echo "$SEED_CONFIG_BASE64" | base64 --decode > config.cfg
     fi
-
-    printf "seed_privkey=\"$SEED_PRIVATEKEY\"\nseed_value=$SEED_VALUE\nseed_from=0\nseed_to=$SEED_OUTPUTS\n" >> config.cfg
     tools/shard-seeder/shard-seeder config.cfg
 fi
 rm -rf tools

@@ -85,7 +85,15 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 		}
 	}
 
-	err = t.CheckPreseed(tr)
+	// Generate the configuration file the system needs based on the configured
+	// parameters in the UI
+	dummyCfg, err := t.GenerateConfig(tr, true)
+	if err != nil {
+		t.FailTestRun(tr, err)
+		return
+	}
+
+	err = t.CheckPreseed(tr, dummyCfg)
 	if err != nil {
 		t.FailTestRun(tr, fmt.Errorf("Preseeding failed: %v", err))
 		return
@@ -212,7 +220,7 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 
 	// Generate the configuration file the system needs based on the configured
 	// parameters in the UI
-	cfg, err := t.GenerateConfig(tr)
+	cfg, err := t.GenerateConfig(tr, false)
 	if err != nil {
 		t.FailTestRun(tr, err)
 		return

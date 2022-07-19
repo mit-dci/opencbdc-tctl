@@ -105,6 +105,7 @@ func (t *TestRunManager) RunBinariesAtomizer(
 
 func (t *TestRunManager) GenerateConfigAtomizer(
 	tr *common.TestRun,
+	dummy bool,
 ) ([]byte, error) {
 	var cfg bytes.Buffer
 	var err error
@@ -113,7 +114,7 @@ func (t *TestRunManager) GenerateConfigAtomizer(
 		return nil, err
 	}
 
-	if err = t.writeEndpointConfig(&cfg, tr); err != nil {
+	if err = t.writeEndpointConfig(&cfg, tr, dummy); err != nil {
 		return nil, err
 	}
 

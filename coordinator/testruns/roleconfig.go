@@ -4,17 +4,33 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net"
 	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
 )
 
-func (t *TestRunManager) GenerateConfig(tr *common.TestRun) ([]byte, error) {
-	t.UpdateStatus(tr, common.TestRunStatusRunning, "Generating config")
+// GenerateConfig creates a configuration file to place on all nodes
+// such that the system roles can properly find each other and are configured
+// as was dictacted by the scheduled test definition in the UI. dummy configs
+// are created for preseeding such that it includes role counts and private
+// keys, but uses dummy IP addresses for endpoints since we only know those
+// after booting up the actual roles - which we don't want to do until
+// preseeding succeeded. The IP addresses are also irrelevant for preseeding.
+func (t *TestRunManager) GenerateConfig(
+	tr *common.TestRun,
+	dummy bool,
+) ([]byte, error) {
+	t.UpdateStatus(
+		tr,
+		common.TestRunStatusRunning,
+		fmt.Sprintf("Generating config (Dummy=%t)", dummy),
+	)
 	if t.Is2PC(tr.Architecture) {
-		return t.GenerateConfigTwoPhase(tr)
+		return t.GenerateConfigTwoPhase(tr, dummy)
 	} else if t.IsAtomizer(tr.Architecture) {
-		return t.GenerateConfigAtomizer(tr)
+		return t.GenerateConfigAtomizer(tr, dummy)
 	} else {
 		params, err := t.GenerateParams(tr)
 		if err != nil {
@@ -30,6 +46,27 @@ func (t *TestRunManager) GenerateConfig(tr *common.TestRun) ([]byte, error) {
 		}
 		return cfg.Bytes(), nil
 	}
+}
+
+var dummyIP = net.IP{0, 0, 0, 0}
+
+// GetAgentOrDummy returns an agent when dummy is false (or an error if it
+// doesn't exist) or a dummy agent when dummy is true. Used in config
+// generation prior to agents being launched.
+func (t *TestRunManager) GetAgentOrDummy(
+	agentID int32,
+	dummy bool,
+) (*coordinator.ConnectedAgent, error) {
+	if dummy {
+		return &coordinator.ConnectedAgent{
+			SystemInfo: common.AgentSystemInfo{
+				PrivateIPs: []net.IP{
+					dummyIP,
+				},
+			},
+		}, nil
+	}
+	return t.coord.GetAgent(agentID)
 }
 
 // writeTestRunConfigVariables writes generic testrun-level configuration
@@ -292,10 +329,11 @@ func (t *TestRunManager) writeLogLevelConfig(
 func (t *TestRunManager) writeEndpointConfig(
 	cfg io.Writer,
 	tr *common.TestRun,
+	dummy bool,
 ) error {
 	for _, r := range tr.Roles {
 		// Get the agent on which this role is supposed to run
-		a, err := t.coord.GetAgent(r.AgentID)
+		a, err := t.GetAgentOrDummy(r.AgentID, dummy)
 		if err != nil {
 			return err
 		}
