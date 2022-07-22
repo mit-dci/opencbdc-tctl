@@ -43,10 +43,15 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	}
 	// allCmds now holds all of the running commands for this test run.
 
+	timeout := time.Duration(tr.SampleCount) * time.Second
+
 	t.UpdateStatus(
 		tr,
 		common.TestRunStatusRunning,
-		"Waiting for manual termination or timeout (5 minutes)",
+		fmt.Sprintf(
+			"Waiting for manual termination or timeout (%.1f minutes)",
+			timeout.Minutes(),
+		),
 	)
 
 	// Run the failure scenario in a separate goroutine. Pass it a channel
@@ -63,8 +68,6 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	// user to manually terminate the run (case 3), or load gens end
 	// successfully
 	// (case 2 - success case)
-
-	timeout := time.Duration(tr.SampleCount) * time.Second
 
 	select {
 	case fail := <-failures:
