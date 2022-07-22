@@ -135,7 +135,7 @@ func (t *TestRunManager) CreateStartSequencePhaseTwo(
 	// Determine the start sequence
 	startSequence := make([]startSequenceEntry, 0)
 
-	roleStartTimeout := time.Minute * 1
+	roleStartTimeout := time.Minute * 4
 
 	// Raft clusters now elect a random leader so we start them all at once
 	ticketMachines := t.GetAllRolesSorted(tr, common.SystemRoleTicketMachine)
