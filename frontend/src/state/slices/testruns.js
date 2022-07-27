@@ -2,6 +2,7 @@ import { TestController } from '../actions';
 import { createSelector } from 'reselect'
 import { send } from '@giantmachines/redux-websocket/dist';
 import client from '../apiclient';
+import * as numeral from "numeral";
 
 const initialState = {
     testruns: [],
@@ -783,13 +784,10 @@ const mapListFields = (architectures, users) => tr => {
 
     let params = "";
     if (tr.fixedTxRate > 0 && tr.fixedTxRate < 1) {
-        params += `Fixed: ${tr.fixedTxRate} (${tr.loadGenInputCount}/${tr.loadGenOutputCount}) / `
+        params += `Fixed: ${numeral(tr.fixedTxRate).format("#0%")} (${tr.loadGenInputCount}/${tr.loadGenOutputCount}) / `
     }
     if (tr.contentionRate > 0 && tr.contentionRate < 1) {
-        params += `Contention: ${tr.contentionRate} / `
-    }
-    if (tr.contentionRate > 0 && tr.contentionRate < 1) {
-        params += `Contention: ${tr.contentionRate} / `
+        params += `Contention: ${numeral(tr.contentionRate).format("#0%")} / `
     }
     if (tr.preseedShards) {
         params += `Preseed: ${tr.preseedCount / 1000000}M / `
