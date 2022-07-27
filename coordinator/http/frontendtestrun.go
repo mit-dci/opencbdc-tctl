@@ -105,6 +105,8 @@ type FrontendTestRunListEntry struct {
 	InvalidTxRate            float64                    `json:"invalidTxRate"`
 	FixedTxRate              float64                    `json:"fixedTxRate"`
 	PreseedCount             int64                      `json:"preseedCount"`
+	ContentionRate           float64                    `json:"contentionRate"`
+	LoadGenTxType            string                     `json:"loadGenTxType"`
 	PreseedShards            bool                       `json:"preseedShards"`
 	ShardReplicationFactor   int                        `json:"shardReplicationFactor"`
 	LoadGenOutputCount       int                        `json:"loadGenOutputCount"`
