@@ -61,6 +61,7 @@ type TestRun struct {
 	WatchtowerErrorCacheSize int                `json:"watchtowerErrorCacheSize" feFieldTitle:"Watchtower Error Cache Size"     feFieldType:"int"`
 	InvalidTxRate            float64            `json:"invalidTxRate"            feFieldTitle:"Invalid TX Rate"                 feFieldType:"float"`
 	FixedTxRate              float64            `json:"fixedTxRate"              feFieldTitle:"Fixed TX Rate"                   feFieldType:"float"`
+	ContentionRate           float64            `json:"contentionRate"           feFieldTitle:"Contention Rate"                 feFieldType:"float"`
 	PreseedCount             int64              `json:"preseedCount"             feFieldTitle:"Number of preseeded outputs"     feFieldType:"int"`
 	PreseedShards            bool               `json:"preseedShards"            feFieldTitle:"Preseed outputs on shards"       feFieldType:"bool"`
 	KeepTimedOutAgents       bool               `json:"keepTimedOutAgents"       feFieldTitle:"Keep timed out agents"           feFieldType:"bool"`

@@ -296,5 +296,12 @@ func (t *TestRunManager) GenerateParams(tr *common.TestRun) ([]string, error) {
 		ret = append(ret, "--telemetry=1")
 	}
 
+	if tr.ContentionRate > 0 {
+		ret = append(
+			ret,
+			fmt.Sprintf("--contention_rate=%.2f", tr.ContentionRate),
+		)
+	}
+
 	return ret, nil
 }
