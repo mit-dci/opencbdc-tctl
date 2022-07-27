@@ -785,6 +785,12 @@ const mapListFields = (architectures, users) => tr => {
     if (tr.fixedTxRate > 0 && tr.fixedTxRate < 1) {
         params += `Fixed: ${tr.fixedTxRate} (${tr.loadGenInputCount}/${tr.loadGenOutputCount}) / `
     }
+    if (tr.contentionRate > 0 && tr.contentionRate < 1) {
+        params += `Contention: ${tr.contentionRate} / `
+    }
+    if (tr.contentionRate > 0 && tr.contentionRate < 1) {
+        params += `Contention: ${tr.contentionRate} / `
+    }
     if (tr.preseedShards) {
         params += `Preseed: ${tr.preseedCount / 1000000}M / `
     }
@@ -794,6 +800,10 @@ const mapListFields = (architectures, users) => tr => {
     if ((tr.architectureID.indexOf('default') > -1 && tr.shardReplicationFactor !== 2) ||
         (tr.architectureID.indexOf('2pc') > -1 && tr.shardReplicationFactor !== 3)) {
         params += `Shard Repl: ${tr.shardReplicationFactor} / `
+    }
+
+    if (tr.architectureID.indexOf('phase-two') > -1 && tr.loadGenTxType) {
+        params += `TX Type: ${tr.loadGenTxType} / `
     }
 
     if (params.length > 0) {
