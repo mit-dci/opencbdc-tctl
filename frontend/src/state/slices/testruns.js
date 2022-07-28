@@ -787,7 +787,7 @@ const mapListFields = (architectures, users) => tr => {
         params += `Fixed: ${numeral(tr.fixedTxRate).format("#0%")} (${tr.loadGenInputCount}/${tr.loadGenOutputCount}) / `
     }
     if (tr.contentionRate > 0 && tr.contentionRate < 1) {
-        params += `Contention: ${numeral(tr.contentionRate).format("#0%")} / `
+        params += `Contention: ${numeral(tr.contentionRate).format("#0[.][0][0][0][0]%")} / `
     }
     if (tr.preseedShards) {
         params += `Preseed: ${tr.preseedCount / 1000000}M / `
