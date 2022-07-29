@@ -209,6 +209,8 @@ func (t *TestRunManager) PreseedShards(
 	return nil
 }
 
+var errAbortedWhilePreseeding = errors.New("aborted by user while preseeding")
+
 func (t *TestRunManager) CheckPreseed(tr *common.TestRun, cfg []byte) error {
 	if !tr.PreseedShards {
 		return nil
@@ -273,7 +275,14 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun, cfg []byte) error {
 		if hasSeed {
 			break
 		}
-
+		if t.TerminateIfNeeded(
+			tr,
+			[]runningCommand{},
+			map[int32][]byte{},
+			nil,
+		) {
+			return errAbortedWhilePreseeding
+		}
 		time.Sleep(time.Second * 5)
 	}
 

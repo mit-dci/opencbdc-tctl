@@ -97,7 +97,9 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 
 		err = t.CheckPreseed(tr, dummyCfg)
 		if err != nil {
-			t.FailTestRun(tr, fmt.Errorf("Preseeding failed: %v", err))
+			if err != errAbortedWhilePreseeding {
+				t.FailTestRun(tr, fmt.Errorf("Preseeding failed: %v", err))
+			}
 			return
 		}
 	}

@@ -37,13 +37,16 @@ func (t *TestRunManager) TerminateIfNeeded(
 			common.TestRunStatusRunning,
 			"Aborted by user request, killing all commands",
 		)
-		err := t.BreakAndTerminateAllCmds(tr, allCmds)
-		if err != nil {
-			// No need to return it, we're going to abort the testrun any way
-			logging.Warnf("Error terminating commands: %v", err)
-		}
+		if len(allCmds) > 0 {
+			err := t.BreakAndTerminateAllCmds(tr, allCmds)
+			if err != nil {
+				// No need to return it, we're going to abort the testrun any
+				// way
+				logging.Warnf("Error terminating commands: %v", err)
+			}
 
-		time.Sleep(5 * time.Second)
+			time.Sleep(5 * time.Second)
+		}
 
 		// Upon manual termination, need to kill AWS agents
 		if t.HasAWSRoles(tr) {
