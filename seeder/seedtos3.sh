@@ -33,7 +33,13 @@ if [[ "$USAGE_DIRECTIVES" == *"number of shards"* ]]; then
 else
     echo "Generating shards with a fancy config file"
     rm -rf config.cfg
-    if [ "$SEED_CONFIG_BASE64" = "" ]; then
+    if [ ! -z "$SEED_CONFIG_BASE64" ]; then
+        echo "Decoding passed config file from SEED_CONFIG_BASE64"
+        echo "$SEED_CONFIG_BASE64" | base64 --decode > config.cfg
+    elif [ ! -z "$SEED_CONFIG_S3URI" ]; then
+        echo "Downloading configuration from S3: $SEED_CONFIG_S3URI"
+        aws s3 cp "$SEED_CONFIG_S3URI" ./config.cfg
+    else
         echo "Generating config file locally - will not work for sentinel attestation code"
         # Generate it - doesn't work for sentinel attestations
         touch config.cfg
@@ -62,10 +68,8 @@ else
             done
         fi
         printf "seed_privkey=\"$SEED_PRIVATEKEY\"\nseed_value=$SEED_VALUE\nseed_from=0\nseed_to=$SEED_OUTPUTS\n" >> config.cfg
-    else
-        echo "Decoding passed config file from SEED_CONFIG_BASE64"
-        echo "$SEED_CONFIG_BASE64" | base64 --decode > config.cfg
     fi
+    echo "Starting shard seeder"
     tools/shard-seeder/shard-seeder config.cfg
 fi
 rm -rf tools
@@ -105,3 +109,7 @@ for f in *.tar
 do
     aws s3 cp $f "s3://${BINARIES_S3_BUCKET}/shard-preseeds/$f"
 done
+
+if [ ! -z "$SEED_CONFIG_S3URI" ]; then
+    aws s3 rm "$SEED_CONFIG_S3URI"
+fi
