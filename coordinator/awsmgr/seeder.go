@@ -2,7 +2,7 @@ package awsmgr
 
 import (
 	"context"
-	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/batch"
 	"github.com/aws/aws-sdk-go-v2/service/batch/types"
+	"github.com/mit-dci/opencbdc-tctl/common"
 	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
@@ -40,6 +41,30 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed, cfg []byte) error {
 		return err
 	}
 	if !alreadyHere {
+		f, err := os.CreateTemp("", "")
+		if err != nil {
+			return err
+		}
+		n, err := f.Write(cfg)
+		if err != nil {
+			return err
+		}
+		if n != len(cfg) {
+			return errors.New("could not write entire config to temp file")
+		}
+		f.Close()
+		err = am.UploadToS3(common.S3Upload{
+			TargetRegion: os.Getenv("AWS_REGION"),
+			TargetBucket: os.Getenv("BINARIES_S3_BUCKET"),
+			TargetPath: fmt.Sprintf(
+				"shard-preseeds/configs/%s.cfg",
+				seed.TestRunID,
+			),
+			SourcePath: f.Name(),
+		})
+		if err != nil {
+			return err
+		}
 		input := &batch.SubmitJobInput{
 			JobName:       aws.String(fmt.Sprintf("SEED_%s", seed.TestRunID)),
 			JobQueue:      aws.String(os.Getenv("UHS_SEEDER_BATCH_JOB")),
@@ -75,9 +100,13 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed, cfg []byte) error {
 						Value: aws.String(fmt.Sprintf("%d", seed.SeedMode)),
 					},
 					{
-						Name: aws.String("SEED_CONFIG_BASE64"),
+						Name: aws.String("SEED_CONFIG_S3URI"),
 						Value: aws.String(
-							base64.StdEncoding.EncodeToString(cfg),
+							fmt.Sprintf(
+								"s3://%s/shard-preseeds/configs/%s.cfg",
+								os.Getenv("BINARIES_S3_BUCKET"),
+								seed.TestRunID,
+							),
 						),
 					},
 				},
