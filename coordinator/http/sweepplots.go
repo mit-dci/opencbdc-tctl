@@ -349,6 +349,12 @@ func (h *HttpServer) getSweepPlotConfig() SweepPlotConfig {
 				Eval: "r['result']['latencyMin']*1000",
 				Name: "Observed latency minimum (ms)",
 			},
+			{
+				ID:        "contentionRate",
+				Eval:      "r['config']['contentionRate']",
+				Name:      "Percentage of contending accounts",
+				ShortHand: "Contention Rate",
+			},
 		}, bucketFields...),
 		Axes: []SweepPlotAxis{
 			{ID: "x", Name: "'X-Axis"},

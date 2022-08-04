@@ -269,6 +269,7 @@ var AvailableArchitectures = []SystemArchitecture{
 			MaxRetries:               1,
 			SentinelAttestations:     1,
 			AuditInterval:            60,
+			ContentionRate:           0.0,
 		},
 	},
 }
