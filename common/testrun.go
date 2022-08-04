@@ -73,6 +73,7 @@ type TestRun struct {
 	SentinelAttestations     int                `json:"sentinelAttestations"     feFieldTitle:"Number of sentinel attestations" feFieldType:"int"`
 	AuditInterval            int                `json:"auditInterval"            feFieldTitle:"Audit Interval (blocks)"         feFieldType:"int"`
 	RecordNetworkTraffic     bool               `json:"recordNetworkTraffic"     feFieldTitle:"Record network traffic"          feFieldType:"bool"`
+	AgentShutdownDelay       int                `json:"agentShutdownDelay"       feFieldTitle:"Agent Shutdown Delay (seconds)"  feFieldType:"int"`
 	DontRunBefore            time.Time          `json:"notBefore"`
 	Sweep                    string             `json:"sweep"`
 	SweepID                  string             `json:"sweepID"`
