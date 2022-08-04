@@ -59,6 +59,7 @@ type TestRunNormalizedConfig struct {
 	PreseedCount           int64   `json:"preseedCount"`
 	PreseedShards          bool    `json:"preseedShards"`
 	LoadGenAccounts        int     `json:"loadGenAccounts"`
+	ContentionRate         float64 `json:"contentionRate"`
 }
 
 // Calculates a hash over the normalized config by hashing the serialized JSON
