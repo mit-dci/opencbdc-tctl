@@ -102,6 +102,9 @@ func (t *TestRunManager) CleanupCommandsPhaseTwo(
 	}
 
 	for _, rl := range stopSequence {
+		if rl == common.SystemRoleAgent && tr.AgentShutdownDelay > 5 {
+			time.Sleep(time.Second * time.Duration(tr.AgentShutdownDelay-5))
+		}
 		t.WriteLog(tr, "Breaking all commands for role %s", string(rl))
 		err := t.BreakAndTerminateAllCmds(
 			tr,
