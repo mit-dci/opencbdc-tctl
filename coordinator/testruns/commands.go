@@ -233,28 +233,23 @@ func (t *TestRunManager) BreakAndTerminateAllCmds(
 	tr *common.TestRun,
 	cmds []runningCommand,
 ) error {
+	err := t.BreakAllCmds(tr, cmds)
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Second * 5)
+	return t.TerminateAllCmds(tr, cmds)
+}
+
+// TerminateAllCmds will instruct the agent runnning a command to send a
+// an os.Kill signal to it, for each of the commands in the runningCommands
+// array.
+func (t *TestRunManager) TerminateAllCmds(
+	tr *common.TestRun,
+	cmds []runningCommand,
+) error {
 	errs := make([]error, 0)
 	wg := sync.WaitGroup{}
-	wg.Add(len(cmds))
-	t.WriteLog(tr, "Breaking %d commands", len(cmds))
-	for i := range cmds {
-		go func(cmd runningCommand) {
-			err := t.am.BreakCommand(cmd.agentID, cmd.commandID)
-			if err != nil && err != coordinator.ErrAgentNotFound {
-				t.WriteLog(
-					tr,
-					"Error breaking command %x on agent %d: %s",
-					cmd.commandID,
-					cmd.agentID,
-					err,
-				)
-				errs = append(errs, err)
-			}
-			wg.Done()
-		}(cmds[i])
-	}
-	wg.Wait()
-	time.Sleep(time.Second * 5)
 	wg.Add(len(cmds))
 	t.WriteLog(tr, "Terminating %d commands", len(cmds))
 	for i := range cmds {
@@ -279,6 +274,41 @@ func (t *TestRunManager) BreakAndTerminateAllCmds(
 		return fmt.Errorf("%d error(s) occurred stopping commands", len(errs))
 	}
 	t.WriteLog(tr, "Terminated %d commands", len(cmds))
+	return nil
+}
+
+// BreakAllCmds will instruct the agent runnning a command to send a
+// os.Interrupt signal, for each of the
+// commands in the runningCommands array.
+func (t *TestRunManager) BreakAllCmds(
+	tr *common.TestRun,
+	cmds []runningCommand,
+) error {
+	errs := make([]error, 0)
+	wg := sync.WaitGroup{}
+	wg.Add(len(cmds))
+	t.WriteLog(tr, "Interrupting %d commands", len(cmds))
+	for i := range cmds {
+		go func(cmd runningCommand) {
+			err := t.am.BreakCommand(cmd.agentID, cmd.commandID)
+			if err != nil && err != coordinator.ErrAgentNotFound {
+				t.WriteLog(
+					tr,
+					"Error breaking command %x on agent %d: %s",
+					cmd.commandID,
+					cmd.agentID,
+					err,
+				)
+				errs = append(errs, err)
+			}
+			wg.Done()
+		}(cmds[i])
+	}
+	wg.Wait()
+	if len(errs) > 0 {
+		return fmt.Errorf("%d error(s) occurred breaking commands", len(errs))
+	}
+	t.WriteLog(tr, "Interrupted %d commands", len(cmds))
 	return nil
 }
 
