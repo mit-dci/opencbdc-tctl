@@ -92,34 +92,86 @@ func (t *TestRunManager) CleanupCommandsPhaseTwo(
 	allCmds []runningCommand,
 	envs map[int32][]byte,
 ) error {
-	// Break commands in the correct sequence: first kill load gens, wait,
-	// then kill agents, wait, then the rest.
-	stopSequence := []common.SystemRole{
-		common.SystemRolePhaseTwoGen,
-		common.SystemRoleAgent,
-		common.SystemRoleRuntimeLockingShard,
-		common.SystemRoleTicketMachine,
+
+	// More sophisticated shutdown sequence:
+	// - sigint all loadgens
+	// - sigint the agents
+	// - wait for agentdelay
+	// - sigkill loadgens
+	// - sigkill agents
+	// - sigint shard
+	// - wait 5 seconds
+	// - sigkill shard
+	// - sigint ticketmachine
+	// - wait 5 seconds
+	// - sigkill ticketmachine
+
+	t.WriteLog(tr, "Interrupting all loadgens")
+	err := t.BreakAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRolePhaseTwoGen),
+	)
+	if err != nil {
+		return err
 	}
 
-	for _, rl := range stopSequence {
-		if rl == common.SystemRoleAgent && tr.AgentShutdownDelay > 5 {
-			time.Sleep(time.Second * time.Duration(tr.AgentShutdownDelay-5))
-		}
-		t.WriteLog(tr, "Breaking all commands for role %s", string(rl))
-		err := t.BreakAndTerminateAllCmds(
+	t.WriteLog(tr, "Interrupting all agents")
+	err = t.BreakAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleAgent),
+	)
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(time.Second * 5)
+	if tr.AgentShutdownDelay > 5 {
+		time.Sleep(time.Second * time.Duration(tr.AgentShutdownDelay-5))
+	}
+
+	t.WriteLog(tr, "Terminating all loadgens")
+	err = t.TerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRolePhaseTwoGen),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Terminating all agents")
+	err = t.TerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleAgent),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Interrupting and terminating all shards")
+	err = t.BreakAndTerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(
 			tr,
-			t.FilterCommandsByRole(tr, allCmds, rl),
-		)
-		if err != nil {
-			return err
-		}
-		// Time for the commands to break and commit perf results
-		time.Sleep(time.Second * 5)
+			allCmds,
+			common.SystemRoleRuntimeLockingShard,
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Interrupting and terminating all ticket machines")
+	err = t.BreakAndTerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleTicketMachine),
+	)
+	if err != nil {
+		return err
 	}
 
 	// Trigger the agents to upload the performance data for all commands
 	// to S3
-	err := t.GetPerformanceProfiles(tr, allCmds, envs)
+	err = t.GetPerformanceProfiles(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
