@@ -75,7 +75,7 @@ func (t *TestRunManager) RunBinariesTwoPhase(
 	case <-time.After(5 * time.Minute):
 	}
 
-	err = t.CleanupCommands(tr, allCmds, envs)
+	err = t.CleanupCommands2PC(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
@@ -126,6 +126,102 @@ func (t *TestRunManager) GenerateConfigTwoPhase(
 		return nil, err
 	}
 	return cfg.Bytes(), nil
+}
+
+func (t *TestRunManager) CleanupCommands2PC(
+	tr *common.TestRun,
+	allCmds []runningCommand,
+	envs map[int32][]byte,
+) error {
+
+	// More sophisticated shutdown sequence:
+	// - sigint all loadgens
+	// - sigint the sentinels
+	// - wait for agentdelay
+	// - sigkill loadgens
+	// - sigkill sentinels
+	// - sigint coordinator
+	// - wait 5 seconds
+	// - sigkill coordinator
+	// - sigint shard
+	// - wait 5 seconds
+	// - sigkill shard
+
+	t.WriteLog(tr, "Interrupting all loadgens")
+	err := t.BreakAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleTwoPhaseGen),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Interrupting all sentinels")
+	err = t.BreakAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleSentinelTwoPhase),
+	)
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(time.Second * 5)
+	if tr.AgentShutdownDelay > 5 {
+		time.Sleep(time.Second * time.Duration(tr.AgentShutdownDelay-5))
+	}
+
+	t.WriteLog(tr, "Terminating all loadgens")
+	err = t.TerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleTwoPhaseGen),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Terminating all agents")
+	err = t.TerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleSentinelTwoPhase),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Interrupting and terminating all coordinators")
+	err = t.BreakAndTerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(
+			tr,
+			allCmds,
+			common.SystemRoleCoordinator,
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	t.WriteLog(tr, "Interrupting and terminating all shards")
+	err = t.BreakAndTerminateAllCmds(
+		tr,
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleShardTwoPhase),
+	)
+	if err != nil {
+		return err
+	}
+
+	// Trigger the agents to upload the performance data for all commands
+	// to S3
+	err = t.GetPerformanceProfiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
+
+	err = t.GetLogFiles(tr, allCmds, envs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // writeCoordinatorConfigTwoPhase writes the section of the configuration file
