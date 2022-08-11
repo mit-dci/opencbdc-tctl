@@ -188,6 +188,11 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 	if _, err := cfg.Write([]byte(fmt.Sprintf("batch_delay=%d\n", tr.BatchDelay))); err != nil {
 		return err
 	}
+	if tr.Telemetry {
+		if _, err := cfg.Write([]byte("enable_telemetry=1\n")); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
