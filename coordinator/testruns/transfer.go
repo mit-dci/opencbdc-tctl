@@ -42,15 +42,22 @@ var copyFiles = map[common.SystemRole][]string{
 		"tp_samples.txt%%OPT",
 		"block_log.txt%%OPT",
 	},
-	common.SystemRoleCoordinator: {},
+	common.SystemRoleCoordinator: {
+		"telemetry.bin%%OPT",
+	},
 	common.SystemRoleWatchtower: {
 		"tp_samples.txt%%OPT",
 		"block_log.txt%%OPT",
 	},
-	common.SystemRoleShardTwoPhase:    {},
-	common.SystemRoleSentinelTwoPhase: {},
+	common.SystemRoleShardTwoPhase: {
+		"telemetry.bin%%OPT",
+	},
+	common.SystemRoleSentinelTwoPhase: {
+		"telemetry.bin%%OPT",
+	},
 	common.SystemRoleTwoPhaseGen: {
 		"tx_samples_%IDX%.txt",
+		"telemetry.bin%%OPT",
 	},
 	common.SystemRolePhaseTwoGen: {
 		"tx_samples_%IDX%.txt",
