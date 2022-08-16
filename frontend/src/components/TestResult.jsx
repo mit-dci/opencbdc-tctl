@@ -265,7 +265,7 @@ const TestResult = (props) => {
             </CCol>
           </CRow>
           <CRow>
-            <CCol xs={4}>
+            <CCol xs={3}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -280,7 +280,7 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={4}>
+            <CCol xs={3}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -295,7 +295,22 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={4}>
+            <CCol xs={3}>
+              <CCard>
+                <CCardHeader>
+                  <b>
+                    <u>Latency over time</u>
+                  </b>
+                </CCardHeader>
+                <CCardBody>
+                  <img
+                    style={{ width: "100%" }}
+                    src={`${client.apiUrl}testruns/${props.testRun.id}/plot/system_latency_line?v=${lastRecalc}`}
+                  />
+                </CCardBody>
+              </CCard>
+            </CCol>
+            <CCol xs={3}>
               <CCard>
                 <CCardHeader>
                   <b>
