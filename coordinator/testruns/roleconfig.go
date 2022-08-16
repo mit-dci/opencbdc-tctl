@@ -203,6 +203,9 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_percentage=%f\n", tr.LoadGenTPSStepPercent))); err != nil {
 			return err
 		}
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_start=%f\n", tr.LoadGenTPSStepStart))); err != nil {
+			return err
+		}
 	}
 	return nil
 }
