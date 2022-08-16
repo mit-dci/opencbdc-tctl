@@ -114,7 +114,7 @@ if archiver_based:
                         block_time_ms=int(value)
 
 tps_lines = []
-
+lat_lines = []
 if two_phase:
     hdf5_files = ['outputs/' + x for x in listdir('outputs') \
              if 'tx_samples' in x and 'hdf5' in x]
@@ -142,18 +142,21 @@ if two_phase:
     df['latsS'] = df.lats / 10**3
     df['pDate'] = df.time.values.astype('datetime64[ns]')
     df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
-    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df), agg={'count': 'count'})
+    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df), agg={'count': 'count', 'lats': 'mean'})
     tps_its = dat.to_items()
     current = tps_its[0][1][0].astype(datetime.datetime)
     end = tps_its[0][1][-1].astype(datetime.datetime)
     tps = []
+    lat_ts = []
     idx = 0
     while current < end:
         dt = tps_its[0][1][idx].astype(datetime.datetime)
         if dt != current:
             tps.append(0)
+            lat_ts.append(0)
         else:
             tps.append(tps_its[1][1][idx])
+            lat_ts.append(tps_its[2][1][idx])
             idx += 1
         current += datetime.timedelta(seconds=1)
 
@@ -177,7 +180,7 @@ if two_phase:
         bin_depths[current_bin] += val[1]
     bin_depths /= np.sum(bin_depths)
     tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1})
-
+    lat_lines.append({"lats":lat_ts, "title":"Loadgens", "freq": 1})
 if archiver_based:
     for output_file in output_files:
         if output_file.find('tp_samples') > -1:
@@ -407,8 +410,60 @@ plt.grid()
 plt.savefig('plots/system_throughput_line.png')
 plt.close('all')
 
+## Create latency line
+
+fig, (ax) = plt.subplots(nrows=1)
+
+max = 0
+for i, lat_line in enumerate(lat_lines):
+    if len(lat_line["lats"]) == 0: continue
+    lat_time = []
+    lat_ma = []
+    time = 0
+    lat_ma_tmp = []
+    lat_ma_ms = 5000
+    if archiver_based:
+        lat_ma_ms = block_time_ms * 5
+
+    for t in lat_lines[i]["lats"]:
+        lat_ma_tmp.append(t)
+        while len(lat_ma_tmp) > 5:
+            lat_ma_tmp = lat_ma_tmp[1:]
+
+        val = np.mean(lat_ma_tmp)
+        if max < val:
+            max = val
+        lat_ma.append(np.mean(lat_ma_tmp))
 
 
+        time = time + lat_lines[i]["freq"]
+        lat_time.append(datetime.datetime.fromtimestamp(time))
+
+    color = (random.random(), random.random(), random.random())
+    if len(colors) > i:
+        color = colors[i]
+    ax.plot(lat_time, lat_ma, label=lat_line["title"], color=color)
+
+
+
+
+ax.set_ylabel('Mean Latency (ms, {}ms moving average)'.format(tps_ma_ms))
+ax.set_xlabel('Time (mm:ss)')
+ax.set_title('Time series')
+ax.set_ylim(ymin=0, ymax=max)
+ax.set_xlim(xmin=datetime.datetime.fromtimestamp(0))
+
+timeFmt = mdates.DateFormatter('%M:%S')
+
+ax.xaxis.set_major_formatter(timeFmt)
+
+if len(tps_lines) > 1:
+    ax.legend()
+
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.grid()
+plt.savefig('plots/system_latency_line.png')
+plt.close('all')
 
 ## Create blockheight line
 
