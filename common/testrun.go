@@ -43,8 +43,9 @@ type TestRun struct {
 	LoadGenTxType            string             `json:"loadGenTxType"            feFieldTitle:"Loadgen Transaction Type"        feFieldType:"txtype"`
 	LoadGenAffinity          bool               `json:"loadGenAffinity"          feFieldTitle:"Enable LoadGen Region Affinity"  feFieldType:"bool"`
 	LoadGenTPSTarget         int                `json:"loadGenTPSTarget"         feFieldTitle:"Loadgen Target TPS"              feFieldType:"float"`
-    LoadGenTPSStepTime       float64            `json:"loadGenTPSStepTime"       feFieldTitle:"Loadgen TPS Step Time (sec)"     feFieldType:"float"`
+	LoadGenTPSStepTime       float64            `json:"loadGenTPSStepTime"       feFieldTitle:"Loadgen TPS Step Time (sec)"     feFieldType:"float"`
 	LoadGenTPSStepPercent    float64            `json:"loadGenTPSStepPercent"    feFieldTitle:"Loadgen TPS Step Percent"        feFieldType:"float"`
+	LoadGenTPSStepStart      float64            `json:"loadGenTPSStepStart"      feFieldTitle:"Loadgen TPS Step Start"          feFieldType:"float"`
 	Telemetry                bool               `json:"telemetry"                feFieldTitle:"Enable Telemetry"                feFieldType:"bool"`
 	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
 	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
