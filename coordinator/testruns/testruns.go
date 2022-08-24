@@ -17,7 +17,7 @@ import (
 // recalculation
 // on startup of the coordinator
 const TestResultVersion = 2
-const PerformanceDataVersion = 3
+const PerformanceDataVersion = 4
 
 type TestRunManager struct {
 	coord                 *coordinator.Coordinator
