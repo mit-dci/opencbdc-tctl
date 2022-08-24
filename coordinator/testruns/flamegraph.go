@@ -1,6 +1,7 @@
 package testruns
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,7 +26,7 @@ func (t *TestRunManager) CalculateFlameGraph(
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command("bash", "calculate_flamegraph.sh", tr.ID, commandID)
+	cmd := exec.Command("bash", "calculate_flamegraph.sh", tr.ID, commandID, fmt.Sprintf("%d", PerformanceDataVersion))
 	cmd.Dir = exeDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
