@@ -24,7 +24,7 @@ const Config = () => {
   const history = useHistory();
   const [newUser, setNewUser] = useState(null);
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.users.users);
+  const users = useSelector((state) => state.users.users.sort((a, b) => a.name.localeCompare(b.name)));
   const maintenanceMode = useSelector((state) => state.system?.maintenanceMode);
   const config = useSelector((state) => state.system?.config);
   const [newMaxAgents, setNewMaxAgents] = useState(config?.maxAgents || 500);
