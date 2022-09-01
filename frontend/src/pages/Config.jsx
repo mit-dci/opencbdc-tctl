@@ -84,40 +84,8 @@ const Config = () => {
           </CCard>
         </CCol>
       </CRow>
-
       <CRow>
-        <CCol xl={6}>
-          <CCard>
-            <CCardHeader>Users</CCardHeader>
-            <CCardBody>
-              <CDataTable
-                items={users}
-                sorter={false}
-                fields={[
-                  { key: "name", _classes: "font-weight-bold", label: "Name" },
-                  { key: "email", label: "E-mail" },
-                  { key: "org", label: "Organization" },
-                  { key: "actions", label: "" },
-                ]}
-                scopedSlots={{
-                  actions: (item) => (
-                    <td>
-                      <CButton
-                        color="primary"
-                        onClick={(e) => dispatch(deleteUser(item.thumbPrint))}
-                      >
-                        Delete
-                      </CButton>
-                    </td>
-                  ),
-                }}
-                hover
-                striped
-              />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xl={6}>
+        <CCol xl={12}>
           <CCard>
             <CCardHeader>Authorize new user</CCardHeader>
             <CCardBody>
@@ -161,6 +129,41 @@ const Config = () => {
             </CCardBody>
           </CCard>
         </CCol>
+      </CRow>
+      <CRow>
+        <CCol xl={12}>
+          <CCard>
+            <CCardHeader>Users</CCardHeader>
+            <CCardBody>
+              <CDataTable
+                items={users}
+                sorter={false}
+                fields={[
+                  { key: "name", _classes: "font-weight-bold", label: "Name" },
+                  { key: "email", label: "E-mail" },
+                  { key: "org", label: "Organization" },
+                  { key: "thumbPrint", label: "Thumbprint" },
+                  { key: "actions", label: "" },
+                ]}
+                scopedSlots={{
+                  actions: (item) => (
+                    <td>
+                      <CButton
+                        color="primary"
+                        onClick={(e) => dispatch(deleteUser(item.thumbPrint))}
+                      >
+                        Delete
+                      </CButton>
+                    </td>
+                  ),
+                }}
+                hover
+                striped
+              />
+            </CCardBody>
+          </CCard>
+        </CCol>
+
       </CRow>
     </CContainer>
   );
