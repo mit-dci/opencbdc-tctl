@@ -36,6 +36,7 @@ export const addUser = cert => async (dispatch) => {
         if(result.ok){
            result = await(client.get("users"));
            dispatch({type:TestController.UsersUpdated, payload: result});
+           dispatch({type:TestController.Toast.Success, payload: "User authorized"});
         } else {
            dispatch({type:TestController.Toast.Error, payload: "Server did not return OK"});
         }
