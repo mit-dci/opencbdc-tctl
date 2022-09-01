@@ -15,7 +15,7 @@ import (
 
 func (srv *HttpServer) addUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := srv.addUser(w, r, r.Body)
-	writeJson(w, map[string]interface{}{"ok": err != nil})
+	writeJson(w, map[string]interface{}{"ok": err == nil})
 	srv.ReloadCerts()
 }
 
