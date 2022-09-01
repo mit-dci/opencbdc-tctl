@@ -200,10 +200,15 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_time=%.1f\n", tr.LoadGenTPSStepTime))); err != nil {
 			return err
 		}
-		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_percentage=%f\n", tr.LoadGenTPSStepPercent))); err != nil {
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_percentage=%.1f\n", tr.LoadGenTPSStepPercent))); err != nil {
 			return err
 		}
-		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_start=%f\n", tr.LoadGenTPSStepStart))); err != nil {
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_start=%.1f\n", tr.LoadGenTPSStepStart))); err != nil {
+			return err
+		}
+	}
+	if tr.LoadGenLatencyTarget > 0 {
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_latency_target=%d\n", tr.LoadGenLatencyTarget))); err != nil {
 			return err
 		}
 	}
