@@ -254,37 +254,38 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun, cfg []byte) error {
 		}
 	}
 
-	start := time.Now()
-	for {
-		if time.Since(start).Minutes() > 65 {
-			return fmt.Errorf(
-				"Shard preseeding timed out - "+
-					"Please check on Batch job with name [SEED_%s] from the AWS console for details",
-				tr.ID,
+	if !hasSeed {
+		start := time.Now()
+		for {
+			if time.Since(start).Minutes() > 65 {
+				return fmt.Errorf(
+					"Shard preseeding timed out - "+
+						"Please check on Batch job with name [SEED_%s] from the AWS console for details",
+					tr.ID,
+				)
+			}
+			t.UpdateStatus(
+				tr,
+				common.TestRunStatusRunning,
+				"Waiting for preseed generation to complete",
 			)
+			hasSeed, err := t.awsm.HasSeed(wantSeed, false)
+			if err != nil {
+				return fmt.Errorf("error checking preseed existence: %v", err)
+			}
+			if hasSeed {
+				break
+			}
+			if t.TerminateIfNeeded(
+				tr,
+				[]runningCommand{},
+				map[int32][]byte{},
+				nil,
+			) {
+				return errAbortedWhilePreseeding
+			}
+			time.Sleep(time.Second * 5)
 		}
-		t.UpdateStatus(
-			tr,
-			common.TestRunStatusRunning,
-			"Waiting for preseed generation to complete",
-		)
-		hasSeed, err := t.awsm.HasSeed(wantSeed, false)
-		if err != nil {
-			return fmt.Errorf("error checking preseed existence: %v", err)
-		}
-		if hasSeed {
-			break
-		}
-		if t.TerminateIfNeeded(
-			tr,
-			[]runningCommand{},
-			map[int32][]byte{},
-			nil,
-		) {
-			return errAbortedWhilePreseeding
-		}
-		time.Sleep(time.Second * 5)
 	}
-
 	return nil
 }
