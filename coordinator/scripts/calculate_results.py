@@ -83,6 +83,27 @@ def read_latency_sample_file(file):
         raise "Too many failed values in throughput file {}".format(file)
     return samples
 
+def make_tps_target_series_line(its, end, time_f, val_f):
+    current = time_f(its, 0).replace(microsecond=0)
+    tps = []
+    idx = 0
+    prev_val = 0
+
+    while current < end:
+        if len(its[1][1]) > idx:
+            dt = time_f(its, idx)
+
+
+        if dt.replace(microsecond=0) != current:
+            tps.append(prev_val)
+        else:
+            prev_val = val_f(its, idx)
+            tps.append(prev_val)
+            idx += 1
+        current += datetime.timedelta(seconds=1)
+
+    return tps
+
 lats = []
 
 output_files = [f for f in listdir('outputs') if isfile(join("outputs", f))]
@@ -137,7 +158,7 @@ if two_phase:
         else:
             print('{} has no rows', f)
 
-    df = vaex.open('outputs/*.txt.hdf5')
+    df = vaex.open('outputs/*-tx_samples_*.txt.hdf5')
     df['lats'] = df.latency // 10**6
     df['latsS'] = df.lats / 10**3
     df['pDate'] = df.time.values.astype('datetime64[ns]')
@@ -181,6 +202,34 @@ if two_phase:
     bin_depths /= np.sum(bin_depths)
     tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1})
     lat_lines.append({"lats":lat_ts, "title":"Loadgens", "freq": 1})
+
+    idx = 0
+    tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
+                if 'tps_target_' in x and 'hdf5' not in x]
+    if len(tps_target_files) > 0:   
+        exports = 0
+        for f in tps_target_files:
+            print('Reading {}'.format(f))
+            p = pandas.read_csv(f, sep=' ', error_bad_lines=True, warn_bad_lines=True, names=['time', 'tps_target'], encoding="ISO-8859-1")
+            if p.dtypes['time'] != np.int64:
+                p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
+                p = p[pandas.notnull(p.time)]
+
+            if p.size > 0:
+                v = vaex.from_pandas(p, copy_index=False)
+                v.export_hdf5(f + '.hdf5')
+                exports = exports + 1
+            else:
+                print('{} has no rows', f)
+        
+        if exports > 0:
+            df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
+            df2['pDate'] = df2.time.values.astype('datetime64[ns]')
+            dat2 = df2.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df2), agg={'tps_target': 'sum'})
+            its = dat2.to_items()
+            tps_target = make_tps_target_series_line(its, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
+            tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1})
+
 if archiver_based:
     for output_file in output_files:
         if output_file.find('tp_samples') > -1:
@@ -190,75 +239,6 @@ if archiver_based:
             filelats = read_latency_sample_file(output_file)
             lats.extend(filelats)
 
-
-atomizer_discard_log = ['outputs/' + x for x in listdir('outputs') if 'atomizer' in x and 'discarded_log.txt' in x]
-if len(atomizer_discard_log) > 0:
-    for f in atomizer_discard_log:
-        p = pandas.read_csv(f, sep=' ', error_bad_lines=True, warn_bad_lines=True, names=['reason', 'time'], encoding="ISO-8859-1")
-        if p.dtypes['time'] != np.int64:
-            p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
-            p = p[pandas.notnull(p.time)]
-
-        v = vaex.from_pandas(p, copy_index=False)
-        v['pDate'] = v.time.values.astype('datetime64[ns]')
-        exp = v[v.reason == 'exp']
-        print(exp)
-        spent = v[v.reason == 'spe']
-        print(spent)
-        if len(exp) > 0:
-            exp_dat = exp.groupby(by=MyBinnerTime(expression=exp.pDate, resolution='s', df=exp), agg={'count': 'count'})
-            exp_tps_its = exp_dat.to_items()
-            current = exp_tps_its[0][1][0].astype(datetime.datetime)
-            end = exp_tps_its[0][1][-1].astype(datetime.datetime)
-            exptps = []
-            idx = 0
-            while current < end:
-                dt = exp_tps_its[0][1][idx].astype(datetime.datetime)
-                if dt != current:
-                    exptps.append(0)
-                else:
-                    exptps.append(exp_tps_its[1][1][idx])
-                    idx += 1
-                current += datetime.timedelta(seconds=1)
-            tps_lines.append({"tps":exptps, "title":"Discarded by Atomizer (expired)", "freq": 1})
-        if len(spent) > 0:
-            spent_dat = spent.groupby(by=MyBinnerTime(expression=spent.pDate, resolution='s', df=spent), agg={'count': 'count'})
-            spent_tps_its = spent_dat.to_items()
-            current = spent_tps_its[0][1][0].astype(datetime.datetime)
-            end = spent_tps_its[0][1][-1].astype(datetime.datetime)
-            spenttps = []
-            idx = 0
-            while current < end:
-                dt = spent_tps_its[0][1][idx].astype(datetime.datetime)
-                if dt != current:
-                    spenttps.append(0)
-                else:
-                    spenttps.append(spent_tps_its[1][1][idx])
-                    idx += 1
-                current += datetime.timedelta(seconds=1)
-            tps_lines.append({"tps":spenttps, "title":"Discarded by Atomizer (spent)", "freq": 1})
-
-
-hdf5_files = ['outputs/' + x for x in listdir('outputs') \
-             if 'block_log.txt' in x and 'hdf5' in x]
-
-for hdf in hdf5_files:
-    remove(hdf)
-
-block_lines = []
-
-global_min_time = 0
-for output_file in output_files:
-    if 'block_log.txt' in output_file:
-        block_data, min_time = read_block_log(output_file, global_min_time)
-        if block_data is not None:
-            if global_min_time == 0 or global_min_time > min_time:
-                global_min_time = min_time
-            block_lines.append({"data":block_data, "title":output_file.replace("-block_log.txt","")})
-
-for block_line in block_lines:
-    block_line['data']['timeOffset'] = block_line['data']['time'] - global_min_time
-    block_line['data']['pDate'] = block_line['data']['timeOffset'].values.astype('datetime64[ns]')
 
 ## Lob off zero samples at the start (while the system is started but no
 ## load is generated yet)
@@ -284,8 +264,6 @@ if 'TRIM_SAMPLES' in environ:
 fig, (ax) = plt.subplots(nrows=1)
 
 colors = ['blue','red','green','orange','black','purple','cyan']
-
-print(tps_lines)
 
 avg_tp = np.mean(tps_lines[0]["tps"])
 sigma_tp = np.std(tps_lines[0]["tps"])
@@ -389,7 +367,7 @@ for i, tps_line in enumerate(tps_lines):
         color = colors[i]
     ax.plot(tps_time, tps_ma, label=tps_line["title"], color=color)
 
-
+max = max * 1.02
 
 
 ax.set_ylabel('Throughput (TX/s, {}ms moving average)'.format(tps_ma_ms))
@@ -465,33 +443,6 @@ plt.grid()
 plt.savefig('plots/system_latency_line.png')
 plt.close('all')
 
-## Create blockheight line
-
-fig, (ax) = plt.subplots(nrows=1)
-for i, block_line in enumerate(block_lines):
-    tps_time = []
-    tps_ma = []
-
-    color = (random.random(), random.random(), random.random())
-    if len(colors) > i:
-        color = colors[i]
-    ax.plot(block_line["data"]["pDate"], block_line["data"]["height"], label=block_line["title"], color=color)
-
-ax.set_ylabel('Block height')
-ax.set_xlabel('Time (mm:ss)')
-ax.set_title('Block height')
-ax.set_ylim(ymin=0)
-ax.legend()
-#ax.set_xlim(xmin=datetime.datetime.fromtimestamp(0))
-
-timeFmt = mdates.DateFormatter('%M:%S')
-
-ax.xaxis.set_major_formatter(timeFmt)
-
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig('plots/block_heights_line.png')
-plt.close('all')
-
 # Workaround for https://github.com/vaexio/vaex/issues/385
 # The first percentile on linux comes out to NaN, so put all the data we want
 # after the first index.
@@ -510,16 +461,6 @@ if not two_phase:
 
 
 results = {}
-results['blockLatencies'] = {}
-
-for i, block_line in enumerate(block_lines):
-    results['blockLatencies'][block_line["title"]] = {}
-    results['blockLatencies'][block_line["title"]]['avg'] = np.mean(block_line["data"]["latsS"]).item()
-    results['blockLatencies'][block_line["title"]]['min'] = np.min(block_line["data"]["latsS"]).item()
-    results['blockLatencies'][block_line["title"]]['max'] = np.max(block_line["data"]["latsS"]).item()
-    results['blockLatencies'][block_line["title"]]['std'] = np.std(block_line["data"]["latsS"]).item()
-
-
 results['throughputAvg'] = np.mean(tps_lines[0]["tps"]).astype(float)
 results['throughputMin'] = np.min(tps_lines[0]["tps"]).astype(float)
 results['throughputMax'] = np.max(tps_lines[0]["tps"]).astype(float)
