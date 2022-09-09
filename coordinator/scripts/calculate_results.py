@@ -11,6 +11,7 @@ from vaex import BinnerTime
 import pandas
 import datetime
 import matplotlib.dates as mdates
+import time
 
 # Ensure this matches the variable TestResultVersion at the
 # top of coordinator/testruns/testruns.go
@@ -104,6 +105,11 @@ def make_tps_target_series_line(its, end, time_f, val_f):
 
     return tps
 
+def process_lats(lats):
+    mean = np.mean(lats)
+    pct = np.percentile(lats, [99,99.999])
+    return [mean, pct[0], pct[1]]
+
 lats = []
 
 output_files = [f for f in listdir('outputs') if isfile(join("outputs", f))]
@@ -163,24 +169,33 @@ if two_phase:
     df['latsS'] = df.lats / 10**3
     df['pDate'] = df.time.values.astype('datetime64[ns]')
     df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
-    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df), agg={'count': 'count', 'lats': 'mean'})
+    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
+    dat['lats'] = dat['lats'].apply(process_lats)
+
     tps_its = dat.to_items()
     current = tps_its[0][1][0].astype(datetime.datetime)
     end = tps_its[0][1][-1].astype(datetime.datetime)
     tps = []
-    lat_ts = []
+    lat_mean = []
+    lat_99 = []
+    lat_99999 = []
     idx = 0
     while current < end:
         dt = tps_its[0][1][idx].astype(datetime.datetime)
         if dt != current:
             tps.append(0)
-            lat_ts.append(0)
+            lat_mean.append(0)
+            lat_99.append(0)
+            lat_99999.append(0)
+
         else:
             tps.append(tps_its[1][1][idx])
-            lat_ts.append(tps_its[2][1][idx])
+            lat_mean.append(tps_its[2][1][idx][0])
+            lat_99.append(tps_its[2][1][idx][1])
+            lat_99999.append(tps_its[2][1][idx][2])
             idx += 1
         current += datetime.timedelta(seconds=1)
-
+    
     dat = df.groupby(df.latsS, agg='count')
     lats = dat.values
     lat_max = df.max(df.latsS)
@@ -201,7 +216,9 @@ if two_phase:
         bin_depths[current_bin] += val[1]
     bin_depths /= np.sum(bin_depths)
     tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1})
-    lat_lines.append({"lats":lat_ts, "title":"Loadgens", "freq": 1})
+    lat_lines.append({"lats":lat_mean, "title":"Mean", "freq": 1})
+    lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
+    lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
 
     idx = 0
     tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
@@ -268,13 +285,11 @@ colors = ['blue','red','green','orange','black','purple','cyan']
 avg_tp = np.mean(tps_lines[0]["tps"])
 sigma_tp = np.std(tps_lines[0]["tps"])
 
-for i, tps_line in enumerate(tps_lines):
-    weights = np.ones_like(tps_line["tps"]) / len(tps_line["tps"])
-    color = (random.random(), random.random(), random.random())
-    if len(colors) > i:
-        color = colors[i]
+tps_line = tps_lines[0]
+weights = np.ones_like(tps_line["tps"]) / len(tps_line["tps"])
+color = colors[0]
 
-    ax.hist(tps_line["tps"], weights=weights, label=tps_line["title"], bins=15, edgecolor='black', color=color)
+ax.hist(tps_line["tps"], weights=weights, label=tps_line["title"], bins=15, edgecolor='black', color=color)
 
 ax.yaxis.set_major_formatter(PercentFormatter(xmax=1))
 
@@ -290,9 +305,6 @@ std_axis.set_xlabel('+/- σ')
 ax.set_ylabel('Percentage')
 ax.set_xlabel('Throughput (TX/s)')
 ax.set_title('Distribution')
-
-if len(tps_lines) > 1:
-    ax.legend()
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.savefig('plots/system_throughput_hist.png')
@@ -403,11 +415,7 @@ for i, lat_line in enumerate(lat_lines):
     if archiver_based:
         lat_ma_ms = block_time_ms * 5
 
-    for t in lat_lines[i]["lats"]:
-        lat_ma_tmp.append(t)
-        while len(lat_ma_tmp) > 5:
-            lat_ma_tmp = lat_ma_tmp[1:]
-
+    for val in lat_lines[i]["lats"]:
         val = np.mean(lat_ma_tmp)
         if max < val:
             max = val
@@ -425,7 +433,7 @@ for i, lat_line in enumerate(lat_lines):
 
 
 
-ax.set_ylabel('Mean Latency (ms, {}ms moving average)'.format(tps_ma_ms))
+ax.set_ylabel('Latency (ms)')
 ax.set_xlabel('Time (mm:ss)')
 ax.set_title('Time series')
 ax.set_ylim(ymin=0, ymax=max)
