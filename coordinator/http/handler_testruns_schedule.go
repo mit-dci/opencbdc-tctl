@@ -29,6 +29,7 @@ func (h *HttpServer) scheduleTestRunHandler(
 		return
 	}
 	tr.CreatedByThumbprint = usr.Thumbprint
+	tr.SweepID = ""
 
 	sweepID, err := common.RandomID(12)
 	if err != nil {
