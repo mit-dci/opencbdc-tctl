@@ -46,7 +46,6 @@ type TestRun struct {
 	LoadGenTPSStepTime       float64            `json:"loadGenTPSStepTime"       feFieldTitle:"Loadgen TPS Step Time (sec)"     feFieldType:"float"`
 	LoadGenTPSStepPercent    float64            `json:"loadGenTPSStepPercent"    feFieldTitle:"Loadgen TPS Step Percent"        feFieldType:"float"`
 	LoadGenTPSStepStart      float64            `json:"loadGenTPSStepStart"      feFieldTitle:"Loadgen TPS Step Start"          feFieldType:"float"`
-	LoadGenLatencyTarget     int                `json:"loadGenLatencyTarget"     feFieldTitle:"Loadgen Latency Target"          feFieldType:"int"`
 	Telemetry                bool               `json:"telemetry"                feFieldTitle:"Enable Telemetry"                feFieldType:"bool"`
 	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
 	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
