@@ -173,6 +173,7 @@ if two_phase:
     dat['lats'] = dat['lats'].apply(process_lats)
 
     tps_its = dat.to_items()
+
     current = tps_its[0][1][0].astype(datetime.datetime)
     end = tps_its[0][1][-1].astype(datetime.datetime)
     tps = []
@@ -187,7 +188,6 @@ if two_phase:
             lat_mean.append(0)
             lat_99.append(0)
             lat_99999.append(0)
-
         else:
             tps.append(tps_its[1][1][idx])
             lat_mean.append(tps_its[2][1][idx][0])
@@ -408,19 +408,12 @@ max = 0
 for i, lat_line in enumerate(lat_lines):
     if len(lat_line["lats"]) == 0: continue
     lat_time = []
-    lat_ma = []
+    lats = []
     time = 0
-    lat_ma_tmp = []
-    lat_ma_ms = 5000
-    if archiver_based:
-        lat_ma_ms = block_time_ms * 5
-
     for val in lat_lines[i]["lats"]:
-        val = np.mean(lat_ma_tmp)
         if max < val:
             max = val
-        lat_ma.append(np.mean(lat_ma_tmp))
-
+        lats.append(val)
 
         time = time + lat_lines[i]["freq"]
         lat_time.append(datetime.datetime.fromtimestamp(time))
@@ -428,7 +421,7 @@ for i, lat_line in enumerate(lat_lines):
     color = (random.random(), random.random(), random.random())
     if len(colors) > i:
         color = colors[i]
-    ax.plot(lat_time, lat_ma, label=lat_line["title"], color=color)
+    ax.plot(lat_time, lats, label=lat_line["title"], color=color)
 
 
 
