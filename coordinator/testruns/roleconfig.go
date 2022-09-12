@@ -194,10 +194,28 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 		}
 	}
 	if tr.LoadGenTPSTarget > 0 {
-		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_target=%d\n", tr.LoadGenTPSTarget))); err != nil {
+		if tr.LoadGenTPSStepTime == -1 && tr.LoadGenTPSStepPercent == -1 {
+			tr.LoadGenTPSStepPercent = 0.05
+		} else if tr.LoadGenTPSStepPercent == -1 && tr.LoadGenTPSStepTime != -1 {
+			tr.LoadGenTPSStepPercent = tr.LoadGenTPSStepTime / float64(tr.SampleCount-60)
+		}
+		if tr.LoadGenTPSStepTime == -1 {
+			tr.LoadGenTPSStepTime = float64(tr.SampleCount-60) / float64((1-tr.LoadGenTPSStepStart)/tr.LoadGenTPSStepPercent)
+		}
+
+		numRoles := t.countRoles(tr)
+		numClis := 0
+		numClis += numRoles[common.SystemRoleAtomizerCliWatchtower]
+		numClis += numRoles[common.SystemRolePhaseTwoGen]
+		numClis += numRoles[common.SystemRoleTwoPhaseGen]
+
+		// Calculate target per role
+		tpsTarget := int(float64(tr.LoadGenTPSTarget) / float64(numClis))
+
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_target=%d\n", tpsTarget))); err != nil {
 			return err
 		}
-		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_time=%.1f\n", tr.LoadGenTPSStepTime))); err != nil {
+		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_time=%.5f\n", tr.LoadGenTPSStepTime))); err != nil {
 			return err
 		}
 		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_tps_step_percentage=%.5f\n", tr.LoadGenTPSStepPercent))); err != nil {
@@ -207,11 +225,7 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 			return err
 		}
 	}
-	if tr.LoadGenLatencyTarget > 0 {
-		if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_latency_target=%d\n", tr.LoadGenLatencyTarget))); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }
 
