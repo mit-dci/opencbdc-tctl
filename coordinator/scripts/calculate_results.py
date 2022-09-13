@@ -131,6 +131,10 @@ def extract_tps_target_periods(its, begin, end, time_f, val_f, sign_f):
         idx += 1
         current += datetime.timedelta(seconds=1)
 
+
+    if current_period['tps'] > 0:
+        current_period['end'] = end
+        periods.append(current_period)
     return periods
 
 def process_lats(lats):
@@ -343,6 +347,7 @@ if 'TRIM_SAMPLES' in environ:
 fig, (ax) = plt.subplots(nrows=1)
 
 colors = ['blue','red','orange','cyan','black','purple','green']
+markers = ['s','^','.','2']
 
 avg_tp = np.mean(tps_lines[0]["tps"])
 sigma_tp = np.std(tps_lines[0]["tps"])
@@ -535,7 +540,10 @@ if len(elbow_tps) > 0:
         color = (random.random(), random.random(), random.random())
         if len(colors) > i:
             color = colors[i]
-        ax.plot(elbow_tps, yy, label=titles[i], color=color)
+        marker = None
+        if len(markers) > i:
+            marker = markers[i]
+        ax.plot(elbow_tps, yy, label=titles[i], color=color, marker=marker)
             
     max = max * 1.02
 
