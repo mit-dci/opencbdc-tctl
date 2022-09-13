@@ -218,7 +218,7 @@ if two_phase:
             current_bin += 1
         bin_depths[current_bin] += val[1]
     bin_depths /= np.sum(bin_depths)
-    tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1})
+    tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1, "ma": True})
     lat_lines.append({"lats":lat_mean, "title":"Mean", "freq": 1})
     lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
     lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
@@ -254,7 +254,7 @@ if two_phase:
             dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2), agg={'tps_target': 'sum'})
             its = dat2.to_items()
             tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
-            tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1})
+            tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
 
 if archiver_based:
     for output_file in output_files:
@@ -289,7 +289,7 @@ if 'TRIM_SAMPLES' in environ:
 ## Create throughput histogram
 fig, (ax) = plt.subplots(nrows=1)
 
-colors = ['blue','red','green','orange','black','purple','cyan']
+colors = ['blue','red','orange','cyan','black','purple','green']
 
 avg_tp = np.mean(tps_lines[0]["tps"])
 sigma_tp = np.std(tps_lines[0]["tps"])
@@ -363,6 +363,7 @@ for i, tps_line in enumerate(tps_lines):
     if len(tps_line["tps"]) == 0: continue
     tps_time = []
     tps_ma = []
+    tps_val = []
     time = 0
     tps_ma_tmp = []
     tps_ma_ms = 5000
@@ -370,6 +371,8 @@ for i, tps_line in enumerate(tps_lines):
         tps_ma_ms = block_time_ms * 5
 
     for t in tps_lines[i]["tps"]:
+        tps_val.append(t)
+
         tps_ma_tmp.append(t)
         while len(tps_ma_tmp) > 5:
             tps_ma_tmp = tps_ma_tmp[1:]
@@ -386,12 +389,21 @@ for i, tps_line in enumerate(tps_lines):
     color = (random.random(), random.random(), random.random())
     if len(colors) > i:
         color = colors[i]
-    ax.plot(tps_time, tps_ma, label=tps_line["title"], color=color)
+    ax.plot(tps_time, tps_val, label=tps_line["title"], color=color)
+
+    if tps_line["ma"] == True:
+        color = (random.random(), random.random(), random.random())
+        j = i + len(tps_lines)
+        if len(colors) > j:
+            color = colors[j]
+        ax.plot(tps_time, tps_ma, label='{} ({}ms MA)'.format(tps_line["title"],tps_ma_ms), color=color)
+    
+
 
 max = max * 1.02
 
 
-ax.set_ylabel('Throughput (TX/s, {}ms moving average)'.format(tps_ma_ms))
+ax.set_ylabel('Throughput (TX/s)')
 ax.set_xlabel('Time (mm:ss)')
 ax.set_title('Time series')
 ax.set_ylim(ymin=0, ymax=max)
