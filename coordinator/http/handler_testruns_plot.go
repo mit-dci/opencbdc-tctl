@@ -67,8 +67,16 @@ func (h *HttpServer) testRunPlotHandler(
 				return
 			}
 		} else {
-			http.Error(w, "Not found", 404)
-			return
+			// Try PNG fallback for previously generated results
+			extension = "png"
+			path = filepath.Join(
+				common.DataDir(),
+				fmt.Sprintf("testruns/%s/plots/%s.%s", runID, plot, extension),
+			)
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				http.Error(w, "Not found", 404)
+				return
+			}
 		}
 	}
 
