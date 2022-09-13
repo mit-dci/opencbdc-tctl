@@ -84,7 +84,7 @@ def read_latency_sample_file(file):
         raise "Too many failed values in throughput file {}".format(file)
     return samples
 
-def make_tps_target_series_line(its, end, time_f, val_f):
+def make_tps_target_series_line(its, begin, end, time_f, val_f):
     current = time_f(its, 0).replace(microsecond=0)
     tps = []
     idx = 0
@@ -94,8 +94,9 @@ def make_tps_target_series_line(its, end, time_f, val_f):
         if len(its[1][1]) > idx:
             dt = time_f(its, idx)
 
-
-        if dt.replace(microsecond=0) != current:
+        if dt < begin:
+            idx += 1
+        elif dt.replace(microsecond=0) != current:
             tps.append(prev_val)
         else:
             prev_val = val_f(its, idx)
@@ -174,6 +175,7 @@ if two_phase:
 
     tps_its = dat.to_items()
 
+    begin = tps_its[0][1][0].astype(datetime.datetime)
     current = tps_its[0][1][0].astype(datetime.datetime)
     end = tps_its[0][1][-1].astype(datetime.datetime)
     tps = []
@@ -220,20 +222,26 @@ if two_phase:
     lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
     lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
 
+    
     idx = 0
     tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
                 if 'tps_target_' in x and 'hdf5' not in x]
     if len(tps_target_files) > 0:   
+        t_index = pandas.date_range(start=begin- datetime.timedelta(seconds=5), end=end, freq='1s')
         exports = 0
         for f in tps_target_files:
             print('Reading {}'.format(f))
-            p = pandas.read_csv(f, sep=' ', error_bad_lines=True, warn_bad_lines=True, names=['time', 'tps_target'], encoding="ISO-8859-1")
+            p = pandas.read_csv(f, sep=' ', names=['time', 'tps_target'], encoding="ISO-8859-1")
             if p.dtypes['time'] != np.int64:
                 p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
                 p = p[pandas.notnull(p.time)]
 
+
             if p.size > 0:
-                v = vaex.from_pandas(p, copy_index=False)
+                p['pDate'] = pandas.to_datetime(p.time, unit='ns').apply(lambda x: x.replace(microsecond=0, nanosecond=0))
+                p = p.set_index('pDate')
+                p = p.reindex(t_index).ffill()
+                v = vaex.from_pandas(p, copy_index=True)
                 v.export_hdf5(f + '.hdf5')
                 exports = exports + 1
             else:
@@ -241,10 +249,10 @@ if two_phase:
         
         if exports > 0:
             df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
-            df2['pDate'] = df2.time.values.astype('datetime64[ns]')
-            dat2 = df2.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df2), agg={'tps_target': 'sum'})
+            df2['pDate'] = df2['index']
+            dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2), agg={'tps_target': 'sum'})
             its = dat2.to_items()
-            tps_target = make_tps_target_series_line(its, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
+            tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
             tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1})
 
 if archiver_based:
