@@ -111,6 +111,8 @@ type FrontendTestRunListEntry struct {
 	ShardReplicationFactor   int                        `json:"shardReplicationFactor"`
 	LoadGenOutputCount       int                        `json:"loadGenOutputCount"`
 	LoadGenInputCount        int                        `json:"loadGenInputCount"`
+	SentinelAttestations     int                        `json:"sentinelAttestations"`
+	AuditInterval            int                        `json:"auditInterval"`
 }
 
 type FrontendTestRunRoleCount struct {

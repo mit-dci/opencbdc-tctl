@@ -799,7 +799,12 @@ const mapListFields = (architectures, users) => tr => {
         (tr.architectureID.indexOf('2pc') > -1 && tr.shardReplicationFactor !== 3)) {
         params += `Shard Repl: ${tr.shardReplicationFactor} / `
     }
-
+    if (tr.sentinelAttestations > 0) {
+        params += `Attestations: ${tr.sentinelAttestations} / `
+    }
+    if (tr.auditInterval > 0) {
+        params += `Audit: ${tr.auditInterval} / `
+    }
     if (tr.architectureID.indexOf('phase-two') > -1 && tr.loadGenTxType) {
         params += `TX Type: ${tr.loadGenTxType} / `
     }
