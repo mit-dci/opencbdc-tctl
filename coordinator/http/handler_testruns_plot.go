@@ -27,7 +27,7 @@ func (h *HttpServer) testRunPlotHandler(
 	}
 	cmdID := ""
 	plotType := ""
-	extension := "png"
+	extension := "svg"
 	if strings.HasPrefix(plot, "perf_") {
 
 		// Generate it!

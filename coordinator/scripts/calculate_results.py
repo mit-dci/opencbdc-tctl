@@ -369,7 +369,7 @@ ax.set_xlabel('Throughput (TX/s)')
 ax.set_title('Distribution')
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig('plots/system_throughput_hist.png')
+plt.savefig('plots/system_throughput_hist.svg')
 plt.close('all')
 ## Create latency histogram
 
@@ -402,7 +402,7 @@ ax.set_xlabel('Latency (sec)')
 ax.set_title('Distribution')
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.savefig('plots/system_latency_hist.png')
+plt.savefig('plots/system_latency_hist.svg')
 plt.close('all')
 
 
@@ -471,7 +471,7 @@ if len(tps_lines) > 1:
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.grid()
-plt.savefig('plots/system_throughput_line.png')
+plt.savefig('plots/system_throughput_line.svg')
 plt.close('all')
 
 ## Create latency line
@@ -515,7 +515,7 @@ if len(tps_lines) > 1:
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.grid()
-plt.savefig('plots/system_latency_line.png')
+plt.savefig('plots/system_latency_line.svg')
 plt.close('all')
 
 ## Create elbow line
@@ -548,7 +548,7 @@ if len(elbow_tps) > 0:
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.grid()
-    plt.savefig('plots/system_elbow_plot.png')
+    plt.savefig('plots/system_elbow_plot.svg')
     plt.close('all')
 
 
