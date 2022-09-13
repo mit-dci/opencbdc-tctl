@@ -18,7 +18,7 @@ import time
 version = 2
 
 class MyBinnerTime(BinnerTime):
-    def __init__(self, expression, resolution='W', df=None, every=1):
+    def __init__(self, expression, resolution='W', df=None, every=1, label=''):
         self._promise = vaex.promise.Promise.fulfilled(None)
         self.every = every
         self.resolution = resolution
@@ -29,7 +29,7 @@ class MyBinnerTime(BinnerTime):
         self.expression = self.df[str(self.expression)]
         self.tmin, self.tmax = self.df[str(self.expression)].min(), self.df[str(self.expression)].max()
 
-        self.label = ''
+        self.label = label
 
         self.resolution_type = 'M8[%s]' % self.resolution
         dt = (self.tmax.astype(self.resolution_type) - self.tmin.astype(self.resolution_type))
@@ -106,6 +106,33 @@ def make_tps_target_series_line(its, begin, end, time_f, val_f):
 
     return tps
 
+def extract_tps_target_periods(its, begin, end, time_f, val_f, sign_f):
+    current = time_f(its, 0).replace(microsecond=0)
+    periods = []
+    idx = 0
+    prev_val = 0
+    current_period = {'start':current, 'tps': 0}
+    while current < end:
+        if len(its[1][1]) > idx:
+            dt = time_f(its, idx)
+
+        s = sign_f(its, idx)
+
+        if dt < begin:
+            current_period = {'start':current, 'tps': 0}
+        elif s == 0:
+            current_period['tps'] = val_f(its, idx)
+        elif s != 0 and s != -2:
+            if current_period['tps'] > 0:
+                current_period['end'] = current
+                periods.append(current_period)
+                current_period = {'start':current, 'tps': 0}
+
+        idx += 1
+        current += datetime.timedelta(seconds=1)
+
+    return periods
+
 def process_lats(lats):
     mean = np.mean(lats)
     pct = np.percentile(lats, [99,99.999])
@@ -144,6 +171,10 @@ if archiver_based:
 
 tps_lines = []
 lat_lines = []
+elbow_tps = []
+elbow_latmean = []
+elbow_lat99 = []
+elbow_lat99999 = []
 if two_phase:
     hdf5_files = ['outputs/' + x for x in listdir('outputs') \
              if 'tx_samples' in x and 'hdf5' in x]
@@ -171,7 +202,7 @@ if two_phase:
     df['latsS'] = df.lats / 10**3
     df['pDate'] = df.time.values.astype('datetime64[ns]')
     df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
-    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
+    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df, label='pDate'), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
     dat['lats'] = dat['lats'].apply(process_lats)
 
     tps_its = dat.to_items()
@@ -223,6 +254,7 @@ if two_phase:
     lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
     lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
 
+    periods = []
     
     idx = 0
     tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
@@ -251,10 +283,31 @@ if two_phase:
         if exports > 0:
             df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
             df2['pDate'] = df2['index']
-            dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2), agg={'tps_target': 'sum'})
+            dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2, label='pDate'), agg={'tps_target': 'sum'})
+            dat3 = dat2.diff(periods=1, column='tps_target')
+            dat3['tps_target_diff'] = dat3['tps_target']
+            dat3['tps_target_diff_sign'] = dat3['tps_target_diff'].apply(lambda x: -2 if x is None else -1 if x < 0 else 1 if x > 0 else 0)
+            dat3.drop('tps_target', inplace=True)
+            dat3.drop('pDate', inplace=True)
+            dat2.join(dat3, inplace=True)
+            
             its = dat2.to_items()
             tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
+            periods = extract_tps_target_periods(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]), (lambda its,idx: its[3][1][idx]))
+            
             tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
+
+    for period in periods:
+        elbow_tps.append(period['tps'])
+        start_ns = (period['start'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
+        end_ns = (period['end'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
+        df_period = df[df.time >= start_ns]
+        df_period = df_period[df.time < end_ns]
+        lat_list = df_period.lats.tolist()
+        elbow_latmean.append(np.mean(lat_list))
+        pct = np.percentile(lat_list, [99, 99.999])
+        elbow_lat99.append(pct[0])
+        elbow_lat99999.append(pct[1])
 
 if archiver_based:
     for output_file in output_files:
@@ -464,6 +517,40 @@ plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.grid()
 plt.savefig('plots/system_latency_line.png')
 plt.close('all')
+
+## Create elbow line
+if len(elbow_tps) > 0:
+    fig, (ax) = plt.subplots(nrows=1)
+
+    max = 0
+
+    x = elbow_tps
+    y = [elbow_latmean, elbow_lat99, elbow_lat99999]
+    titles = ['Latency (mean)', 'Latency (99%)', 'Latency (99.999%)']
+
+    for i, yy in enumerate(y):
+        for yyy in yy:
+            if max < yyy:
+                max = yyy
+        color = (random.random(), random.random(), random.random())
+        if len(colors) > i:
+            color = colors[i]
+        ax.plot(elbow_tps, yy, label=titles[i], color=color)
+            
+    max = max * 1.02
+
+    ax.set_ylabel('Latency (ms)')
+    ax.set_xlabel('Throughput (TX/s)')
+    ax.set_title('Latency/Throughput Elbow')
+    ax.set_ylim(ymin=0, ymax=max)
+    ax.set_xlim(xmin=0)
+    ax.legend()
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.grid()
+    plt.savefig('plots/system_elbow_plot.png')
+    plt.close('all')
+
 
 # Workaround for https://github.com/vaexio/vaex/issues/385
 # The first percentile on linux comes out to NaN, so put all the data we want

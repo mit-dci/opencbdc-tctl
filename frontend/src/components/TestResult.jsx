@@ -265,7 +265,7 @@ const TestResult = (props) => {
             </CCol>
           </CRow>
           <CRow>
-            <CCol xs={3}>
+            <CCol xs={4}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -280,7 +280,7 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={3}>
+            <CCol xs={4}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -295,7 +295,7 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={3}>
+            <CCol xs={4}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -310,7 +310,7 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={3}>
+            <CCol xs={4}>
               <CCard>
                 <CCardHeader>
                   <b>
@@ -321,6 +321,21 @@ const TestResult = (props) => {
                   <img
                     style={{ width: "100%" }}
                     src={`${client.apiUrl}testruns/${props.testRun.id}/plot/system_latency_hist?v=${lastRecalc}`}
+                  />
+                </CCardBody>
+              </CCard>
+            </CCol>
+            <CCol xs={4}>
+              <CCard>
+                <CCardHeader>
+                  <b>
+                    <u>Latency distribution</u>
+                  </b>
+                </CCardHeader>
+                <CCardBody>
+                  <img
+                    style={{ width: "100%" }}
+                    src={`${client.apiUrl}testruns/${props.testRun.id}/plot/system_elbow_plot?v=${lastRecalc}`}
                   />
                 </CCardBody>
               </CCard>
