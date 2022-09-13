@@ -120,7 +120,8 @@ two_phase = False
 for output_file in output_files:
     if 'tx_samples' in output_file:
         two_phase = True
-    if 'tp_samples' in output_file:
+        archiver_based = False
+    if 'tp_samples' in output_file and not two_phase:
         archiver_based = True
 
 block_time_ms = 1000
