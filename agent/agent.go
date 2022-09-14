@@ -78,7 +78,7 @@ func NewAgent(
 	case *wire.HelloResponseMsg:
 		ack = (t.Header.YourID == sentID)
 		clt.Tag = fmt.Sprintf("Agent %d", t.YourAgentID)
-		logging.Debugf("We are agent ID %d on the coordinator", t.YourAgentID)
+		logging.Infof("We are agent ID %d on the coordinator", t.YourAgentID)
 	case *wire.ErrorMsg:
 		return nil, fmt.Errorf("Handshake failed: %v", t.Error)
 	}
