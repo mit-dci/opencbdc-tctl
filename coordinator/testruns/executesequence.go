@@ -2,6 +2,7 @@ package testruns
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
 )
@@ -20,6 +21,10 @@ func (t *TestRunManager) executeStartSequence(
 
 	// Now that we have the full start sequence, execute it
 	for _, seq := range startSequence {
+		if seq.waitBefore > time.Millisecond {
+			t.WriteLog(tr, "Waiting for %.2f seconds before starting %d %s(s)", seq.waitBefore.Seconds(), len(seq.roles), seq.roles[0].Role)
+			time.Sleep(seq.waitBefore)
+		}
 		if len(seq.roles) == 0 {
 			continue
 		}
@@ -88,4 +93,25 @@ func (t *TestRunManager) executeStartSequence(
 		)
 	}
 	return allCmds, false, nil
+}
+
+// startSequenceEntry describes a individual entry of a (set of) role(s) to be
+// started, how long to wait for the role to be started and which port offset
+// to wait for to be available
+type startSequenceEntry struct {
+	roles []*common.TestRunRole
+	// waitBefore is an extra option to wait for a fixed duration before
+	// executing this entry in the start sequence
+	waitBefore time.Duration
+	timeout    time.Duration
+	// waitForPort has a collection of port increments to test on the roles. It
+	// will contact the endpoint where that port increment is supposed to be
+	// listening to check if it's online. You can specify multiple which will
+	// be tried in sequence they're in the array
+	waitForPort []PortIncrement
+	// waitForPortCount indicates how many endpoints are expected to respond.
+	// If this is zero, we will use len(roles) - i.e. expect all of them to.
+	waitForPortCount []int
+	doneChan         chan []runningCommand
+	errChan          chan error
 }

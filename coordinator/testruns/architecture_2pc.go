@@ -461,6 +461,7 @@ func (t *TestRunManager) CreateStartSequenceTwoPhase(
 
 	// Start all load generators
 	startSequence = append(startSequence, startSequenceEntry{
+		waitBefore:  time.Second * 10,
 		roles:       t.GetAllRolesSorted(tr, common.SystemRoleTwoPhaseGen),
 		timeout:     roleStartTimeout,
 		waitForPort: []PortIncrement{}, // Don't wait for anything - loadgens don't accept incoming
