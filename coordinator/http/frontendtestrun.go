@@ -112,7 +112,8 @@ type FrontendTestRunListEntry struct {
 	LoadGenOutputCount       int                        `json:"loadGenOutputCount"`
 	LoadGenInputCount        int                        `json:"loadGenInputCount"`
 	SentinelAttestations     int                        `json:"sentinelAttestations"`
-	AuditInterval            int                        `json:"auditInterval"`
+	LoadGenTPSTarget         int                        `json:"loadGenTPSTarget"`
+	LoadGenTPSStepStart      float64                    `json:"loadGenTPSStepStart"`
 }
 
 type FrontendTestRunRoleCount struct {

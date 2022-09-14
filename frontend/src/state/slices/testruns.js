@@ -808,6 +808,9 @@ const mapListFields = (architectures, users) => tr => {
     if (tr.architectureID.indexOf('phase-two') > -1 && tr.loadGenTxType) {
         params += `TX Type: ${tr.loadGenTxType} / `
     }
+    if (tr.loadGenTPSTarget > 0) {
+        params += `TPS Throttle: ${tr.loadGenTPSTarget * tr.loadGenTPSStepStart} - ${tr.loadGenTPSTarget} / `
+    }
 
     if (params.length > 0) {
         params = params.substr(0, params.length - 3);
