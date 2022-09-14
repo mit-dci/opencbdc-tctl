@@ -417,6 +417,7 @@ plt.close('all')
 fig, (ax) = plt.subplots(nrows=1)
 
 max = 0
+lines = 0
 for i, tps_line in enumerate(tps_lines):
     if len(tps_line["tps"]) == 0: continue
     tps_time = []
@@ -448,8 +449,10 @@ for i, tps_line in enumerate(tps_lines):
     if len(colors) > i:
         color = colors[i]
     ax.plot(tps_time, tps_val, label=tps_line["title"], color=color)
+    lines += 1
 
     if "ma" not in tps_line or tps_line["ma"] == True:
+        lines += 1
         color = (random.random(), random.random(), random.random())
         j = i + len(tps_lines)
         if len(colors) > j:
@@ -471,7 +474,7 @@ timeFmt = mdates.DateFormatter('%M:%S')
 
 ax.xaxis.set_major_formatter(timeFmt)
 
-if len(tps_lines) > 1:
+if lines > 1:
     ax.legend()
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
@@ -515,7 +518,7 @@ timeFmt = mdates.DateFormatter('%M:%S')
 
 ax.xaxis.set_major_formatter(timeFmt)
 
-if len(tps_lines) > 1:
+if len(lat_lines) > 1:
     ax.legend()
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])
