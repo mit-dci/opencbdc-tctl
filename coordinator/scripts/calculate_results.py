@@ -449,7 +449,7 @@ for i, tps_line in enumerate(tps_lines):
         color = colors[i]
     ax.plot(tps_time, tps_val, label=tps_line["title"], color=color)
 
-    if tps_line["ma"] == True:
+    if "ma" not in tps_line or tps_line["ma"] == True:
         color = (random.random(), random.random(), random.random())
         j = i + len(tps_lines)
         if len(colors) > j:
