@@ -554,7 +554,6 @@ if len(elbow_tps) > 0:
     ax.set_xlabel('Throughput (TX/s)')
     ax.set_title('Latency/Throughput Elbow')
     ax.set_ylim(ymin=0, ymax=max)
-    ax.set_xlim(xmin=0)
     ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
