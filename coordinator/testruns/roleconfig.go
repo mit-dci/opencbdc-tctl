@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
 	"github.com/mit-dci/opencbdc-tctl/coordinator"
@@ -448,22 +447,4 @@ func (t *TestRunManager) writeEndpointConfig(
 		}
 	}
 	return nil
-}
-
-// startSequenceEntry describes a individual entry of a (set of) role(s) to be
-// started, how long to wait for the role to be started and which port offset
-// to wait for to be available
-type startSequenceEntry struct {
-	roles   []*common.TestRunRole
-	timeout time.Duration
-	// waitForPort has a collection of port increments to test on the roles. It
-	// will contact the endpoint where that port increment is supposed to be
-	// listening to check if it's online. You can specify multiple which will
-	// be tried in sequence they're in the array
-	waitForPort []PortIncrement
-	// waitForPortCount indicates how many endpoints are expected to respond.
-	// If this is zero, we will use len(roles) - i.e. expect all of them to.
-	waitForPortCount []int
-	doneChan         chan []runningCommand
-	errChan          chan error
 }
