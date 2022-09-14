@@ -82,6 +82,8 @@ func main() {
 		os.Exit(129)
 	}
 
+	logging.Infof("Succesfully connected to coordinator")
+
 	// Synchronize the time with an NTP server such that the agents are in sync
 	// as much as possible
 	a.SyncTime()
