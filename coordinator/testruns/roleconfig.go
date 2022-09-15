@@ -196,7 +196,7 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 		if tr.LoadGenTPSStepTime == -1 && tr.LoadGenTPSStepPercent == -1 {
 			tr.LoadGenTPSStepPercent = 0.05
 		} else if tr.LoadGenTPSStepPercent == -1 && tr.LoadGenTPSStepTime != -1 {
-			tr.LoadGenTPSStepPercent = tr.LoadGenTPSStepTime / float64(tr.SampleCount-60)
+			tr.LoadGenTPSStepPercent = (1 - tr.LoadGenTPSStepStart) * (tr.LoadGenTPSStepTime / float64(tr.SampleCount-60))
 		}
 		if tr.LoadGenTPSStepTime == -1 {
 			tr.LoadGenTPSStepTime = float64(tr.SampleCount-60) / float64((1-tr.LoadGenTPSStepStart)/tr.LoadGenTPSStepPercent)
