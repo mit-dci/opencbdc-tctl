@@ -46,7 +46,7 @@ class MyBinnerTime(BinnerTime):
 one_sec = 10**9
 
 def read_block_log(file, global_min_time):
-    p = pandas.read_csv(join("outputs", file), sep=' ', error_bad_lines=False, warn_bad_lines=True, names=['time', 'latency', 'height'], encoding="ISO-8859-1")
+    p = pandas.read_csv(join("outputs", file), sep=' ', on_bad_lines='warn', names=['time', 'latency', 'height'], encoding="ISO-8859-1")
     if p.size > 0:
         min_time = np.min(p.time)
         if(min_time > global_min_time and global_min_time > 0):
@@ -188,9 +188,9 @@ if two_phase:
 
     files = ['outputs/' + x for x in listdir('outputs') \
              if 'tx_samples' in x and 'hdf5' not in x]
-
+    exports = 0
     for f in files:
-        p = pandas.read_csv(f, sep=' ', error_bad_lines=True, warn_bad_lines=True, names=['time', 'latency'], encoding="ISO-8859-1")
+        p = pandas.read_csv(f, sep=' ',  on_bad_lines='warn', names=['time', 'latency'], encoding="ISO-8859-1")
         if p.dtypes['time'] != np.int64:
             p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
             p = p[pandas.notnull(p.time)]
@@ -198,120 +198,121 @@ if two_phase:
         if p.size > 0:
             v = vaex.from_pandas(p, copy_index=False)
             v.export_hdf5(f + '.hdf5')
+            exports += 1
         else:
             print('{} has no rows', f)
 
-    df = vaex.open('outputs/*-tx_samples_*.txt.hdf5')
-    df['lats'] = df.latency // 10**6
-    df['latsS'] = df.lats / 10**3
-    df['pDate'] = df.time.values.astype('datetime64[ns]')
-    df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
-    dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df, label='pDate'), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
-    dat['lats'] = dat['lats'].apply(process_lats)
+    if exports > 0:
+        df = vaex.open('outputs/*-tx_samples_*.txt.hdf5')
+        df['lats'] = df.latency // 10**6
+        df['latsS'] = df.lats / 10**3
+        df['pDate'] = df.time.values.astype('datetime64[ns]')
+        df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
+        dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df, label='pDate'), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
+        dat['lats'] = dat['lats'].apply(process_lats)
 
-    tps_its = dat.to_items()
+        tps_its = dat.to_items()
 
-    begin = tps_its[0][1][0].astype(datetime.datetime)
-    current = tps_its[0][1][0].astype(datetime.datetime)
-    end = tps_its[0][1][-1].astype(datetime.datetime)
-    tps = []
-    lat_mean = []
-    lat_99 = []
-    lat_99999 = []
-    idx = 0
-    while current < end:
-        dt = tps_its[0][1][idx].astype(datetime.datetime)
-        if dt != current:
-            tps.append(0)
-            lat_mean.append(0)
-            lat_99.append(0)
-            lat_99999.append(0)
-        else:
-            tps.append(tps_its[1][1][idx])
-            lat_mean.append(tps_its[2][1][idx][0])
-            lat_99.append(tps_its[2][1][idx][1])
-            lat_99999.append(tps_its[2][1][idx][2])
-            idx += 1
-        current += datetime.timedelta(seconds=1)
-    
-    dat = df.groupby(df.latsS, agg='count')
-    lats = dat.values
-    lat_max = df.max(df.latsS)
-    lat_min = df.min(df.latsS)
-    n_bins = 15
-    lats_binsize = (lat_max - lat_min) / n_bins
-    bin_edges = []
-    bin_depths = []
-    for i in range(n_bins):
-        bin_edges.append(lat_min + i * lats_binsize)
-        bin_depths.append(0)
-    bin_edges = np.array(bin_edges)
-    current_bin = 0
-    sorted_lats = lats[lats[:,0].argsort()]
-    for val in sorted_lats:
-        if current_bin + 1 < n_bins and val[0] >= bin_edges[current_bin+1]:
-            current_bin += 1
-        bin_depths[current_bin] += val[1]
-    bin_depths /= np.sum(bin_depths)
-    tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1, "ma": True})
-    lat_lines.append({"lats":lat_mean, "title":"Mean", "freq": 1})
-    lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
-    lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
-
-    periods = []
-    
-    idx = 0
-    tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
-                if 'tps_target_' in x and 'hdf5' not in x]
-    if len(tps_target_files) > 0:   
-        t_index = pandas.date_range(start=begin- datetime.timedelta(seconds=5), end=end, freq='1s')
-        exports = 0
-        for f in tps_target_files:
-            print('Reading {}'.format(f))
-            p = pandas.read_csv(f, sep=' ', names=['time', 'tps_target'], encoding="ISO-8859-1")
-            if p.dtypes['time'] != np.int64:
-                p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
-                p = p[pandas.notnull(p.time)]
-
-
-            if p.size > 0:
-                p['pDate'] = pandas.to_datetime(p.time, unit='ns').apply(lambda x: x.replace(microsecond=0, nanosecond=0))
-                p = p.set_index('pDate')
-                p = p.reindex(t_index).ffill()
-                v = vaex.from_pandas(p, copy_index=True)
-                v.export_hdf5(f + '.hdf5')
-                exports = exports + 1
+        begin = tps_its[0][1][0].astype(datetime.datetime)
+        current = tps_its[0][1][0].astype(datetime.datetime)
+        end = tps_its[0][1][-1].astype(datetime.datetime)
+        tps = []
+        lat_mean = []
+        lat_99 = []
+        lat_99999 = []
+        idx = 0
+        while current < end:
+            dt = tps_its[0][1][idx].astype(datetime.datetime)
+            if dt != current:
+                tps.append(0)
+                lat_mean.append(0)
+                lat_99.append(0)
+                lat_99999.append(0)
             else:
-                print('{} has no rows', f)
+                tps.append(tps_its[1][1][idx])
+                lat_mean.append(tps_its[2][1][idx][0])
+                lat_99.append(tps_its[2][1][idx][1])
+                lat_99999.append(tps_its[2][1][idx][2])
+                idx += 1
+            current += datetime.timedelta(seconds=1)
         
-        if exports > 0:
-            df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
-            df2['pDate'] = df2['index']
-            dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2, label='pDate'), agg={'tps_target': 'sum'})
-            dat3 = dat2.diff(periods=1, column='tps_target')
-            dat3['tps_target_diff'] = dat3['tps_target']
-            dat3['tps_target_diff_sign'] = dat3['tps_target_diff'].apply(lambda x: -2 if x is None else -1 if x < 0 else 1 if x > 0 else 0)
-            dat3.drop('tps_target', inplace=True)
-            dat3.drop('pDate', inplace=True)
-            dat2.join(dat3, inplace=True)
-            
-            its = dat2.to_items()
-            tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
-            periods = extract_tps_target_periods(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]), (lambda its,idx: its[3][1][idx]))
-            
-            tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
+        dat = df.groupby(df.latsS, agg='count')
+        lats = dat.values
+        lat_max = df.max(df.latsS)
+        lat_min = df.min(df.latsS)
+        n_bins = 15
+        lats_binsize = (lat_max - lat_min) / n_bins
+        bin_edges = []
+        bin_depths = []
+        for i in range(n_bins):
+            bin_edges.append(lat_min + i * lats_binsize)
+            bin_depths.append(0)
+        bin_edges = np.array(bin_edges)
+        current_bin = 0
+        sorted_lats = lats[lats[:,0].argsort()]
+        for val in sorted_lats:
+            if current_bin + 1 < n_bins and val[0] >= bin_edges[current_bin+1]:
+                current_bin += 1
+            bin_depths[current_bin] += val[1]
+        bin_depths /= np.sum(bin_depths)
+        tps_lines.append({"tps":tps, "title":"Loadgens", "freq": 1, "ma": True})
+        lat_lines.append({"lats":lat_mean, "title":"Mean", "freq": 1})
+        lat_lines.append({"lats":lat_99, "title":"99%", "freq": 1})
+        lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
 
-    for period in periods:
-        elbow_tps.append(period['tps'])
-        start_ns = (period['start'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
-        end_ns = (period['end'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
-        df_period = df[df.time >= start_ns]
-        df_period = df_period[df.time < end_ns]
-        lat_list = df_period.lats.tolist()
-        elbow_latmean.append(np.mean(lat_list))
-        pct = np.percentile(lat_list, [99, 99.999])
-        elbow_lat99.append(pct[0])
-        elbow_lat99999.append(pct[1])
+        periods = []
+        
+        idx = 0
+        tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
+                    if 'tps_target_' in x and 'hdf5' not in x]
+        if len(tps_target_files) > 0:   
+            t_index = pandas.date_range(start=begin- datetime.timedelta(seconds=5), end=end, freq='1s')
+            exports = 0
+            for f in tps_target_files:
+                p = pandas.read_csv(f, sep=' ', names=['time', 'tps_target'], encoding="ISO-8859-1")
+                if p.dtypes['time'] != np.int64:
+                    p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
+                    p = p[pandas.notnull(p.time)]
+
+
+                if p.size > 0:
+                    p['pDate'] = pandas.to_datetime(p.time, unit='ns').apply(lambda x: x.replace(microsecond=0, nanosecond=0))
+                    p = p.set_index('pDate')
+                    p = p.reindex(t_index).ffill()
+                    v = vaex.from_pandas(p, copy_index=True)
+                    v.export_hdf5(f + '.hdf5')
+                    exports = exports + 1
+                else:
+                    print('{} has no rows', f)
+            
+            if exports > 0:
+                df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
+                df2['pDate'] = df2['index']
+                dat2 = df2.groupby(by=MyBinnerTime(expression=df2.pDate, resolution='s', df=df2, label='pDate'), agg={'tps_target': 'sum'})
+                dat3 = dat2.diff(periods=1, column='tps_target')
+                dat3['tps_target_diff'] = dat3['tps_target']
+                dat3['tps_target_diff_sign'] = dat3['tps_target_diff'].apply(lambda x: -2 if x is None else -1 if x < 0 else 1 if x > 0 else 0)
+                dat3.drop('tps_target', inplace=True)
+                dat3.drop('pDate', inplace=True)
+                dat2.join(dat3, inplace=True)
+                
+                its = dat2.to_items()
+                tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
+                periods = extract_tps_target_periods(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]), (lambda its,idx: its[3][1][idx]))
+                
+                tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
+
+        for period in periods:
+            elbow_tps.append(period['tps'])
+            start_ns = (period['start'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
+            end_ns = (period['end'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
+            df_period = df[df.time >= start_ns]
+            df_period = df_period[df.time < end_ns]
+            lat_list = df_period.lats.tolist()
+            elbow_latmean.append(np.mean(lat_list))
+            pct = np.percentile(lat_list, [99, 99.999])
+            elbow_lat99.append(pct[0])
+            elbow_lat99999.append(pct[1])
 
 if archiver_based:
     for output_file in output_files:
@@ -526,6 +527,9 @@ plt.grid()
 plt.savefig('plots/system_latency_line.svg')
 plt.close('all')
 
+peak_lb = 0
+peak_ub = 0
+
 ## Create elbow line
 if len(elbow_tps) > 0:
     fig, (ax) = plt.subplots(nrows=1)
@@ -556,11 +560,98 @@ if len(elbow_tps) > 0:
     ax.set_ylim(ymin=0, ymax=max)
     ax.legend()
 
+    delta_ma_tmp = [] 
+    above_ma = 0
+
+    for yy in y:
+        pf_x = x
+        pf_y = yy
+
+        if len(pf_x) < 100:
+            x_incr = (pf_x[-1] - pf_x[0]) / 100
+            new_x = np.arange(0,100)*x_incr+pf_x[0]
+            new_y = np.interp(new_x, pf_x, pf_y)
+            pf_x = new_x
+            pf_y = new_y
+
+        delta_ma_above_tmp = []
+        peak_found = False
+        for i, xx in enumerate(pf_x):
+            if i > 0:
+                delta_lat = pf_y[i] - pf_y[i-1]
+                delta_ma_tmp.append(delta_lat)
+                if len(delta_ma_tmp) > 20:
+                    delta_ma_tmp = delta_ma_tmp[-20:]
+                    delta_lat_ma20 = np.mean(delta_ma_tmp)
+                    delta_lat_ma10 = np.mean(delta_ma_tmp[-10:])
+                    delta_lat_ma5 = np.mean(delta_ma_tmp[-5:])
+                    delta_ma_above_tmp.append(delta_lat_ma5/delta_lat_ma20)
+
+                if len(delta_ma_above_tmp) >= 10:
+                    delta_ma_above_tmp = delta_ma_above_tmp[-5:]
+                    delta_ma_above = sum(delta_ma_above_tmp)
+                    if delta_ma_above > 10 and not peak_found:
+                        peak_lb_idx = i-6
+                        peak_ub_idx = i-3
+                        if peak_lb_idx < 0:
+                            peak_lb_idx = 0
+                        if peak_ub_idx < 0:
+                            peak_ub_idx = 0
+                        
+                        peak_lb = pf_x[peak_lb_idx]
+                        peak_ub = pf_x[peak_ub_idx]
+                        peak_found = True
+                    if delta_ma_above < 5:
+                        peak_found = False
+        
+        if peak_found:
+            break
+    
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.grid()
     plt.savefig('plots/system_elbow_plot.svg')
     plt.close('all')
 
+    delta_ma_tmp = [] 
+    above_ma = 0
+
+    pf_x = x
+    pf_y = y[0]
+
+    if len(pf_x) < 100:
+        x_incr = (pf_x[-1] - pf_x[0]) / 100
+        new_x = np.arange(0,100)*x_incr+pf_x[0]
+        new_y = np.interp(new_x, pf_x, pf_y)
+        pf_x = new_x
+        pf_y = new_y
+
+    delta_ma_above_tmp = []
+    peak_found = False
+    for i, xx in enumerate(pf_x):
+        if i > 0:
+            delta_lat = pf_y[i] - pf_y[i-1]
+            delta_ma_tmp.append(delta_lat)
+            if len(delta_ma_tmp) > 5:
+                delta_ma_tmp = delta_ma_tmp[-5:]
+                delta_lat_ma = np.mean(delta_ma_tmp)
+                delta_ma_above_tmp.append(delta_lat > delta_lat_ma)
+
+            if len(delta_ma_above_tmp) >= 10:
+                print("Delta MA Above: {}".format(delta_ma_above_tmp))
+                delta_ma_above_tmp = delta_ma_above_tmp[-10:]
+                if sum(delta_ma_above_tmp) > 7 and not peak_found: # 7 increasing elements in the last 10 samples
+                    peak_lb_idx = i-12
+                    peak_ub_idx = i-9
+                    if peak_lb_idx < 0:
+                        peak_lb_idx = 0
+                    if peak_ub_idx < 0:
+                        peak_ub_idx = 0
+                    
+                    peak_lb = pf_x[peak_lb_idx]
+                    peak_ub = pf_x[peak_ub_idx]
+                    peak_found = True
+                if sum(delta_ma_above_tmp) < 3:
+                    peak_found = False
 
 # Workaround for https://github.com/vaexio/vaex/issues/385
 # The first percentile on linux comes out to NaN, so put all the data we want
@@ -585,6 +676,8 @@ results['throughputMin'] = np.min(tps_lines[0]["tps"]).astype(float)
 results['throughputMax'] = np.max(tps_lines[0]["tps"]).astype(float)
 results['throughputStd'] = np.std(tps_lines[0]["tps"]).astype(float)
 results['throughputPercentiles'] = []
+results['throughputPeakLB'] = peak_lb
+results['throughputPeakUB'] = peak_ub
 
 if len(tps_lines) > 1:
     results['throughputAvg2'] = 0

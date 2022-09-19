@@ -45,6 +45,10 @@ func (h *HttpServer) scheduleTestRunHandler(
 		tr.WatchtowerErrorCacheSize = 10000000
 	}
 
+	if tr.Sweep == "peak" {
+		tr.SweepOneAtATime = true
+	}
+
 	runs := common.ExpandSweepRun(&tr, sweepID)
 	for i := range runs {
 		h.tr.ScheduleTestRun(runs[i])
