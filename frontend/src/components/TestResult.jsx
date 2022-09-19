@@ -83,7 +83,7 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            <CCol xs={{size:4, offset:1}} style={{ paddingBottom: "10px" }}>
+            <CCol xs={{ size: 4, offset: 1 }} style={{ paddingBottom: "10px" }}>
               <CButton
                 onClick={(e) => {
                   dispatch(reloadTestResults(props.testRun?.id, trimZeroes, trimSamples, trimZeroesEnd));
@@ -94,7 +94,7 @@ const TestResult = (props) => {
                 color="primary"
               >
                 Recalculate Test Results
-              </CButton><br/>
+              </CButton><br />
               <CButton
                 onClick={(e) => {
                   dispatch(redownloadOutputs(props.testRun?.id));
@@ -133,6 +133,19 @@ const TestResult = (props) => {
                     <CCol xs={8}>
                       <b>
                         {numeral(props.testRun.result.throughputAvg2).format(
+                          "#,##0.00"
+                        )}{" "}
+                        tx/s
+                      </b>
+                    </CCol>
+                  </CRow>}
+                  {props.testRun.result.throughputPeakLB && props.testRun.result.throughputPeakLB > 0 && <CRow>
+                    <CCol xs={4}>Throughput peak (Lower/Upper bound):</CCol>
+                    <CCol xs={8}>
+                      <b>
+                        {numeral(props.testRun.result.throughputPeakLB).format(
+                          "#,##0.00"
+                        )}{" - "}{numeral(props.testRun.result.throughputPeakUB).format(
                           "#,##0.00"
                         )}{" "}
                         tx/s
@@ -347,16 +360,16 @@ const TestResult = (props) => {
         <CRow>
           <CCol xs={6}>Results not (yet) available</CCol>
           <CCol xs={6}><CButton
-                onClick={(e) => {
-                  dispatch(reloadTestResults(props.testRun?.id, trimZeroes, trimSamples,  trimZeroesEnd));
-                }}
-                size="sm"
-                className="btn-pill"
-                block
-                color="primary"
-              >
-                Recalculate Test Results
-              </CButton></CCol>
+            onClick={(e) => {
+              dispatch(reloadTestResults(props.testRun?.id, trimZeroes, trimSamples, trimZeroesEnd));
+            }}
+            size="sm"
+            className="btn-pill"
+            block
+            color="primary"
+          >
+            Recalculate Test Results
+          </CButton></CCol>
         </CRow>
       )}
     </>

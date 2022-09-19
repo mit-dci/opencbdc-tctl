@@ -21,9 +21,10 @@ func (t *TestRunManager) ContinueSweep(tr *common.TestRun, sweepID string) {
 		}
 	}
 
-	// If last three runs have > 10s latency, stop the sweep
+	// If last three runs have > 10s latency, stop the sweep - unless this is a peak finding sweep
+
 	stopSweep := false
-	if len(sweepRuns) >= 3 {
+	if len(sweepRuns) >= 3 && tr.Sweep != "peak" {
 		// Sort the test runs by creation datetime
 		sort.Slice(sweepRuns, func(i, j int) bool {
 			return sweepRuns[i].Created.After(sweepRuns[j].Created)
@@ -54,8 +55,8 @@ func (t *TestRunManager) ContinueSweep(tr *common.TestRun, sweepID string) {
 		// If the last three runs have an average throughput lower than the
 		// six runs before, then we should also stop sweeping. More client
 		// load leading to lower throughput means the system is getting over-
-		// loaded
-		if len(sweepRuns) >= 9 {
+		// loaded - unless this is a peak finding sweep
+		if len(sweepRuns) >= 9 && tr.Sweep != "peak" {
 			// Sort sweeps newest to oldest
 			sort.Slice(sweepRuns, func(i, j int) bool {
 				return sweepRuns[i].Created.After(sweepRuns[j].Created)
@@ -107,12 +108,25 @@ func (t *TestRunManager) ContinueSweep(tr *common.TestRun, sweepID string) {
 		t.WriteLog(tr, "Scheduling next sweep run")
 		missing := common.FindMissingSweepRuns(t.GetTestRuns(), tr.SweepID)
 		if len(missing) > 0 {
-			missing[0].AWSInstancesStopped = false
-			for j := range missing[0].Roles {
-				missing[0].Roles[j].AgentID = -1
+			// For normal one-at-a-time sweeps schedule only the next one, for
+			// peak finding, schedule all returned runs (will be only one during
+			// initial peak finding, and 6 for confirmation runs)
+
+			scheduleRuns := []*common.TestRun{missing[0]}
+			if tr.Sweep == "peak" {
+				scheduleRuns = missing
 			}
-			missing[0].Result = nil
-			t.ScheduleTestRun(missing[0])
+
+			for i := range scheduleRuns {
+				scheduleRuns[i].AWSInstancesStopped = false
+				for j := range scheduleRuns[i].Roles {
+					scheduleRuns[i].Roles[j].AgentID = -1
+				}
+				scheduleRuns[i].Result = nil
+				t.ScheduleTestRun(scheduleRuns[i])
+			}
+		} else {
+			t.WriteLog(tr, "No missing runs returned - sweep done")
 		}
 	}
 }

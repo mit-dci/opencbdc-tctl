@@ -639,6 +639,18 @@ const ScheduleTestRun = (props) => {
                           />{" "}
                           Time
                         </CRow>
+                        <CRow>
+                          <CInputRadio
+                            id="sweep"
+                            checked={scheduledRun.sweep === "peak"}
+                            onChange={(e) =>
+                              dispatch(
+                                setScheduledRunProperty({ sweep: "peak" })
+                              )
+                            }
+                          />{" "}
+                          Peak Finding
+                        </CRow>
                         {launchTemplates && launchTemplates.length > 0 && <CRow>
                           <CInputRadio
                             id="sweep"
