@@ -14,7 +14,7 @@ import {
   CInput,
   CInputCheckbox,
 } from "@coreui/react";
-import { reloadTestResults, redownloadOutputs } from "../state/slices/testruns";
+import { reloadTestResults, redownloadOutputs, confirmPeak } from "../state/slices/testruns";
 import { useDispatch } from "react-redux";
 import client from "../state/apiclient";
 
@@ -22,6 +22,8 @@ const TestResult = (props) => {
   const [trimZeroes, setTrimZeroes] = useState(props.testRun.trimZeroesAtStart);
   const [trimZeroesEnd, setTrimZeroesEnd] = useState(props.testRun.trimZeroesAEnd);
   const [trimSamples, setTrimSamples] = useState(props.testRun.trimSamplesAtStart);
+  const [peakLB, setPeakLB] = useState(props.testRun?.result?.throughputPeakLB);
+  const [peakUB, setPeakUB] = useState(props.testRun?.result?.throughputPeakUB);
 
   const lastRecalc = props.testRun.resultUpdated?.valueOf() || 0;
 
@@ -30,6 +32,7 @@ const TestResult = (props) => {
     <>
       {props.testRun?.result && (
         <>
+          
           <CRow>
             <CCol xs={6}>
               <CCard>
@@ -353,6 +356,62 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
+            {props.testRun?.sweep === 'peak' && <CCol xs={4}>
+              <CCard>
+                <CCardHeader>Confirm Peak Bandwidth</CCardHeader>
+                <CCardBody>
+                  <CFormGroup row>
+                    <CCol sm={6}>
+                      <CLabel htmlFor="peakLB">Lower bound:</CLabel>
+                    </CCol>
+                    <CCol sm={6}>
+                      <CInput
+                        type="text"
+                        id="peakLB"
+                        value={peakLB}
+                        onChange={(e) => {
+                          let val = parseInt(e.target.value);
+                          if (Number.isNaN(val)) val = 0;
+                          setPeakLB(val);
+                        }}
+                      ></CInput>
+                    </CCol>
+                  </CFormGroup>
+                  <CFormGroup row>
+                    <CCol sm={6}>
+                      <CLabel htmlFor="peakUB">Upper bound:</CLabel>
+                    </CCol>
+                    <CCol sm={6}>
+                      <CInput
+                        type="text"
+                        id="peakUB"
+                        value={peakUB}
+                        onChange={(e) => {
+                          let val = parseInt(e.target.value);
+                          if (Number.isNaN(val)) val = 0;
+                          setPeakUB(val);
+                        }}
+                      ></CInput>
+                    </CCol>
+                  </CFormGroup>
+                  <CFormGroup row>
+                    <CCol sm={12}>
+                      <CButton
+                        onClick={(e) => {
+                          dispatch(confirmPeak(props.testRun?.id, peakLB, peakUB));
+                        }}
+                        size="sm"
+                        className="btn-pill"
+                        block
+                        color="primary"
+                      >
+                        Confirm Peak Bandwidth
+                      </CButton>
+                    </CCol>
+                  </CFormGroup>
+                </CCardBody>
+              </CCard>
+            </CCol>}
           </CRow>
         </>
       )}

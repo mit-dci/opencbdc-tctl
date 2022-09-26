@@ -2,6 +2,7 @@ from os import listdir, environ, remove
 from os.path import isfile, join
 import random
 import sys
+import math
 import json
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
@@ -190,7 +191,7 @@ if two_phase:
              if 'tx_samples' in x and 'hdf5' not in x]
     exports = 0
     for f in files:
-        p = pandas.read_csv(f, sep=' ',  on_bad_lines='warn', names=['time', 'latency'], encoding="ISO-8859-1")
+        p = pandas.read_csv(f, sep=' ', on_bad_lines='warn', names=['time', 'latency'], encoding="ISO-8859-1")
         if p.dtypes['time'] != np.int64:
             p.time = pandas.to_numeric(p.time, errors='coerce', downcast='integer')
             p = p[pandas.notnull(p.time)]
@@ -560,98 +561,67 @@ if len(elbow_tps) > 0:
     ax.set_ylim(ymin=0, ymax=max)
     ax.legend()
 
-    delta_ma_tmp = [] 
-    above_ma = 0
-
-    for yy in y:
-        pf_x = x
-        pf_y = yy
-
-        if len(pf_x) < 100:
-            x_incr = (pf_x[-1] - pf_x[0]) / 100
-            new_x = np.arange(0,100)*x_incr+pf_x[0]
-            new_y = np.interp(new_x, pf_x, pf_y)
-            pf_x = new_x
-            pf_y = new_y
-
-        delta_ma_above_tmp = []
-        peak_found = False
-        for i, xx in enumerate(pf_x):
-            if i > 0:
-                delta_lat = pf_y[i] - pf_y[i-1]
-                delta_ma_tmp.append(delta_lat)
-                if len(delta_ma_tmp) > 20:
-                    delta_ma_tmp = delta_ma_tmp[-20:]
-                    delta_lat_ma20 = np.mean(delta_ma_tmp)
-                    delta_lat_ma10 = np.mean(delta_ma_tmp[-10:])
-                    delta_lat_ma5 = np.mean(delta_ma_tmp[-5:])
-                    delta_ma_above_tmp.append(delta_lat_ma5/delta_lat_ma20)
-
-                if len(delta_ma_above_tmp) >= 10:
-                    delta_ma_above_tmp = delta_ma_above_tmp[-5:]
-                    delta_ma_above = sum(delta_ma_above_tmp)
-                    if delta_ma_above > 10 and not peak_found:
-                        peak_lb_idx = i-6
-                        peak_ub_idx = i-3
-                        if peak_lb_idx < 0:
-                            peak_lb_idx = 0
-                        if peak_ub_idx < 0:
-                            peak_ub_idx = 0
-                        
-                        peak_lb = pf_x[peak_lb_idx]
-                        peak_ub = pf_x[peak_ub_idx]
-                        peak_found = True
-                    if delta_ma_above < 5:
-                        peak_found = False
-        
-        if peak_found:
-            break
+    # TODO: Find proper way of finding peak TPS range. None of this is working
+    # accurately
+    # for yy in y:
+    #     delta_ma_tmp = [] 
+    #     pf_x = x
+    #     pf_y = yy
+    #     while math.isnan(pf_y[-1]):
+    #         pf_y = pf_y[:-1]
+    #         pf_x = pf_x[:-1]
     
+    #     while math.isnan(pf_y[1]):
+    #         pf_y = pf_y[1:]
+    #         pf_x = pf_x[1:]
+
+    #     if len(pf_x) < 100:
+    #         x_incr = (pf_x[-1] - pf_x[0]) / 100
+    #         new_x = np.arange(0,100)*x_incr+pf_x[0]
+    #         new_y = np.interp(new_x, pf_x, pf_y)
+    #         pf_x = new_x
+    #         pf_y = new_y
+
+    #     delta_ma_above_tmp = []
+    #     peak_found = False
+    #     for i, xx in enumerate(pf_x):
+    #         if i > 0:
+    #             delta_lat = pf_y[i] / pf_y[i-1]
+    #             delta_ma_tmp.append(delta_lat)
+    #             if len(delta_ma_tmp) > 20:
+    #                 delta_ma_tmp = delta_ma_tmp[-20:]
+    #                 delta_lat_ma20 = np.mean(delta_ma_tmp)
+    #                 delta_lat_ma10 = np.mean(delta_ma_tmp[-10:])
+    #                 delta_lat_ma5 = np.mean(delta_ma_tmp[-5:])
+    #                 delta_ma_above_tmp.append(delta_lat_ma5/delta_lat_ma20)
+
+    #             if len(delta_ma_above_tmp) >= 10:
+    #                 delta_ma_above_tmp = delta_ma_above_tmp[-10:]
+    #                 delta_ma_above = sum(delta_ma_above_tmp)
+    #                 if delta_ma_above > 10.2 and not peak_found: # 7 increasing elements in the last 10 samples
+    #                     peak_lb_idx = i-14
+    #                     peak_ub_idx = i-9
+    #                     if peak_lb_idx < 0:
+    #                         peak_lb_idx = 0
+    #                     if peak_ub_idx < 0:
+    #                         peak_ub_idx = 0
+                        
+    #                     peak_lb = pf_x[peak_lb_idx]
+    #                     peak_ub = pf_x[peak_ub_idx]
+    #                     peak_found = True
+    #                 if delta_ma_above < 8:
+    #                     peak_found = False
+        
+    #     if peak_found:
+    #         break
+    
+    # if peak_ub > 0:
+    #     ax.set_title('Latency/Throughput Elbow\nDetected peak {}-{} TX/s'.format(peak_lb, peak_ub))
+
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.grid()
     plt.savefig('plots/system_elbow_plot.svg')
     plt.close('all')
-
-    delta_ma_tmp = [] 
-    above_ma = 0
-
-    pf_x = x
-    pf_y = y[0]
-
-    if len(pf_x) < 100:
-        x_incr = (pf_x[-1] - pf_x[0]) / 100
-        new_x = np.arange(0,100)*x_incr+pf_x[0]
-        new_y = np.interp(new_x, pf_x, pf_y)
-        pf_x = new_x
-        pf_y = new_y
-
-    delta_ma_above_tmp = []
-    peak_found = False
-    for i, xx in enumerate(pf_x):
-        if i > 0:
-            delta_lat = pf_y[i] - pf_y[i-1]
-            delta_ma_tmp.append(delta_lat)
-            if len(delta_ma_tmp) > 5:
-                delta_ma_tmp = delta_ma_tmp[-5:]
-                delta_lat_ma = np.mean(delta_ma_tmp)
-                delta_ma_above_tmp.append(delta_lat > delta_lat_ma)
-
-            if len(delta_ma_above_tmp) >= 10:
-                print("Delta MA Above: {}".format(delta_ma_above_tmp))
-                delta_ma_above_tmp = delta_ma_above_tmp[-10:]
-                if sum(delta_ma_above_tmp) > 7 and not peak_found: # 7 increasing elements in the last 10 samples
-                    peak_lb_idx = i-12
-                    peak_ub_idx = i-9
-                    if peak_lb_idx < 0:
-                        peak_lb_idx = 0
-                    if peak_ub_idx < 0:
-                        peak_ub_idx = 0
-                    
-                    peak_lb = pf_x[peak_lb_idx]
-                    peak_ub = pf_x[peak_ub_idx]
-                    peak_found = True
-                if sum(delta_ma_above_tmp) < 3:
-                    peak_found = False
 
 # Workaround for https://github.com/vaexio/vaex/issues/385
 # The first percentile on linux comes out to NaN, so put all the data we want
