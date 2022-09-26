@@ -160,6 +160,11 @@ func GetNextPeakFindingRun(succeededSweepRuns []*TestRun) (*TestRun, error) {
 
 	// Get the last one and "zoom in"
 	baseRun := succeededSweepRuns[len(succeededSweepRuns)-1]
+
+	if baseRun.Result == nil {
+		return nil, fmt.Errorf("base run has no result - cannot continue")
+	}
+	
 	buf, _, err := GetTestRunCopy(baseRun)
 	if err != nil {
 		return nil, fmt.Errorf("error getting testrun copy: %v", err)
