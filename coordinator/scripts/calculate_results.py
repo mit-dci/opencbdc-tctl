@@ -303,6 +303,9 @@ if two_phase:
                 
                 tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
 
+        prev_lat99 = 0
+        prev_lat99999 = 0
+        prev_latmean = 0
         for period in periods:
             elbow_tps.append(period['tps'])
             start_ns = (period['start'].replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp() * 1e9)
@@ -310,10 +313,19 @@ if two_phase:
             df_period = df[df.time >= start_ns]
             df_period = df_period[df.time < end_ns]
             lat_list = df_period.lats.tolist()
-            elbow_latmean.append(np.mean(lat_list))
-            pct = np.percentile(lat_list, [99, 99.999])
-            elbow_lat99.append(pct[0])
-            elbow_lat99999.append(pct[1])
+            if len(lat_list) > 0:
+                prev_latmean = np.mean(lat_list)
+
+                elbow_latmean.append(prev_latmean)
+                pct = np.percentile(lat_list, [99, 99.999])
+                elbow_lat99.append(pct[0])
+                elbow_lat99999.append(pct[1])
+                prev_lat99 = pct[0]
+                prev_lat99999 = pct[1]
+            else:
+                elbow_latmean.append(prev_latmean)
+                elbow_lat99.append(prev_lat99)
+                elbow_lat99999.append(prev_lat99999)
 
 if archiver_based:
     for output_file in output_files:
