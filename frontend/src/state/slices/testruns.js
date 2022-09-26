@@ -709,6 +709,18 @@ export const reloadTestResults = (id, trimZeroes, trimSamples, trimZeroesEnd) =>
     }
 }
 
+export const confirmPeak = (id, peakLB, peakUB) => async (dispatch) => {
+    try {
+        let result = await client.post(`testruns/${id}/confirmPeak`, { peakLB, peakUB });
+        if (result?.ok === true) {
+            dispatch({ type: TestController.Toast.Success, payload: "Peak bandwidth confirmed. Peak finding will continue" });
+            dispatch({ type: TestController.TestRunChanged, payload: { id: id, result: null } });
+        }
+    } catch (e) {
+        dispatch({ type: TestController.Toast.Error, payload: e.message });
+    }
+}
+
 export const terminateTestRun = id => async (dispatch) => {
     try {
         let result = await client.put(`testruns/${id}/terminate`);

@@ -125,10 +125,10 @@ func GetConfirmationPeakFindingRuns(succeededSweepRuns []*TestRun) ([]*TestRun, 
 		return nil, fmt.Errorf("base run has no peak lower/upper bound - cannot continue")
 	}
 
-	// Get average between UB and LB, take -5% and +5% for confirmation levels, round to nearest 500 tps increment
+	// Get average between UB and LB, take -2% and +2% for confirmation levels, round to nearest 500 tps increment
 	avg := (baseRun.Result.ThroughputPeakLB + baseRun.Result.ThroughputPeakUB) / 2
-	confirmPeak := int(math.Floor(avg*0.95/500) * 500)
-	confirmAbovePeak := int(math.Floor(avg*1.05/500) * 500)
+	confirmPeak := int(math.Floor(avg*0.98/500) * 500)
+	confirmAbovePeak := int(math.Floor(avg*1.02/500) * 500)
 
 	// Create 3 test runs for peak and above peak levels
 	for _, tps := range []int{confirmPeak, confirmAbovePeak} {

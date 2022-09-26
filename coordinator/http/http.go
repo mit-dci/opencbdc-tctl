@@ -149,6 +149,8 @@ func NewHttpServer(
 		Methods("PUT")
 	r.HandleFunc("/api/testruns/{runID}/bandwidth", httpSrv.testRunBandwidthData).
 		Methods("GET")
+	r.HandleFunc("/api/testruns/{runID}/confirmPeak", httpSrv.testRunConfirmPeakHandler).
+		Methods("POST")
 
 	// Sweeps
 	r.HandleFunc("/api/sweeps/{sweepID}/fixMissing", httpSrv.scheduleMissingSweepRuns).
