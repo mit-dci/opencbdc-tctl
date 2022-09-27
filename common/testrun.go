@@ -78,6 +78,7 @@ type TestRun struct {
 	AuditInterval            int                `json:"auditInterval"            feFieldTitle:"Audit Interval (blocks)"         feFieldType:"int"`
 	RecordNetworkTraffic     bool               `json:"recordNetworkTraffic"     feFieldTitle:"Record network traffic"          feFieldType:"bool"`
 	AgentShutdownDelay       int                `json:"agentShutdownDelay"       feFieldTitle:"Agent Shutdown Delay (seconds)"  feFieldType:"int"`
+	ObservedPeak             float64            `json:"observedPeak"`
 	DontRunBefore            time.Time          `json:"notBefore"`
 	Sweep                    string             `json:"sweep"`
 	SweepID                  string             `json:"sweepID"`
@@ -229,8 +230,6 @@ type TestResult struct {
 	ThroughputPercentiles []TestResultPercentile        `json:"throughputPercentiles"`
 	ThroughputAvg2        float64                       `json:"throughputAvg2"`
 	ThroughputAvgs        map[string]float64            `json:"throughputAvgs"`
-	ThroughputPeakLB      float64                       `json:"throughputPeakLB"`
-	ThroughputPeakUB      float64                       `json:"throughputPeakUB"`
 	BlockLatencies        map[string]BlockLatencyResult `json:"blockLatencies"`
 
 	LatencyAvg         float64                `json:"latencyAvg"`

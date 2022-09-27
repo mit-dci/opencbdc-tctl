@@ -30,6 +30,11 @@ const _nav =  [
   },
   {
     _tag: 'CSidebarNavItem',
+    name: 'Pending Peak Observation',
+    to: '/testruns/pendingPeakObservation',
+  },
+  {
+    _tag: 'CSidebarNavItem',
     name: 'Failed test runs',
     to: '/testruns/failed',
   },

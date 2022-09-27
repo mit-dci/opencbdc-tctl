@@ -114,6 +114,8 @@ type FrontendTestRunListEntry struct {
 	SentinelAttestations     int                        `json:"sentinelAttestations"`
 	LoadGenTPSTarget         int                        `json:"loadGenTPSTarget"`
 	LoadGenTPSStepStart      float64                    `json:"loadGenTPSStepStart"`
+	ObservedPeak             float64                    `json:"observedPeak"`
+	Sweep                    string                     `json:"sweep"`
 }
 
 type FrontendTestRunRoleCount struct {

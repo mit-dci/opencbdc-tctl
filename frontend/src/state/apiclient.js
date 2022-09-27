@@ -1,4 +1,4 @@
-const apiUrl = (window.location.host === "localhost:3000") ? "https://localhost:8443/api/" : `${window.location.protocol}//${window.location.host}/api/`;
+const apiUrl = (window.location.host === "localhost:3000") ? "https://test-controller.test.hmltn.io/api/" : `${window.location.protocol}//${window.location.host}/api/`;
 
 const process = (req) => req.json();
 const myFetch = async (url, opts) => await fetch(url, Object.assign({}, {credentials:'include'}, opts));

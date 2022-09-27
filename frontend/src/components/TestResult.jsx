@@ -22,8 +22,7 @@ const TestResult = (props) => {
   const [trimZeroes, setTrimZeroes] = useState(props.testRun.trimZeroesAtStart);
   const [trimZeroesEnd, setTrimZeroesEnd] = useState(props.testRun.trimZeroesAEnd);
   const [trimSamples, setTrimSamples] = useState(props.testRun.trimSamplesAtStart);
-  const [peakLB, setPeakLB] = useState(props.testRun?.result?.throughputPeakLB);
-  const [peakUB, setPeakUB] = useState(props.testRun?.result?.throughputPeakUB);
+  const [observedPeak, setObservedPeak] = useState(props.testRun?.observedPeak);
   const [peakRerun, setPeakRerun] = useState(false);
   const lastRecalc = props.testRun.resultUpdated?.valueOf() || 0;
 
@@ -136,19 +135,6 @@ const TestResult = (props) => {
                     <CCol xs={8}>
                       <b>
                         {numeral(props.testRun.result.throughputAvg2).format(
-                          "#,##0.00"
-                        )}{" "}
-                        tx/s
-                      </b>
-                    </CCol>
-                  </CRow>}
-                  {props.testRun.result.throughputPeakLB && props.testRun.result.throughputPeakLB > 0 && <CRow>
-                    <CCol xs={4}>Throughput peak (Lower/Upper bound):</CCol>
-                    <CCol xs={8}>
-                      <b>
-                        {numeral(props.testRun.result.throughputPeakLB).format(
-                          "#,##0.00"
-                        )}{" - "}{numeral(props.testRun.result.throughputPeakUB).format(
                           "#,##0.00"
                         )}{" "}
                         tx/s
@@ -356,47 +342,33 @@ const TestResult = (props) => {
                 </CCardBody>
               </CCard>
             </CCol>
-            {props.testRun?.sweep === 'peak' && <CCol xs={4}>
+            {props.testRun?.sweep === 'peak' && props.testRun?.loadGenTPSStepStart !== 1 && <CCol xs={4}>
               <CCard>
-                <CCardHeader>Confirm Peak Bandwidth</CCardHeader>
+                <CCardHeader><b><u>Observed Peak Bandwidth</u></b></CCardHeader>
                 <CCardBody>
+                  <p>Observe the elbow plot and determine where the latency starts rising. Enter this value here.</p>
+                  {props.testRun?.loadGenTPSStepStart === 0 && <p>A second run will be started that ranges from 90-110% of the entered figure, rounded to the nearest 100 TPS.</p>}
+                  {props.testRun?.loadGenTPSStepStart !== 0 && <p>Peak confirmation runs will be scheduled that are throttled at 5% below and 5% above the entered figure, rounded to the nearest 100 TPS.</p>}
                   <CFormGroup row>
                     <CCol sm={6}>
-                      <CLabel htmlFor="peakLB">Lower bound:</CLabel>
+                      <CLabel htmlFor="observedPeak">Observed Peak TPS:</CLabel>
                     </CCol>
                     <CCol sm={6}>
                       <CInput
                         type="text"
-                        id="peakLB"
-                        value={peakLB}
+                        id="observedPeak"
+                        value={observedPeak}
                         onChange={(e) => {
                           let val = parseInt(e.target.value);
                           if (Number.isNaN(val)) val = 0;
-                          setPeakLB(val);
+                          setObservedPeak(val);
                         }}
                       ></CInput>
                     </CCol>
                   </CFormGroup>
                   <CFormGroup row>
                     <CCol sm={6}>
-                      <CLabel htmlFor="peakUB">Upper bound:</CLabel>
-                    </CCol>
-                    <CCol sm={6}>
-                      <CInput
-                        type="text"
-                        id="peakUB"
-                        value={peakUB}
-                        onChange={(e) => {
-                          let val = parseInt(e.target.value);
-                          if (Number.isNaN(val)) val = 0;
-                          setPeakUB(val);
-                        }}
-                      ></CInput>
-                    </CCol>
-                  </CFormGroup>
-                  <CFormGroup row>
-                    <CCol sm={6}>
-                      <CLabel htmlFor="peakUB">Force Rerun Confirmation Runs:</CLabel>
+                      <CLabel htmlFor="peakUB">Force Rerun Confirmation Runs:<br/><small>If the peak was entered before but the confirmation runs ended up invalid, check this box to force the confirmation runs to run again.</small></CLabel>
                     </CCol>
                     <CCol sm={6}>
                     <CInputCheckbox
@@ -409,20 +381,18 @@ const TestResult = (props) => {
 
                     </CCol>
                   </CFormGroup>
-                  forceRerunConf
-
                   <CFormGroup row>
                     <CCol sm={12}>
                       <CButton
                         onClick={(e) => {
-                          dispatch(confirmPeak(props.testRun?.id, peakLB, peakUB, peakRerun));
+                          dispatch(confirmPeak(props.testRun?.id, observedPeak, peakRerun));
                         }}
                         size="sm"
                         className="btn-pill"
                         block
                         color="primary"
                       >
-                        Confirm Peak Bandwidth
+                        Confirm Peak
                       </CButton>
                     </CCol>
                   </CFormGroup>
