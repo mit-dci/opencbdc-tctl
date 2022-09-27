@@ -18,6 +18,7 @@ const routes = [
   { path: '/testruns/reschedule/:testRunID', exact: true,  name: 'Schedule New Test Run', component: ScheduleTestRun },
   { path: '/sweeps',  name: 'Sweeps', component: Sweeps },
   { path: '/sweepPlot/:sweepID',  name: 'Sweep Plot', component: SweepPlot },
+  { path: '/testruns/:state/:spec',  name: 'Test Runs', component: TestRuns },
   { path: '/testruns/:state',  name: 'Test Runs', component: TestRuns },
   { path: '/testrun/:testRunID',  name: 'Test Run Details', component: TestRun },
   { path: '/config', exact: true,  name: 'Config', component: Config },
