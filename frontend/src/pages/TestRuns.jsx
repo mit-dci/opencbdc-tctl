@@ -267,6 +267,19 @@ const TestRuns = (props) => {
       </td>
     );
     testRuns = failedTestRuns;
+  } else if (props.match.params.state === "sweep") {
+    fields.push({ key: "avgThroughput", label: "Throughput (avg)" });
+    fields.push({ key: "tailLatency", label: "99% latency" });
+    scopedSlots["sortDate"] = (r) => (
+      <td>
+        Completed <Moment format="L">{r.completed}</Moment>{" "}
+        <Moment format="LT">{r.completed}</Moment>
+      </td>
+    );
+    scopedSlots["avgThroughput"] = (r) => <td>{`${Math.floor(r.avgThroughput)} tx/s`}</td>;
+    scopedSlots["tailLatency"] = (r) => <td>{`${Math.floor(r.tailLatency * 100000) / 100} ms`}</td>;
+    testRuns = completedTestRuns.filter(r => r.sweepID === props.match.params.spec);
+    console.log(props.match.params)
   }
 
   fields.push({ key: "actions", label: "" });
@@ -275,7 +288,7 @@ const TestRuns = (props) => {
     <>
       <CRow>
         <CCol>
-          <h1>Test runs ({props.match.params.state})</h1>
+          <h1>Test runs ({props.match.params.state === 'sweep' ? `Sweep ${props.match.params.spec}` : props.match.params.state})</h1>
           <CDataTable
             striped
             pagination={{ align: "center" }}
