@@ -27,7 +27,7 @@ func FindMissingSweepRuns(trs []*TestRun, sweepID string) []*TestRun {
 
 	if sweepRuns[0].Sweep == "peak" {
 		// Peak finding sweeps work a little differently
-		if len(succeededSweepRuns) == 0 {
+		if len(sweepRuns) == 0 {
 			return []*TestRun{} // No way to determine sweep
 		} else if len(succeededSweepRuns) == 2 {
 			// finished initial peak finding, schedule confirmation runs
@@ -42,7 +42,7 @@ func FindMissingSweepRuns(trs []*TestRun, sweepID string) []*TestRun {
 			return []*TestRun{}
 		}
 
-		tr, err := GetNextPeakFindingRun(succeededSweepRuns)
+		tr, err := GetNextPeakFindingRun(succeededSweepRuns, sweepRuns)
 		if err != nil || tr == nil {
 			logging.Errorf("Error calculating next peak finding run: %v", err)
 			return []*TestRun{}
@@ -153,16 +153,28 @@ func GetConfirmationPeakFindingRuns(succeededSweepRuns []*TestRun) ([]*TestRun, 
 	return runs, nil
 }
 
-func GetNextPeakFindingRun(succeededSweepRuns []*TestRun) (*TestRun, error) {
-	sort.SliceStable(succeededSweepRuns, func(i, j int) bool {
-		return succeededSweepRuns[i].Created.Before(succeededSweepRuns[j].Created)
-	})
+func GetNextPeakFindingRun(succeededSweepRuns []*TestRun, sweepRuns []*TestRun) (*TestRun, error) {
+	var baseRun *TestRun
+	first := false
+	if len(succeededSweepRuns) == 0 {
+		// Just retry the failed one
+		sort.SliceStable(sweepRuns, func(i, j int) bool {
+			return sweepRuns[i].Created.Before(sweepRuns[j].Created)
+		})
 
-	// Get the last one and "zoom in"
-	baseRun := succeededSweepRuns[len(succeededSweepRuns)-1]
+		baseRun = sweepRuns[len(sweepRuns)-1]
+		first = true
+	} else {
+		sort.SliceStable(succeededSweepRuns, func(i, j int) bool {
+			return succeededSweepRuns[i].Created.Before(succeededSweepRuns[j].Created)
+		})
 
-	if baseRun.Result == nil {
-		return nil, fmt.Errorf("base run has no result - cannot continue")
+		// Get the last one and "zoom in"
+		baseRun = succeededSweepRuns[len(succeededSweepRuns)-1]
+
+		if baseRun.Result == nil {
+			return nil, fmt.Errorf("base run has no result - cannot continue")
+		}
 	}
 
 	buf, _, err := GetTestRunCopy(baseRun)
@@ -177,15 +189,17 @@ func GetNextPeakFindingRun(succeededSweepRuns []*TestRun) (*TestRun, error) {
 	}
 	newTr.SweepID = baseRun.SweepID
 
-	if baseRun.ObservedPeak == 0 {
-		return nil, fmt.Errorf("base run has no peak lower/upper bound - cannot continue")
-	}
+	if !first {
+		if baseRun.ObservedPeak == 0 {
+			return nil, fmt.Errorf("base run has no peak lower/upper bound - cannot continue")
+		}
 
-	newTr.LoadGenTPSTarget = int(baseRun.ObservedPeak * 1.1)
-	newTr.LoadGenTPSStepStart = 0.9 / 1.1
-	newTr.LoadGenTPSStepPercent = -1
-	newTr.LoadGenTPSStepTime = 30
-	newTr.ObservedPeak = 0
+		newTr.LoadGenTPSTarget = int(baseRun.ObservedPeak * 1.1)
+		newTr.LoadGenTPSStepStart = 0.9 / 1.1
+		newTr.LoadGenTPSStepPercent = -1
+		newTr.LoadGenTPSStepTime = 30
+		newTr.ObservedPeak = 0
+	}
 
 	return &newTr, nil
 }
