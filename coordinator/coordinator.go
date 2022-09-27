@@ -263,7 +263,9 @@ func (c *Coordinator) handleConn(agent *ConnectedAgent) {
 			// (which indicates the remote site terminated the
 			// connection), log whatever went wrong as well
 			if err.Error() != "EOF" {
-				logging.Warnf("Error reading message: %v", err.Error())
+				logging.Warnf("Agent %d: Error reading message: %v", agent.ID, err.Error())
+			} else {
+				logging.Infof("Agent %d disconnected", agent.ID)
 			}
 			agent.conn.Close()
 			c.removeAgent(agent)

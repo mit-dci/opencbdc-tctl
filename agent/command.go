@@ -226,12 +226,19 @@ func (a *Agent) handleExecuteCommand(
 		)
 	}
 
-	// Send an initial command status to the coordinator to show that the
-	// command is now running
-	a.outgoing <- &wire.ExecuteCommandStatusMsg{
-		CommandID: ret.CommandID,
-		Status:    wire.CommandStatusRunning,
-	}
+	// Wait for a few moments to allow the status listener to register
+	// container side. Should fix errors like:
+	// [ERROR] Received error from controller: unable to process message
+	//         of type *wire.ExecuteCommandStatusMsg
+	go func() {
+		time.Sleep(time.Second * 5)
+		// Send an initial command status to the coordinator to show that the
+		// command is now running
+		a.outgoing <- &wire.ExecuteCommandStatusMsg{
+			CommandID: ret.CommandID,
+			Status:    wire.CommandStatusRunning,
+		}
+	}()
 
 	// Insert the pending command into our pendingCommands array
 	a.addPendingCommand(&pendingCommand{cmd: cmd, id: ret.CommandID})
