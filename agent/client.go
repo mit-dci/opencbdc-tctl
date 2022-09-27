@@ -31,8 +31,11 @@ func (a *Agent) RunClient() {
 		if err != nil {
 			if err.Error() != "EOF" {
 				logging.Warnf("Error reading message: %v", err.Error())
+			} else {
+				logging.Infof("Connection to coordinator closed: %v", err.Error())
 			}
 			a.conn.Close()
+			close(a.processingQueue)
 			return
 		}
 		// Send the message to the processing queue
@@ -67,7 +70,7 @@ func (a *Agent) sendLoop() {
 		if err != nil {
 			logging.Warnf("Could not send message: %v", err)
 			a.conn.Close()
-			return
+			break
 		}
 	}
 	logging.Warnf("Send loop exited!")
