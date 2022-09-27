@@ -709,12 +709,12 @@ export const reloadTestResults = (id, trimZeroes, trimSamples, trimZeroesEnd) =>
     }
 }
 
-export const confirmPeak = (id, peakLB, peakUB, forceRerunConf) => async (dispatch) => {
+export const confirmPeak = (id, observedPeak, forceRerunConf) => async (dispatch) => {
     try {
-        let result = await client.post(`testruns/${id}/confirmPeak`, { peakLB, peakUB, forceRerunConf });
+        let result = await client.post(`testruns/${id}/confirmPeak`, { observedPeak, forceRerunConf });
         if (result?.ok === true) {
             dispatch({ type: TestController.Toast.Success, payload: "Peak bandwidth confirmed. Peak finding will continue" });
-            dispatch({ type: TestController.TestRunChanged, payload: { id: id, result: null } });
+            dispatch({ type: TestController.TestRunChanged, payload: { id: id, observedPeak: observedPeak } });
         }
     } catch (e) {
         dispatch({ type: TestController.Toast.Error, payload: e.message });
@@ -848,6 +848,9 @@ const mapListFields = (architectures, users) => tr => {
         tailLatency: tr.tailLatency,
         details: tr.details,
         roles: roleDesc,
+        loadGenTPSStepStart: tr.loadGenTPSStepStart,
+        sweep: tr.sweep,
+        observedPeak: tr.observedPeak,
     };
 }
 

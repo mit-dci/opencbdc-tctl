@@ -121,14 +121,13 @@ func GetConfirmationPeakFindingRuns(succeededSweepRuns []*TestRun) ([]*TestRun, 
 
 	// Get the last run's bandwidth
 	baseRun := succeededSweepRuns[len(succeededSweepRuns)-1]
-	if baseRun.Result.ThroughputPeakLB == 0 || baseRun.Result.ThroughputPeakUB == 0 {
+	if baseRun.ObservedPeak == 0 {
 		return nil, fmt.Errorf("base run has no peak lower/upper bound - cannot continue")
 	}
 
-	// Get average between UB and LB, take -2% and +2% for confirmation levels, round to nearest 500 tps increment
-	avg := (baseRun.Result.ThroughputPeakLB + baseRun.Result.ThroughputPeakUB) / 2
-	confirmPeak := int(math.Floor(avg*0.95/500) * 500)
-	confirmAbovePeak := int(math.Floor(avg*1.05/500) * 500)
+	// Take -5% and +5% of entered peak value for confirmation levels, round to nearest 100 tps increment
+	confirmPeak := int(math.Floor(baseRun.ObservedPeak*0.95/100) * 100)
+	confirmAbovePeak := int(math.Floor(baseRun.ObservedPeak*1.05/100) * 100)
 
 	// Create 3 test runs for peak and above peak levels
 	for _, tps := range []int{confirmPeak, confirmAbovePeak} {
@@ -147,6 +146,7 @@ func GetConfirmationPeakFindingRuns(succeededSweepRuns []*TestRun) ([]*TestRun, 
 			newTr.LoadGenTPSStepStart = 1
 			newTr.LoadGenTPSStepPercent = 0
 			newTr.LoadGenTPSStepTime = 0
+			newTr.ObservedPeak = 0
 			runs = append(runs, &newTr)
 		}
 	}
@@ -177,14 +177,15 @@ func GetNextPeakFindingRun(succeededSweepRuns []*TestRun) (*TestRun, error) {
 	}
 	newTr.SweepID = baseRun.SweepID
 
-	if baseRun.Result.ThroughputPeakLB == 0 || baseRun.Result.ThroughputPeakUB == 0 {
+	if baseRun.ObservedPeak == 0 {
 		return nil, fmt.Errorf("base run has no peak lower/upper bound - cannot continue")
 	}
 
-	newTr.LoadGenTPSTarget = int(baseRun.Result.ThroughputPeakUB)
-	newTr.LoadGenTPSStepStart = baseRun.Result.ThroughputPeakLB / baseRun.Result.ThroughputPeakUB
+	newTr.LoadGenTPSTarget = int(baseRun.ObservedPeak * 1.1)
+	newTr.LoadGenTPSStepStart = 0.9 / 1.1
 	newTr.LoadGenTPSStepPercent = -1
-	newTr.LoadGenTPSStepTime = 20
+	newTr.LoadGenTPSStepTime = 30
+	newTr.ObservedPeak = 0
 
 	return &newTr, nil
 }
@@ -248,8 +249,8 @@ func ExpandSweepRun(originalTr *TestRun, sweepID string) []*TestRun {
 
 		// Initial peak finding runs should use sufficient steps and duration
 		// TODO: Atomizer account for block time
-		newTr.SampleCount = 600
-		newTr.LoadGenTPSStepPercent = 0.01
+		newTr.SampleCount = 300
+		newTr.LoadGenTPSStepPercent = 0.02
 		newTr.LoadGenTPSStepTime = 5
 		runs = append(runs, &newTr)
 		return runs

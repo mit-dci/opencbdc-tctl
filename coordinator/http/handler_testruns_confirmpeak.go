@@ -10,8 +10,7 @@ import (
 )
 
 type confirmPeakBody struct {
-	LowerBound             float64 `json:"peakLB"`
-	UpperBound             float64 `json:"peakUB"`
+	ObservedPeak           float64 `json:"observedPeak"`
 	ForceRerunConfirmation bool    `json:"forceRerunConf"`
 }
 
@@ -37,8 +36,8 @@ func (h *HttpServer) testRunConfirmPeakHandler(
 		return
 	}
 
-	run.Result.ThroughputPeakLB = body.LowerBound
-	run.Result.ThroughputPeakUB = body.UpperBound
+	run.ObservedPeak = body.ObservedPeak
+
 	h.tr.PersistTestRun(run)
 	if body.ForceRerunConfirmation {
 		trs, err := common.GetConfirmationPeakFindingRuns([]*common.TestRun{run})
