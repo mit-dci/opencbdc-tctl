@@ -127,8 +127,8 @@ func GetConfirmationPeakFindingRuns(succeededSweepRuns []*TestRun) ([]*TestRun, 
 
 	// Get average between UB and LB, take -2% and +2% for confirmation levels, round to nearest 500 tps increment
 	avg := (baseRun.Result.ThroughputPeakLB + baseRun.Result.ThroughputPeakUB) / 2
-	confirmPeak := int(math.Floor(avg*0.98/500) * 500)
-	confirmAbovePeak := int(math.Floor(avg*1.02/500) * 500)
+	confirmPeak := int(math.Floor(avg*0.95/500) * 500)
+	confirmAbovePeak := int(math.Floor(avg*1.05/500) * 500)
 
 	// Create 3 test runs for peak and above peak levels
 	for _, tps := range []int{confirmPeak, confirmAbovePeak} {
@@ -164,7 +164,7 @@ func GetNextPeakFindingRun(succeededSweepRuns []*TestRun) (*TestRun, error) {
 	if baseRun.Result == nil {
 		return nil, fmt.Errorf("base run has no result - cannot continue")
 	}
-	
+
 	buf, _, err := GetTestRunCopy(baseRun)
 	if err != nil {
 		return nil, fmt.Errorf("error getting testrun copy: %v", err)

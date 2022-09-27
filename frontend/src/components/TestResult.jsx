@@ -24,7 +24,7 @@ const TestResult = (props) => {
   const [trimSamples, setTrimSamples] = useState(props.testRun.trimSamplesAtStart);
   const [peakLB, setPeakLB] = useState(props.testRun?.result?.throughputPeakLB);
   const [peakUB, setPeakUB] = useState(props.testRun?.result?.throughputPeakUB);
-
+  const [peakRerun, setPeakRerun] = useState(false);
   const lastRecalc = props.testRun.resultUpdated?.valueOf() || 0;
 
   const dispatch = useDispatch();
@@ -395,10 +395,27 @@ const TestResult = (props) => {
                     </CCol>
                   </CFormGroup>
                   <CFormGroup row>
+                    <CCol sm={6}>
+                      <CLabel htmlFor="peakUB">Force Rerun Confirmation Runs:</CLabel>
+                    </CCol>
+                    <CCol sm={6}>
+                    <CInputCheckbox
+                        id="forceRerun"
+                        checked={peakRerun}
+                        onChange={(e) => {
+                          setPeakRerun(e.target.checked);
+                        }}
+                      ></CInputCheckbox>           
+
+                    </CCol>
+                  </CFormGroup>
+                  forceRerunConf
+
+                  <CFormGroup row>
                     <CCol sm={12}>
                       <CButton
                         onClick={(e) => {
-                          dispatch(confirmPeak(props.testRun?.id, peakLB, peakUB));
+                          dispatch(confirmPeak(props.testRun?.id, peakLB, peakUB, peakRerun));
                         }}
                         size="sm"
                         className="btn-pill"

@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mit-dci/opencbdc-tctl/common"
 	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 type confirmPeakBody struct {
-	LowerBound float64 `json:"peakLB"`
-	UpperBound float64 `json:"peakUB"`
+	LowerBound             float64 `json:"peakLB"`
+	UpperBound             float64 `json:"peakUB"`
+	ForceRerunConfirmation bool    `json:"forceRerunConf"`
 }
 
 func (h *HttpServer) testRunConfirmPeakHandler(
@@ -38,6 +40,17 @@ func (h *HttpServer) testRunConfirmPeakHandler(
 	run.Result.ThroughputPeakLB = body.LowerBound
 	run.Result.ThroughputPeakUB = body.UpperBound
 	h.tr.PersistTestRun(run)
-	h.tr.ContinueSweep(run, run.SweepID)
+	if body.ForceRerunConfirmation {
+		trs, err := common.GetConfirmationPeakFindingRuns([]*common.TestRun{run})
+		if err != nil {
+			logging.Errorf("Error getting confirmation runs to rerun: %v", err)
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		h.tr.ScheduleSweepRuns(trs)
+	} else {
+		h.tr.ContinueSweep(run, run.SweepID)
+	}
+
 	writeJsonOK(w)
 }

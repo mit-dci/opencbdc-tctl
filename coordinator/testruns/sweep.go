@@ -116,17 +116,21 @@ func (t *TestRunManager) ContinueSweep(tr *common.TestRun, sweepID string) {
 			if tr.Sweep == "peak" {
 				scheduleRuns = missing
 			}
+			t.ScheduleSweepRuns(scheduleRuns)
 
-			for i := range scheduleRuns {
-				scheduleRuns[i].AWSInstancesStopped = false
-				for j := range scheduleRuns[i].Roles {
-					scheduleRuns[i].Roles[j].AgentID = -1
-				}
-				scheduleRuns[i].Result = nil
-				t.ScheduleTestRun(scheduleRuns[i])
-			}
 		} else {
 			t.WriteLog(tr, "No missing runs returned - sweep done")
 		}
+	}
+}
+
+func (t *TestRunManager) ScheduleSweepRuns(scheduleRuns []*common.TestRun) {
+	for i := range scheduleRuns {
+		scheduleRuns[i].AWSInstancesStopped = false
+		for j := range scheduleRuns[i].Roles {
+			scheduleRuns[i].Roles[j].AgentID = -1
+		}
+		scheduleRuns[i].Result = nil
+		t.ScheduleTestRun(scheduleRuns[i])
 	}
 }
