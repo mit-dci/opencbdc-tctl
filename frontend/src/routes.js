@@ -9,6 +9,7 @@ const Config = React.lazy(() => import('./pages/Config'));
 const Sweeps = React.lazy(() => import('./pages/Sweeps'));
 const SweepPlot = React.lazy(() => import('./pages/SweepPlot'));
 const Report = React.lazy(() => import('./pages/Report'));
+const PeakFindingResult = React.lazy(() => import('./pages/PeakFindingResult'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -21,6 +22,7 @@ const routes = [
   { path: '/testruns/:state/:spec',  name: 'Test Runs', component: TestRuns },
   { path: '/testruns/:state',  name: 'Test Runs', component: TestRuns },
   { path: '/testrun/:testRunID',  name: 'Test Run Details', component: TestRun },
+  { path: '/peakFinderResult/:sweepID',  name: 'Peak Finding Result', component: PeakFindingResult },
   { path: '/config', exact: true,  name: 'Config', component: Config },
   { path: '/report', exact: true,  name: 'Report', component: Report }
 ];

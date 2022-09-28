@@ -1,5 +1,5 @@
 import { TestController } from '../actions';
-import { createSelector } from 'reselect'
+import { createSelector } from 'reselect';
 import { send } from '@giantmachines/redux-websocket/dist';
 import client from '../apiclient';
 import * as numeral from "numeral";
@@ -90,11 +90,21 @@ export const reducer = (state = initialState, action) => {
                 ]
             };
         case TestController.TestRunChanged:
+            const newTestRunArray = [...state.testruns.filter((tr) => tr !== undefined)];
+            console.log(`Test Run ${action.payload.id} Changed`, action.payload);
             return {
                 ...state,
-                testruns: state.testruns.filter((tr) => tr !== undefined).map((tr) => {
+                testruns: newTestRunArray.map((tr) => {
                     if (tr.id !== action.payload.id) return tr;
                     return Object.assign({}, tr, action.payload);
+                })
+            }
+        case TestController.TestRunSweepChanged:
+            return {
+                ...state,
+                sweeps: state.sweeps.filter((s) => s !== undefined).map((s) => {
+                    if (s.id !== action.payload.id) return s;
+                    return Object.assign({}, s, action.payload);
                 })
             }
         case TestController.TestRunMatrixUpdated:
@@ -680,6 +690,34 @@ export const loadTestRunDetails = (id) => async (dispatch, getState) => {
     }
 }
 
+export const loadSweepRuns = (id) => async (dispatch, getState) => {
+    try {
+        let state = getState();
+        if (!state.testruns.testruns) {
+            return;
+        }
+        let sweep = state.testruns.sweeps.find(s => s.id === id);
+        if (sweep && sweep.runsLoading === true) {
+            return;
+        }
+        dispatch({ type: TestController.TestRunSweepChanged, payload: Object.assign({ id: id, runsLoading: true }) });
+        let trs = state.testruns.testruns.filter(r => r.sweepID === id);
+        for(let tr of trs) {
+            if (tr && tr.detailsLoading === true) {
+                continue;
+            }
+            dispatch({ type: TestController.TestRunChanged, payload: Object.assign({ id: tr.id, detailsLoading: true }) });
+            let result = await client.get(`testruns/${tr.id}/details`);
+            if (result) {
+                dispatch({ type: TestController.TestRunChanged, payload: Object.assign({}, result, { detailLoading: false, detailsAvailable: true }) });
+            }
+        }
+        dispatch({ type: TestController.TestRunSweepChanged, payload: Object.assign({ id: id, runsLoading: false, runsAvailable: true }) });
+    } catch (e) {
+        dispatch({ type: TestController.Toast.Error, payload: e.message });
+    }
+}
+
 export const loadTestRunSweepMatrix = (sweepID) => async (dispatch, getState) => {
     try {
         let state = getState();
@@ -767,7 +805,7 @@ export const redownloadOutputs = id => async (dispatch) => {
 }
 
 
-const mapListFields = (architectures, users) => tr => {
+export const mapListFields = (architectures, users) => tr => {
 
     let arch = architectures.find(a => a.id === (tr.architectureID || 'default'));
     let roleDesc = "";
@@ -887,6 +925,7 @@ const mapSweepFields = (architectures) => sweep => {
     return Object.assign({}, sweep.firstRunData, sweep, { roles: roleDesc })
 }
 
+export const selectSweepRuns = createSelector(state => state.testruns?.testruns, (state, sweepID) => sweepID, (testruns, sweepID) => testruns.filter((tr) => tr.sweepID === sweepID).sort((a, b) => b.created.valueOf() - a.created.valueOf()));
 export const selectSweeps = createSelector(state => state.testruns.sweeps, state => state.architectures.architectures, (sweeps, architectures) => sweeps.map(mapSweepFields(architectures)).sort((a, b) => b.firstRun.valueOf() - a.firstRun.valueOf()));
 export const selectActiveTestRunsList = createSelector(state => state.testruns.testruns, state => state.architectures.architectures, state => state.users.users, (testruns, architectures, users) => testruns.filter((tr) => ["Running"].indexOf(tr.status) > -1).map(mapListFields(architectures, users)).sort((a, b) => b.created.valueOf() - a.created.valueOf()));
 export const selectQueuedTestRunsList = createSelector(state => state.testruns.testruns, state => state.architectures.architectures, state => state.users.users, (testruns, architectures, users) => testruns.filter((tr) => ["Queued"].indexOf(tr.status) > -1).map(mapListFields(architectures, users)).sort((a, b) => b.created.valueOf() - a.created.valueOf()));
