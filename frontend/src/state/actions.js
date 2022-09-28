@@ -9,6 +9,7 @@ export const TestController = {
     TestRunAdded: 'TEST_CONTROLLER::TESTRUN_ADDED',
     TestRunChanged: 'TEST_CONTROLLER::TESTRUN_CHANGED',
     TestRunLogAppended: 'TEST_CONTROLLER::TESTRUN_LOGAPPENDED',
+    TestRunSweepChanged: 'TEST_CONTROLLER::SWEEP_CHANGED',
     AgentAdded: 'TEST_CONTROLLER::AGENT_ADDED',
     AgentCountUpdated: 'TEST_CONTROLLER::AGENT_COUNT_UPDATED',
     AgentsChanged: 'TEST_CONTROLLER::AGENTS_CHANGED',
