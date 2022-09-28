@@ -421,7 +421,7 @@ func (t *TestRunManager) CreateStartSequenceTwoPhase(
 	// to load into RAM
 	shardTimeout := roleStartTimeout
 	if tr.PreseedShards {
-		shardTimeout = time.Minute * 5
+		shardTimeout = time.Minute * 15
 	}
 
 	// Start RAFT replicated components all at once now. A random leader is
