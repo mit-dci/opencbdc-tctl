@@ -8,6 +8,9 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
+	"time"
+
+	"github.com/mit-dci/opencbdc-tctl/logging"
 )
 
 // Conn describes a connection between agent and coordinator
@@ -52,15 +55,23 @@ func (l *Listener) Accept() (*Conn, error) {
 // NewClient will open a TCP connection to the given host and port and return an
 // instance of Conn for the connection that's open
 func NewClient(host string, port int) (*Conn, error) {
-	c, err := net.Dial("tcp4", fmt.Sprintf("%s:%d", host, port))
-	if err != nil {
-		return nil, fmt.Errorf("could not dial: %v", err)
+	attempt := 0
+	for {
+		c, err := net.DialTimeout("tcp4", fmt.Sprintf("%s:%d", host, port), time.Second*15)
+		if err != nil {
+			attempt++
+			logging.Warnf("Dialing failed (attempt = %d): %v", attempt, err)
+			if attempt > 10 {
+				return nil, fmt.Errorf("failed to dial after 10 attempts: %v", err)
+			}
+			time.Sleep(time.Second * 1)
+		} else {
+			return &Conn{
+				conn:     c,
+				connLock: sync.Mutex{},
+			}, nil
+		}
 	}
-
-	return &Conn{
-		conn:     c,
-		connLock: sync.Mutex{},
-	}, nil
 }
 
 // Close will close the connection
