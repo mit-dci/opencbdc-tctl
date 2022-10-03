@@ -41,7 +41,7 @@ def plot_system_mem_available(cmdID, perfdata):
     ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_system_memory_{}_{}.png'.format(version, cmdID))
+    plt.savefig('plots/perf_system_memory_{}_{}.svg'.format(version, cmdID))
     plt.close('all')
 
 def plot_num_threads(cmdID, perfdata):
@@ -67,7 +67,7 @@ def plot_num_threads(cmdID, perfdata):
     ax.set_title('Number of threads in monitored process over time')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_num_threads_{}_{}.png'.format(version, cmdID))
+    plt.savefig('plots/perf_num_threads_{}_{}.svg'.format(version, cmdID))
     plt.close('all')
 
 def plot_process_cpu_usage(cmdID, perfdata):
@@ -100,7 +100,7 @@ def plot_process_cpu_usage(cmdID, perfdata):
     ax.set_title('Monitored process CPU usage')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_process_cpu_usage_{}_{}.png'.format(version, cmdID), dpi=200)
+    plt.savefig('plots/perf_process_cpu_usage_{}_{}.svg'.format(version, cmdID), dpi=200)
 
 
     plt.close('all')
@@ -126,7 +126,7 @@ def plot_process_disk_usage(cmdID, perfdata):
     ax.ticklabel_format(useOffset=False)
     
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_process_disk_usage_{}_{}.png'.format(version, cmdID))
+    plt.savefig('plots/perf_process_disk_usage_{}_{}.svg'.format(version, cmdID))
     plt.close('all')
 
 def plot_cpu_usage(cmdID, perfdata):
@@ -181,7 +181,7 @@ def plot_cpu_usage(cmdID, perfdata):
         axs[row,col].axis('off')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_cpu_usage_{}_{}.png'.format(version, cmdID), dpi=200)
+    plt.savefig('plots/perf_cpu_usage_{}_{}.svg'.format(version, cmdID), dpi=200)
 
     plt.close('all')
 
@@ -226,7 +226,7 @@ def plot_disk_usage(cmdID, perfdata):
         axs[row,col].axis('off')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_disk_usage_{}_{}.png'.format(version, cmdID), dpi=200)
+    plt.savefig('plots/perf_disk_usage_{}_{}.svg'.format(version, cmdID), dpi=200)
 
     plt.close('all')
 
@@ -281,7 +281,7 @@ def plot_network_buffers(cmdID, perfdata):
         axs[row,col].axis('off')
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig('plots/perf_network_buffers_{}_{}.png'.format(version, cmdID), dpi=200)
+    plt.savefig('plots/perf_network_buffers_{}_{}.svg'.format(version, cmdID), dpi=200)
 
     plt.close('all')
 
