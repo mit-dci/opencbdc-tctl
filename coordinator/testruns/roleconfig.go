@@ -277,27 +277,15 @@ func (t *TestRunManager) writeRoleCounts(
 	tr *common.TestRun,
 ) error {
 	num := t.countRoles(tr)
-	// Write role counts tallied in the loop above so that the system knows
-	// how many of each role exist.
-	loadgens := t.GetAllRolesSorted(tr, common.SystemRoleTwoPhaseGen)
-	loadgens = append(
-		loadgens,
-		t.GetAllRolesSorted(tr, common.SystemRoleAtomizerCliWatchtower)...)
-	if _, err := cfg.Write([]byte(fmt.Sprintf("loadgen_count=%d\n", len(loadgens)))); err != nil {
-		return err
-	}
 	for k, v := range num {
-		_, ok := portNums[k]
-		if ok {
-			if k == common.SystemRoleShardTwoPhase ||
-				k == common.SystemRoleCoordinator {
-				// Already done in the separate methods for shards/coordinators
-				continue
-			}
-			role := t.NormalizeRole(k)
-			if _, err := cfg.Write([]byte(fmt.Sprintf("%s_count=%d\n", role, v))); err != nil {
-				return err
-			}
+		if k == common.SystemRoleShardTwoPhase ||
+			k == common.SystemRoleCoordinator {
+			// Already done in the separate methods for shards/coordinators
+			continue
+		}
+		role := t.NormalizeRole(k)
+		if _, err := cfg.Write([]byte(fmt.Sprintf("%s_count=%d\n", role, v))); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -337,6 +325,46 @@ func (t *TestRunManager) RoleLogLevel(
 	return loglevel
 }
 
+// RoleTelLevel determines the configured telemetry level for this role, defaulting to
+// OFF
+func (t *TestRunManager) RoleTelLevel(
+	tr *common.TestRun,
+	r *common.TestRunRole,
+) string {
+	tellevel := "OFF"
+	switch r.Role {
+	case common.SystemRoleRaftAtomizer:
+		tellevel = tr.AtomizerTelemetryLevel
+	case common.SystemRoleShard:
+		fallthrough
+	case common.SystemRoleShardTwoPhase:
+		fallthrough
+	case common.SystemRoleRuntimeLockingShard:
+		tellevel = tr.ShardTelemetryLevel
+	case common.SystemRoleTicketMachine:
+		tellevel = tr.TicketerTelemetryLevel
+	case common.SystemRoleAgent:
+		tellevel = tr.AgentTelemetryLevel
+	case common.SystemRoleSentinel:
+		fallthrough
+	case common.SystemRoleSentinelTwoPhase:
+		tellevel = tr.SentinelTelemetryLevel
+	case common.SystemRoleArchiver:
+		tellevel = tr.ArchiverTelemetryLevel
+	case common.SystemRoleWatchtower:
+		tellevel = tr.WatchtowerTelemetryLevel
+	case common.SystemRoleCoordinator:
+		tellevel = tr.CoordinatorTelemetryLevel
+	case common.SystemRolePhaseTwoGen:
+		fallthrough
+	case common.SystemRoleTwoPhaseGen:
+		fallthrough
+	case common.SystemRoleAtomizerCliWatchtower:
+		tellevel = tr.LoadGenTelemetryLevel
+	}
+	return tellevel
+}
+
 // writeLogLevelConfig writes the role-level error logging level to the config
 // file for all roles in the testrun
 func (t *TestRunManager) writeLogLevelConfig(
@@ -352,6 +380,20 @@ func (t *TestRunManager) writeLogLevelConfig(
 					string(t.NormalizeRole(r.Role)),
 					r.Index,
 					loglevel,
+				),
+			),
+		); err != nil {
+			return err
+		}
+
+		tellevel := t.RoleTelLevel(tr, r)
+		if _, err := cfg.Write(
+			[]byte(
+				fmt.Sprintf(
+					"%s%d_telemetrylevel=\"%s\"\n",
+					string(t.NormalizeRole(r.Role)),
+					r.Index,
+					tellevel,
 				),
 			),
 		); err != nil {
