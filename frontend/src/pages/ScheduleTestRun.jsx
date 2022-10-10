@@ -131,6 +131,20 @@ const ScheduledRunProperty = (props) => {
             }}
           />
           )}
+          {props.type === "tellevel" && (
+            <Selector
+            values={["OFF", "MINIMAL", "BASIC", "FULL"]}
+            valueFunc={(c) => c}
+            displayFunc={(c) => c}
+            value={props.value}
+            id={props.id}
+            onChange={(e) => {
+              var obj = {};
+              obj[props.id] = e.target.value;
+              dispatch(setScheduledRunProperty(obj));
+            }}
+          />
+          )}
           {props.type === "arch" && (
             <Selector
             values={architectures}

@@ -36,6 +36,7 @@ var copyFiles = map[common.SystemRole][]string{
 	common.SystemRoleAtomizerCliWatchtower: {
 		"latency_samples_%IDX%.txt%%OPT",
 		"tx_samples_%IDX%.txt%%OPT",
+		"telemetry.bin%%OPT",
 	},
 	common.SystemRoleSentinel: {},
 	common.SystemRoleShard: {

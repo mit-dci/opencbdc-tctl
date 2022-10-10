@@ -17,99 +17,108 @@ import (
 // field in the frontend (both in the Schedule New Test Run screen and in the
 // detail screen of the test runs)
 type TestRun struct {
-	ID                       string             `json:"id"`
-	CreatedByThumbprint      string             `json:"createdByuserThumbprint"`
-	Created                  time.Time          `json:"created"`
-	Started                  time.Time          `json:"started"`
-	Completed                time.Time          `json:"completed"`
-	Status                   TestRunStatus      `json:"status"`
-	CommitHash               string             `json:"commitHash"               feFieldTitle:"Code commit"                     feFieldType:"commit"`
-	Architecture             string             `json:"architectureID"           feFieldTitle:"Architecture"                    feFieldType:"arch"`
-	BatchSize                int                `json:"batchSize"                feFieldTitle:"Batch size"                      feFieldType:"int"`
-	SampleCount              int                `json:"sampleCount"              feFieldTitle:"Sample count"                    feFieldType:"int"`
-	ShardReplicationFactor   int                `json:"shardReplicationFactor"   feFieldTitle:"Shard Replication Factor"        feFieldType:"int"`
-	STXOCacheDepth           int                `json:"stxoCacheDepth"           feFieldTitle:"STXO Cache Depth"                feFieldType:"int"`
-	WindowSize               int                `json:"windowSize"               feFieldTitle:"Window size"                     feFieldType:"int"`
-	TargetBlockInterval      int                `json:"targetBlockInterval"      feFieldTitle:"Target Block Interval"           feFieldType:"int"`
-	ElectionTimeoutUpper     int                `json:"electionTimeoutUpper"     feFieldTitle:"Election timeout upper"          feFieldType:"int"`
-	ElectionTimeoutLower     int                `json:"electionTimeoutLower"     feFieldTitle:"Election timeout lower"          feFieldType:"int"`
-	Heartbeat                int                `json:"heartbeat"                feFieldTitle:"Heartbeat"                       feFieldType:"int"`
-	RaftMaxBatch             int                `json:"raftMaxBatch"             feFieldTitle:"RAFT Max Batch"                  feFieldType:"int"`
-	SnapshotDistance         int                `json:"snapshotDistance"         feFieldTitle:"Snapshot Distance"               feFieldType:"int"`
-	AgentRPCInstances        int                `json:"agentRPCInstances"        feFieldTitle:"Agent RPC Instances"             feFieldType:"int"`
-	LoadGenOutputCount       int                `json:"loadGenOutputCount"       feFieldTitle:"Loadgen Output Count"            feFieldType:"int"`
-	LoadGenInputCount        int                `json:"loadGenInputCount"        feFieldTitle:"Loadgen Input Count"             feFieldType:"int"`
-	LoadGenAccounts          int                `json:"loadGenAccounts"          feFieldTitle:"Loadgen Accounts"                feFieldType:"int"`
-	LoadGenTxType            string             `json:"loadGenTxType"            feFieldTitle:"Loadgen Transaction Type"        feFieldType:"txtype"`
-	LoadGenAffinity          bool               `json:"loadGenAffinity"          feFieldTitle:"Enable LoadGen Region Affinity"  feFieldType:"bool"`
-	LoadGenTPSTarget         int                `json:"loadGenTPSTarget"         feFieldTitle:"Loadgen Target TPS"              feFieldType:"float"`
-	LoadGenTPSStepTime       float64            `json:"loadGenTPSStepTime"       feFieldTitle:"Loadgen TPS Step Time (sec)"     feFieldType:"float"`
-	LoadGenTPSStepPercent    float64            `json:"loadGenTPSStepPercent"    feFieldTitle:"Loadgen TPS Step Percent"        feFieldType:"float"`
-	LoadGenTPSStepStart      float64            `json:"loadGenTPSStepStart"      feFieldTitle:"Loadgen TPS Step Start"          feFieldType:"float"`
-	Telemetry                bool               `json:"telemetry"                feFieldTitle:"Enable Telemetry"                feFieldType:"bool"`
-	BatchDelay               int                `json:"batchDelay"               feFieldTitle:"Batch Delay"                     feFieldType:"int"`
-	RunPerf                  bool               `json:"runPerf"                  feFieldTitle:"Run Perf"                        feFieldType:"bool"`
-	PerfSampleRate           int                `json:"perfSampleRate"           feFieldTitle:"Perf sample rate"                feFieldType:"int"`
-	TrimSamplesAtStart       int                `json:"trimSamplesAtStart"       feFieldTitle:"Trim samples at start"           feFieldType:"int"`
-	TrimZeroesAtStart        bool               `json:"trimZeroesAtStart"        feFieldTitle:"Trim zeroes at start"            feFieldType:"bool"`
-	TrimZeroesAtEnd          bool               `json:"trimZeroesAtEnd"          feFieldTitle:"Trim zeroes at end"              feFieldType:"bool"`
-	AtomizerLogLevel         string             `json:"atomizerLogLevel"         feFieldTitle:"Atomizer Log Level"              feFieldType:"loglevel"`
-	ArchiverLogLevel         string             `json:"archiverLogLevel"         feFieldTitle:"Archiver Log Level"              feFieldType:"loglevel"`
-	SentinelLogLevel         string             `json:"sentinelLogLevel"         feFieldTitle:"Sentinel Log Level"              feFieldType:"loglevel"`
-	ShardLogLevel            string             `json:"shardLogLevel"            feFieldTitle:"Shard Log Level"                 feFieldType:"loglevel"`
-	AgentLogLevel            string             `json:"agentLogLevel"            feFieldTitle:"Agent Log Level"                 feFieldType:"loglevel"`
-	TicketerLogLevel         string             `json:"ticketerLogLevel"         feFieldTitle:"Ticketer Log Level"              feFieldType:"loglevel"`
-	CoordinatorLogLevel      string             `json:"coordinatorLogLevel"      feFieldTitle:"Coordinator Log Level"           feFieldType:"loglevel"`
-	WatchtowerLogLevel       string             `json:"watchtowerLogLevel"       feFieldTitle:"Watchtower Log Level"            feFieldType:"loglevel"`
-	WatchtowerBlockCacheSize int                `json:"watchtowerBlockCacheSize" feFieldTitle:"Watchtower Block Cache Size"     feFieldType:"int"`
-	WatchtowerErrorCacheSize int                `json:"watchtowerErrorCacheSize" feFieldTitle:"Watchtower Error Cache Size"     feFieldType:"int"`
-	InvalidTxRate            float64            `json:"invalidTxRate"            feFieldTitle:"Invalid TX Rate"                 feFieldType:"float"`
-	FixedTxRate              float64            `json:"fixedTxRate"              feFieldTitle:"Fixed TX Rate"                   feFieldType:"float"`
-	ContentionRate           float64            `json:"contentionRate"           feFieldTitle:"Contention Rate"                 feFieldType:"float"`
-	PreseedCount             int64              `json:"preseedCount"             feFieldTitle:"Number of preseeded outputs"     feFieldType:"int"`
-	PreseedShards            bool               `json:"preseedShards"            feFieldTitle:"Preseed outputs on shards"       feFieldType:"bool"`
-	KeepTimedOutAgents       bool               `json:"keepTimedOutAgents"       feFieldTitle:"Keep timed out agents"           feFieldType:"bool"`
-	SkipCleanUp              bool               `json:"skipCleanup"              feFieldTitle:"Skip cleanup after test"         feFieldType:"bool"`
-	RetryOnFailure           bool               `json:"retryOnFailure"           feFieldTitle:"Retry on failures"               feFieldType:"bool"`
-	MaxRetries               int                `json:"maxRetries"               feFieldTitle:"Maximum number of retries"       feFieldType:"int"`
-	Repeat                   int                `json:"repeat"                   feFieldTitle:"Repeat test X times"             feFieldType:"int"`
-	Debug                    bool               `json:"debug"                    feFieldTitle:"Run in debugger"                 feFieldType:"bool"`
-	SentinelAttestations     int                `json:"sentinelAttestations"     feFieldTitle:"Number of sentinel attestations" feFieldType:"int"`
-	AuditInterval            int                `json:"auditInterval"            feFieldTitle:"Audit Interval (blocks)"         feFieldType:"int"`
-	RecordNetworkTraffic     bool               `json:"recordNetworkTraffic"     feFieldTitle:"Record network traffic"          feFieldType:"bool"`
-	AgentShutdownDelay       int                `json:"agentShutdownDelay"       feFieldTitle:"Agent Shutdown Delay (seconds)"  feFieldType:"int"`
-	ObservedPeak             float64            `json:"observedPeak"`
-	DontRunBefore            time.Time          `json:"notBefore"`
-	Sweep                    string             `json:"sweep"`
-	SweepID                  string             `json:"sweepID"`
-	SweepRoleRuns            int                `json:"sweepRoleRuns"`
-	SweepTimeMinutes         int                `json:"sweepTimeMinutes"`
-	SweepTimeRuns            int                `json:"sweepTimeRuns"`
-	SweepParameter           string             `json:"sweepParameterParam"`
-	SweepParameterStart      float64            `json:"sweepParameterStart"`
-	SweepParameterStop       float64            `json:"sweepParameterStop"`
-	SweepParameterIncrement  float64            `json:"sweepParameterIncrement"`
-	SweepOneAtATime          bool               `json:"sweepOneAtATime"`
-	SweepRoles               []*TestRunRole     `json:"sweepRoles"`
-	Priority                 int                `json:"priority"`
-	Roles                    []*TestRunRole     `json:"roles"`
-	Details                  string             `json:"details"`
-	ExecutedCommands         []*ExecutedCommand `json:"executedCommands"`
-	AgentDataAtStart         []TestRunAgentData `json:"testrunAgentData"`
-	AgentDataAtEnd           []TestRunAgentData `json:"testrunAgentDataEnd"`
-	PerformanceDataAvailable bool               `json:"performanceDataAvailable"`
-	ControllerCommit         string             `json:"controllerCommitHash"`
-	Result                   *TestResult        `json:"result"`
-	SeederHash               string             `json:"seederHash"`
-	TerminateChan            chan bool          `json:"-"`
-	RetrySpawnChan           chan bool          `json:"-"`
-	PendingResultDownloads   []S3Download       `json:"-"`
-	executedCommandsLock     sync.Mutex         `json:"-"`
-	DeliberateFailures       []string           `json:"-"`
-	LogBuffer                string             `json:"-"`
-	logLock                  sync.Mutex         `json:"-"`
-	Params                   []string           `json:"-"`
-	AWSInstancesStopped      bool
+	ID                        string             `json:"id"`
+	CreatedByThumbprint       string             `json:"createdByuserThumbprint"`
+	Created                   time.Time          `json:"created"`
+	Started                   time.Time          `json:"started"`
+	Completed                 time.Time          `json:"completed"`
+	Status                    TestRunStatus      `json:"status"`
+	CommitHash                string             `json:"commitHash"                feFieldTitle:"Code commit"                     feFieldType:"commit"`
+	Architecture              string             `json:"architectureID"            feFieldTitle:"Architecture"                    feFieldType:"arch"`
+	BatchSize                 int                `json:"batchSize"                 feFieldTitle:"Batch size"                      feFieldType:"int"`
+	SampleCount               int                `json:"sampleCount"               feFieldTitle:"Sample count"                    feFieldType:"int"`
+	ShardReplicationFactor    int                `json:"shardReplicationFactor"    feFieldTitle:"Shard Replication Factor"        feFieldType:"int"`
+	STXOCacheDepth            int                `json:"stxoCacheDepth"            feFieldTitle:"STXO Cache Depth"                feFieldType:"int"`
+	WindowSize                int                `json:"windowSize"                feFieldTitle:"Window Size"                     feFieldType:"int"`
+	TargetBlockInterval       int                `json:"targetBlockInterval"       feFieldTitle:"Target Block Interval"           feFieldType:"int"`
+	ElectionTimeoutUpper      int                `json:"electionTimeoutUpper"      feFieldTitle:"Election timeout upper"          feFieldType:"int"`
+	ElectionTimeoutLower      int                `json:"electionTimeoutLower"      feFieldTitle:"Election timeout lower"          feFieldType:"int"`
+	Heartbeat                 int                `json:"heartbeat"                 feFieldTitle:"Heartbeat"                       feFieldType:"int"`
+	RaftMaxBatch              int                `json:"raftMaxBatch"              feFieldTitle:"RAFT Max Batch"                  feFieldType:"int"`
+	SnapshotDistance          int                `json:"snapshotDistance"          feFieldTitle:"Snapshot Distance"               feFieldType:"int"`
+	AgentRPCInstances         int                `json:"agentRPCInstances"         feFieldTitle:"Agent RPC Instances"             feFieldType:"int"`
+	LoadGenOutputCount        int                `json:"loadGenOutputCount"        feFieldTitle:"Loadgen Output Count"            feFieldType:"int"`
+	LoadGenInputCount         int                `json:"loadGenInputCount"         feFieldTitle:"Loadgen Input Count"             feFieldType:"int"`
+	LoadGenAccounts           int                `json:"loadGenAccounts"           feFieldTitle:"Loadgen Accounts"                feFieldType:"int"`
+	LoadGenTxType             string             `json:"loadGenTxType"             feFieldTitle:"Loadgen Transaction Type"        feFieldType:"txtype"`
+	LoadGenAffinity           bool               `json:"loadGenAffinity"           feFieldTitle:"Enable LoadGen Region Affinity"  feFieldType:"bool"`
+	LoadGenTPSTarget          int                `json:"loadGenTPSTarget"          feFieldTitle:"Loadgen Target TPS"              feFieldType:"float"`
+	LoadGenTPSStepTime        float64            `json:"loadGenTPSStepTime"        feFieldTitle:"Loadgen TPS Step Time (sec)"     feFieldType:"float"`
+	LoadGenTPSStepPercent     float64            `json:"loadGenTPSStepPercent"     feFieldTitle:"Loadgen TPS Step Percent"        feFieldType:"float"`
+	LoadGenTPSStepStart       float64            `json:"loadGenTPSStepStart"       feFieldTitle:"Loadgen TPS Step Start"          feFieldType:"float"`
+	Telemetry                 bool               `json:"telemetry"                 feFieldTitle:"Enable Telemetry"                feFieldType:"bool"`
+	BatchDelay                int                `json:"batchDelay"                feFieldTitle:"Batch Delay"                     feFieldType:"int"`
+	RunPerf                   bool               `json:"runPerf"                   feFieldTitle:"Run Perf"                        feFieldType:"bool"`
+	PerfSampleRate            int                `json:"perfSampleRate"            feFieldTitle:"Perf sample rate"                feFieldType:"int"`
+	TrimSamplesAtStart        int                `json:"trimSamplesAtStart"        feFieldTitle:"Trim samples at start"           feFieldType:"int"`
+	TrimZeroesAtStart         bool               `json:"trimZeroesAtStart"         feFieldTitle:"Trim zeroes at start"            feFieldType:"bool"`
+	TrimZeroesAtEnd           bool               `json:"trimZeroesAtEnd"           feFieldTitle:"Trim zeroes at end"              feFieldType:"bool"`
+	AtomizerLogLevel          string             `json:"atomizerLogLevel"          feFieldTitle:"Atomizer Log Level"              feFieldType:"loglevel"`
+	ArchiverLogLevel          string             `json:"archiverLogLevel"          feFieldTitle:"Archiver Log Level"              feFieldType:"loglevel"`
+	SentinelLogLevel          string             `json:"sentinelLogLevel"          feFieldTitle:"Sentinel Log Level"              feFieldType:"loglevel"`
+	ShardLogLevel             string             `json:"shardLogLevel"             feFieldTitle:"Shard Log Level"                 feFieldType:"loglevel"`
+	AgentLogLevel             string             `json:"agentLogLevel"             feFieldTitle:"Agent Log Level"                 feFieldType:"loglevel"`
+	TicketerLogLevel          string             `json:"ticketerLogLevel"          feFieldTitle:"Ticketer Log Level"              feFieldType:"loglevel"`
+	CoordinatorLogLevel       string             `json:"coordinatorLogLevel"       feFieldTitle:"Coordinator Log Level"           feFieldType:"loglevel"`
+	WatchtowerLogLevel        string             `json:"watchtowerLogLevel"        feFieldTitle:"Watchtower Log Level"            feFieldType:"loglevel"`
+	AtomizerTelemetryLevel    string             `json:"atomizerTelemetryLevel"    feFieldTitle:"Atomizer Telemetry Level"        feFieldType:"tellevel"`
+	ArchiverTelemetryLevel    string             `json:"archiverTelemetryLevel"    feFieldTitle:"Archiver Telemetry Level"        feFieldType:"tellevel"`
+	SentinelTelemetryLevel    string             `json:"sentinelTelemetryLevel"    feFieldTitle:"Sentinel Telemetry Level"        feFieldType:"tellevel"`
+	ShardTelemetryLevel       string             `json:"shardTelemetryLevel"       feFieldTitle:"Shard Telemetry Level"           feFieldType:"tellevel"`
+	AgentTelemetryLevel       string             `json:"agentTelemetryLevel"       feFieldTitle:"Agent Telemetry Level"           feFieldType:"tellevel"`
+	TicketerTelemetryLevel    string             `json:"ticketerTelemetryLevel"    feFieldTitle:"Ticketer Telemetry Level"        feFieldType:"tellevel"`
+	CoordinatorTelemetryLevel string             `json:"coordinatorTelemetryLevel" feFieldTitle:"Coordinator Telemetry Level"     feFieldType:"tellevel"`
+	WatchtowerTelemetryLevel  string             `json:"watchtowerTelemetryLevel"  feFieldTitle:"Watchtower Telemetry Level"      feFieldType:"tellevel"`
+	LoadGenTelemetryLevel     string             `json:"loadGenTelemetryLevel"     feFieldTitle:"Loadgen Telemetry Level"         feFieldType:"tellevel"`
+	WatchtowerBlockCacheSize  int                `json:"watchtowerBlockCacheSize"  feFieldTitle:"Watchtower Block Cache Size"     feFieldType:"int"`
+	WatchtowerErrorCacheSize  int                `json:"watchtowerErrorCacheSize"  feFieldTitle:"Watchtower Error Cache Size"     feFieldType:"int"`
+	InvalidTxRate             float64            `json:"invalidTxRate"             feFieldTitle:"Invalid TX Rate"                 feFieldType:"float"`
+	FixedTxRate               float64            `json:"fixedTxRate"               feFieldTitle:"Fixed TX Rate"                   feFieldType:"float"`
+	ContentionRate            float64            `json:"contentionRate"            feFieldTitle:"Contention Rate"                 feFieldType:"float"`
+	PreseedCount              int64              `json:"preseedCount"              feFieldTitle:"Number of preseeded outputs"     feFieldType:"int"`
+	PreseedShards             bool               `json:"preseedShards"             feFieldTitle:"Preseed outputs on shards"       feFieldType:"bool"`
+	KeepTimedOutAgents        bool               `json:"keepTimedOutAgents"        feFieldTitle:"Keep timed out agents"           feFieldType:"bool"`
+	SkipCleanUp               bool               `json:"skipCleanup"               feFieldTitle:"Skip cleanup after test"         feFieldType:"bool"`
+	RetryOnFailure            bool               `json:"retryOnFailure"            feFieldTitle:"Retry on failures"               feFieldType:"bool"`
+	MaxRetries                int                `json:"maxRetries"                feFieldTitle:"Maximum number of retries"       feFieldType:"int"`
+	Repeat                    int                `json:"repeat"                    feFieldTitle:"Repeat test X times"             feFieldType:"int"`
+	Debug                     bool               `json:"debug"                     feFieldTitle:"Run in debugger"                 feFieldType:"bool"`
+	SentinelAttestations      int                `json:"sentinelAttestations"      feFieldTitle:"Number of sentinel attestations" feFieldType:"int"`
+	AuditInterval             int                `json:"auditInterval"             feFieldTitle:"Audit Interval (blocks)"         feFieldType:"int"`
+	RecordNetworkTraffic      bool               `json:"recordNetworkTraffic"      feFieldTitle:"Record network traffic"          feFieldType:"bool"`
+	AgentShutdownDelay        int                `json:"agentShutdownDelay"        feFieldTitle:"Agent Shutdown Delay (seconds)"  feFieldType:"int"`
+	ObservedPeak              float64            `json:"observedPeak"`
+	DontRunBefore             time.Time          `json:"notBefore"`
+	Sweep                     string             `json:"sweep"`
+	SweepID                   string             `json:"sweepID"`
+	SweepRoleRuns             int                `json:"sweepRoleRuns"`
+	SweepTimeMinutes          int                `json:"sweepTimeMinutes"`
+	SweepTimeRuns             int                `json:"sweepTimeRuns"`
+	SweepParameter            string             `json:"sweepParameterParam"`
+	SweepParameterStart       float64            `json:"sweepParameterStart"`
+	SweepParameterStop        float64            `json:"sweepParameterStop"`
+	SweepParameterIncrement   float64            `json:"sweepParameterIncrement"`
+	SweepOneAtATime           bool               `json:"sweepOneAtATime"`
+	SweepRoles                []*TestRunRole     `json:"sweepRoles"`
+	Priority                  int                `json:"priority"`
+	Roles                     []*TestRunRole     `json:"roles"`
+	Details                   string             `json:"details"`
+	ExecutedCommands          []*ExecutedCommand `json:"executedCommands"`
+	AgentDataAtStart          []TestRunAgentData `json:"testrunAgentData"`
+	AgentDataAtEnd            []TestRunAgentData `json:"testrunAgentDataEnd"`
+	PerformanceDataAvailable  bool               `json:"performanceDataAvailable"`
+	ControllerCommit          string             `json:"controllerCommitHash"`
+	Result                    *TestResult        `json:"result"`
+	SeederHash                string             `json:"seederHash"`
+	TerminateChan             chan bool          `json:"-"`
+	RetrySpawnChan            chan bool          `json:"-"`
+	PendingResultDownloads    []S3Download       `json:"-"`
+	executedCommandsLock      sync.Mutex         `json:"-"`
+	DeliberateFailures        []string           `json:"-"`
+	LogBuffer                 string             `json:"-"`
+	logLock                   sync.Mutex         `json:"-"`
+	Params                    []string           `json:"-"`
+	AWSInstancesStopped       bool
 }
 
 func (tr *TestRun) ReadLogTail() {
