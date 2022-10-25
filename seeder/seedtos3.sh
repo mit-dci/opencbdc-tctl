@@ -87,10 +87,15 @@ maketar() {
         shard_end=$((${shard_start} + ${shard_range} - 1))
         target="${base%_*}_${shard_start}_${shard_end}_${SEED_COMMIT}.tar"
     fi
+    echo "Making tar [$target] of [$f]"
     tar -cf "$target" "$f"
+    echo "Exit code from tar: $?"
     rm -rf $1
 }
-
+echo "Directory listing follows"
+ls -sla
+echo "Diskfree result follows"
+df -h
 echo "Making TAR archives of seeds"
 if [ "$SEED_MODE" = "0" ]
 then
