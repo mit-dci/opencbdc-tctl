@@ -33,6 +33,17 @@ type ShardSeed struct {
 	batchJobID string
 }
 
+var seedsFailed = []string{}
+
+func (am *AwsManager) SeedFailed(id string) bool {
+	for _, s := range seedsFailed {
+		if s == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (am *AwsManager) GenerateSeed(seed ShardSeed, cfg []byte) error {
 	am.seedLock.Lock()
 	defer am.seedLock.Unlock()
@@ -196,9 +207,11 @@ func (am *AwsManager) refreshSeeds() error {
 			}
 			if job.Status == types.JobStatusFailed {
 				logging.Warnf(
-					"Batch job %s for shard seeding failed",
+					"Batch job %s (%s) for shard seeding failed",
 					*job.JobId,
+					*job.JobName,
 				)
+				seedsFailed = append(seedsFailed, *job.JobName)
 				continue
 			}
 			// Job is still busy, add to our new array

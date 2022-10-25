@@ -273,6 +273,13 @@ func (t *TestRunManager) CheckPreseed(tr *common.TestRun, cfg []byte) error {
 			if err != nil {
 				return fmt.Errorf("error checking preseed existence: %v", err)
 			}
+			if t.awsm.SeedFailed(fmt.Sprintf("SEED_%s", tr.ID)) {
+				return fmt.Errorf(
+					"Shard preseeding failed - "+
+						"Please check on Batch job with name [SEED_%s] from the AWS console for details",
+					tr.ID,
+				)
+			}
 			if hasSeed {
 				break
 			}
