@@ -7,9 +7,11 @@ then
     exit 1
 fi
 
-mkdir -p /tmp/seeds
+WORKSPACE="${SEEDER_WORKSPACE:=/tmp/seeds}"
 
-cd /tmp/seeds
+mkdir -p $WORKSPACE
+
+pushd $WORKSPACE
 
 echo "Downloading and extracting shard seeder"
 ## Download binaries
@@ -118,3 +120,6 @@ done
 if [ ! -z "$SEED_CONFIG_S3URI" ]; then
     aws s3 rm "$SEED_CONFIG_S3URI"
 fi
+popd
+
+rm -rf $WORKSPACE
