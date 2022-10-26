@@ -111,6 +111,10 @@ func (am *AwsManager) GenerateSeed(seed ShardSeed, cfg []byte) error {
 						Value: aws.String(fmt.Sprintf("%d", seed.SeedMode)),
 					},
 					{
+						Name:  aws.String("JOB_NAME"),
+						Value: aws.String(fmt.Sprintf("SEED_%s", seed.TestRunID)),
+					},
+					{
 						Name: aws.String("SEED_CONFIG_S3URI"),
 						Value: aws.String(
 							fmt.Sprintf(
