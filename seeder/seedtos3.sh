@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-WORKSPACE="${SEEDER_WORKSPACE:=/tmp/seeds}"
+WORKSPACE="${SEEDER_WORKSPACE:=/tmp/seeds}/$JOB_NAME"
 
 mkdir -p $WORKSPACE
 
