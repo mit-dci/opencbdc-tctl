@@ -122,4 +122,4 @@ if [ ! -z "$SEED_CONFIG_S3URI" ]; then
 fi
 popd
 
-rm -rf $WORKSPACE
+rm -rf $WORKSPACE/*
