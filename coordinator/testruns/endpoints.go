@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mit-dci/opencbdc-tctl/common"
+	"github.com/mit-dci/opencbdc-tctl/coordinator"
 )
 
 // PortIncrement is a type that specifies the offset from the default port
@@ -117,6 +118,10 @@ func (t *TestRunManager) WaitForRolesOnline(
 					errLock.Lock()
 					errs = append(errs, err)
 					errLock.Unlock()
+					if err == coordinator.ErrAgentNotFound {
+						// No point in continuing!
+						break
+					}
 				} else {
 					online := atomic.AddInt32(rolesOnline, 1)
 					t.WriteLog(tr, "%d/%d (out of %d) %s are online on port %d",
@@ -181,6 +186,7 @@ func (t *TestRunManager) WaitForRoleOnline(
 	// Use GetRoleEndpoint to determine the IP and port we need to connect to.
 	endpoint, err := t.GetRoleEndpoint(tr, role, portIncrement)
 	if err != nil {
+		time.Sleep(time.Second * 1) // Prevent rapid failures
 		return err
 	}
 
