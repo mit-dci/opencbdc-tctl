@@ -172,7 +172,7 @@ func (c *Coordinator) removeAgent(agent *ConnectedAgent) {
 // Returns ErrAgentNotFound if there is no agent with the given agentID
 func (c *Coordinator) GetAgent(agentID int32) (*ConnectedAgent, error) {
 	for _, a := range c.agents {
-		if a.ID == agentID {
+		if a != nil && a.ID == agentID {
 			return a, nil
 		}
 	}
