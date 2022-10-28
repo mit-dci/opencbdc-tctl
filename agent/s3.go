@@ -30,7 +30,7 @@ func (a *Agent) handleDeployFileFromS3(
 	}
 
 	ret := &wire.DeployFileFromS3ResponseMsg{Success: true}
-	logging.Debugf(
+	logging.Infof(
 		"Received request to deploy from S3 bucket %s - file %s at %s",
 		msg.SourceBucket,
 		msg.SourcePath,
@@ -54,7 +54,6 @@ func (a *Agent) handleDeployFileFromS3(
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
 
 	// Create the S3 client
 	client := s3.NewFromConfig(
@@ -75,12 +74,21 @@ func (a *Agent) handleDeployFileFromS3(
 			Key:    aws.String(msg.SourcePath),
 		})
 	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	f.Close()
+
+	stat, err := os.Stat(targetFile)
+	if err != nil {
 		return nil, err
 	}
 
+	logging.Infof("File downloaded (%s): %d bytes", stat.Name(), stat.Size())
+
 	// Unpack the file if this has been requested
 	if msg.Unpack {
-		logging.Infof("Unpacking file from S3")
+		logging.Infof("Unpacking file from S3 (%s)", targetFile)
 		err = common.TarExtractFlat(targetFile, msg.FlatUnpack, msg.UnpackNoDir)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -89,6 +97,8 @@ func (a *Agent) handleDeployFileFromS3(
 				err,
 			)
 		}
+		logging.Infof("Done unpacking file from S3 (%s) - removing it", targetFile)
+
 		os.Remove(targetFile)
 	}
 	logging.Infof("Done")

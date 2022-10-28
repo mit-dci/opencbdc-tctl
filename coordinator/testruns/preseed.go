@@ -84,7 +84,7 @@ func (t *TestRunManager) PreseedShards(
 			bucket,
 			sourcePath,
 		)
-
+		success := true
 		// Instruct the agent to deploy the file from S3 and unpack it
 		res, err := t.am.QueryAgentWithTimeout(
 			agentID,
@@ -111,6 +111,7 @@ func (t *TestRunManager) PreseedShards(
 			)
 			errs = append(errs, err)
 			errsLock.Unlock()
+			success = false
 		} else {
 			_, ok := res.(*wire.DeployFileFromS3ResponseMsg)
 			if !ok {
@@ -120,7 +121,7 @@ func (t *TestRunManager) PreseedShards(
 
 		// 2PC shard uses a single file, not a folder - have to rename
 		// the file coming from the tar archive
-		if t.Is2PC(trn.Architecture) {
+		if t.Is2PC(trn.Architecture) && err == nil {
 			inmemPreseedSource := fmt.Sprintf(
 				"2pc_shard_preseed_%d_%d_%d",
 				utxoCount,
@@ -162,11 +163,14 @@ func (t *TestRunManager) PreseedShards(
 				if !ok {
 					errs = append(errs, fmt.Errorf("error seeding agent %d (AWS Instance %s): Unexpected return type. Expected DeployFileFromS3ResponseMsg, got %T", agentID, r.AwsAgentInstanceId, res))
 				}
+
 			}
+
 		}
 
-		t.WriteLog(tr, "Pre-seeding agent %d succeeded", agentID)
-
+		if success {
+			t.WriteLog(tr, "Pre-seeding agent %d succeeded", agentID)
+		}
 		wg.Done()
 	}
 
