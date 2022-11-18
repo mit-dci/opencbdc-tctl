@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -277,7 +278,8 @@ func (am *AwsManager) refreshSeeds() error {
 				if err != nil {
 					continue
 				}
-				numShards := 256 / (endFirstRange + 1)
+
+				numShards := int(math.Round(float64(256) / float64(endFirstRange+1)))
 				numOutputs, err := strconv.Atoi(parts[0])
 				if err != nil {
 					continue
