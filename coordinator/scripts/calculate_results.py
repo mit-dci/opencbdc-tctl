@@ -344,17 +344,25 @@ if 'TRIM_ZEROES_START' in environ and environ['TRIM_ZEROES_START'] == "1":
     for i in range(len(tps_lines)):
         while len(tps_lines[i]["tps"]) > 0 and int(tps_lines[i]["tps"][0]) == 0:
             tps_lines[i]["tps"] = tps_lines[i]["tps"][1:]
+    for i in range(len(lat_lines)):
+        while len(lat_lines[i]["lats"]) > 0 and int(lat_lines[i]["lats"][0]) == 0:
+            lat_lines[i]["lats"] = lat_lines[i]["lats"][1:]
 
 if 'TRIM_ZEROES_END' in environ and environ['TRIM_ZEROES_END'] == "1":
     for i in range(len(tps_lines)):
        while len(tps_lines[i]["tps"]) > 0 and int(tps_lines[i]["tps"][-1]) == 0:
             tps_lines[i]["tps"].pop()
+    for i in range(len(lat_lines)):
+       while len(lat_lines[i]["lats"]) > 0 and int(lat_lines[i]["lats"][-1]) == 0:
+            lat_lines[i]["lats"].pop()
 
 ## Lob off (configurable) more "warm up" samples
 if 'TRIM_SAMPLES' in environ:
     trim_samples = int(environ['TRIM_SAMPLES'])
     for i in range(len(tps_lines)):
         tps_lines[i]["tps"] = tps_lines[i]["tps"][trim_samples:]
+    for i in range(len(lat_lines)):
+        lat_lines[i]["lats"] = lat_lines[i]["lats"][trim_samples:]
 
 
 ## Create throughput histogram
