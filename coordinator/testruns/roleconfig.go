@@ -205,7 +205,7 @@ func (t *TestRunManager) writeTestRunConfigVariables(
 		numRoles := t.countRoles(tr)
 		numClis := 0
 		numClis += numRoles[common.SystemRoleAtomizerCliWatchtower]
-		numClis += numRoles[common.SystemRolePhaseTwoGen]
+		numClis += numRoles[common.SystemRoleParsecGen]
 		numClis += numRoles[common.SystemRoleTwoPhaseGen]
 
 		// Calculate target per role
@@ -355,7 +355,7 @@ func (t *TestRunManager) RoleTelLevel(
 		tellevel = tr.WatchtowerTelemetryLevel
 	case common.SystemRoleCoordinator:
 		tellevel = tr.CoordinatorTelemetryLevel
-	case common.SystemRolePhaseTwoGen:
+	case common.SystemRoleParsecGen:
 		fallthrough
 	case common.SystemRoleTwoPhaseGen:
 		fallthrough
