@@ -33,7 +33,7 @@ var roleBinaries = map[common.SystemRole]string{
 	common.SystemRoleAgent:                 "sources/build/src/parsec/agent/agentd",
 	common.SystemRoleRuntimeLockingShard:   "sources/build/src/parsec/runtime_locking_shard/runtime_locking_shardd",
 	common.SystemRoleTicketMachine:         "sources/build/src/parsec/ticket_machine/ticket_machined",
-	common.SystemRolePhaseTwoGen:           "sources/build/tools/bench/parsec/evm/evm_bench",
+	common.SystemRoleParsecGen:           "sources/build/tools/bench/parsec/evm/evm_bench",
 }
 
 // roleParameters is a map from the system role to the parameters we have to
@@ -78,7 +78,7 @@ var roleParameters = map[common.SystemRole][]string{
 		"--loglevel=%LOGLEVEL%",
 		"--component_id=%IDX%",
 	},
-	common.SystemRolePhaseTwoGen: []string{
+	common.SystemRoleParsecGen: []string{
 		"--component_id=%IDX%",
 		"--loadgen_accounts=%ACCOUNTS%",
 		"--loadgen_agent_affinity=%LGAFFINITY%",
@@ -373,8 +373,8 @@ func (t *TestRunManager) RunBinaries(
 		return t.RunBinariesAtomizer(tr, envs, cmd, failures)
 	} else if t.Is2PC(tr.Architecture) {
 		return t.RunBinariesTwoPhase(tr, envs, cmd, failures)
-	} else if t.IsPhaseTwo(tr.Architecture) {
-		return t.RunBinariesPhaseTwo(tr, envs, cmd, failures)
+	} else if t.IsParsec(tr.Architecture) {
+		return t.RunBinariesParsec(tr, envs, cmd, failures)
 	}
 	return fmt.Errorf("unknown architecture: [%s]", tr.Architecture)
 }

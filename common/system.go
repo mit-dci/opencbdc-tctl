@@ -20,7 +20,7 @@ const SystemRoleTwoPhaseGen SystemRole = "twophase-gen"
 const SystemRoleAgent SystemRole = "agent"
 const SystemRoleRuntimeLockingShard SystemRole = "runtime_locking_shard"
 const SystemRoleTicketMachine SystemRole = "ticket_machine"
-const SystemRolePhaseTwoGen SystemRole = "phasetwo_bench"
+const SystemRoleParsecGen SystemRole = "parsec_bench"
 const SystemRoleLoadGen SystemRole = "loadgen"
 
 type SystemArchitectureRole struct {
@@ -223,8 +223,8 @@ var AvailableArchitectures = []SystemArchitecture{
 		},
 	},
 	{
-		ID:   "phase-two",
-		Name: "Phase Two Programmability",
+		ID:   "parsec",
+		Name: "PArSEC",
 		Roles: []SystemArchitectureRole{
 			{
 				Role:       SystemRoleAgent,
@@ -242,7 +242,7 @@ var AvailableArchitectures = []SystemArchitecture{
 				ShortTitle: "Ticketer",
 			},
 			{
-				Role:       SystemRolePhaseTwoGen,
+				Role:       SystemRoleParsecGen,
 				Title:      "Generator",
 				ShortTitle: "Gen",
 			},
@@ -261,7 +261,7 @@ var AvailableArchitectures = []SystemArchitecture{
 			RaftMaxBatch:              100000,
 			SnapshotDistance:          0,
 			ShardReplicationFactor:    3,
-			Architecture:              "phase-two",
+			Architecture:              "parsec",
 			SampleCount:               315,
 			LoadGenOutputCount:        2,
 			LoadGenInputCount:         2,

@@ -85,7 +85,7 @@ func (t *TestRunManager) ExecuteTestRun(tr *common.TestRun) {
 		}
 	}
 
-	if !t.IsPhaseTwo(tr.Architecture) {
+	if !t.IsParsec(tr.Architecture) {
 		// Generate the configuration file the system needs based on the
 		// configured
 		// parameters in the UI

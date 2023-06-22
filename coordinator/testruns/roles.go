@@ -40,7 +40,7 @@ func (t *TestRunManager) NormalizeRole(
 		role = common.SystemRoleShard
 	} else if role == common.SystemRoleSentinelTwoPhase {
 		role = common.SystemRoleSentinel
-	} else if role == common.SystemRoleAtomizerCliWatchtower || role == common.SystemRolePhaseTwoGen || role == common.SystemRoleTwoPhaseGen {
+	} else if role == common.SystemRoleAtomizerCliWatchtower || role == common.SystemRoleParsecGen || role == common.SystemRoleTwoPhaseGen {
 		role = common.SystemRoleLoadGen
 	}
 	return role

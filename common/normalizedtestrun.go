@@ -165,7 +165,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			cpu,
 			SystemRoleAtomizerCliWatchtower,
 			SystemRoleTwoPhaseGen,
-			SystemRolePhaseTwoGen,
+			SystemRoleParsecGen,
 		),
 	)
 	trc.SentinelCPU = int(
@@ -198,7 +198,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 			ram,
 			SystemRoleAtomizerCliWatchtower,
 			SystemRoleTwoPhaseGen,
-			SystemRolePhaseTwoGen,
+			SystemRoleParsecGen,
 		) / 1024,
 	)
 	trc.SentinelRAM = int(
@@ -236,7 +236,7 @@ func (tr *TestRun) NormalizedConfigWithAgentData(
 		count,
 		SystemRoleAtomizerCliWatchtower,
 		SystemRoleTwoPhaseGen,
-		SystemRolePhaseTwoGen,
+		SystemRoleParsecGen,
 	)
 	trc.SentinelCount = getIntValueForAnyKey(
 		count,

@@ -55,7 +55,7 @@ func (t *TestRunManager) SubstituteParameters(
 			fmt.Sprintf("%d", tr.LoadGenAccounts),
 		)
 		p = strings.ReplaceAll(p, "%LOGLEVEL%", t.RoleLogLevel(tr, r))
-		if r.Role == common.SystemRolePhaseTwoGen {
+		if r.Role == common.SystemRoleParsecGen {
 			p = strings.ReplaceAll(p, "%LGAFFINITY%", t.LoadGenAffinity(tr, r))
 		}
 		newParams = append(newParams, p)
