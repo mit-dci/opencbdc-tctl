@@ -249,7 +249,7 @@ func (s *SourcesManager) Compile(
 	proxy_path := filepath.Join(
 		sourcesDir(),
 		"src",
-		"3pc",
+		"parsec",
 		"agent",
 		"runners",
 		"evm",
@@ -257,14 +257,14 @@ func (s *SourcesManager) Compile(
 	)
 	if _, err := os.Stat(proxy_path); !os.IsNotExist(err) {
 		logging.Infof(
-			"[Compile %s-%t]: Copying 3PC/EVM RPC proxy",
+			"[Compile %s-%t]: Copying parsec/EVM RPC proxy",
 			hash,
 			profilingOrDebugging,
 		)
 		dest_proxy_path := filepath.Join(
 			binariesPath,
 			"src",
-			"3pc",
+			"parsec",
 			"agent",
 			"runners",
 			"evm",
