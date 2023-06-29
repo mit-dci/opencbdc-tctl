@@ -209,6 +209,10 @@ if two_phase:
         df['latsS'] = df.lats / 10**3
         df['pDate'] = df.time.values.astype('datetime64[ns]')
         df = df[df.time > 1609459200000] # Filter out (corrupt) times before 2021
+        # trim first <trim_samples> samples from dataframe
+        if 'TRIM_SAMPLES' in environ:
+            trim_samples = int(environ['TRIM_SAMPLES'])
+            df = df[df.time > df[0][0] + trim_samples*(block_time_ms / 1000)*one_sec]
         dat = df.groupby(by=MyBinnerTime(expression=df.pDate, resolution='s', df=df, label='pDate'), agg={'count': 'count', 'lats': vaex.agg.list('lats')})
         dat['lats'] = dat['lats'].apply(process_lats)
 
@@ -236,7 +240,7 @@ if two_phase:
                 lat_99999.append(tps_its[2][1][idx][2])
                 idx += 1
             current += datetime.timedelta(seconds=1)
-        
+
         dat = df.groupby(df.latsS, agg='count')
         lats = dat.values
         lat_max = df.max(df.latsS)
@@ -262,11 +266,11 @@ if two_phase:
         lat_lines.append({"lats":lat_99999, "title":"99.999%", "freq": 1})
 
         periods = []
-        
+
         idx = 0
         tps_target_files =  [join('outputs',x) for x in listdir('outputs') \
                     if 'tps_target_' in x and 'hdf5' not in x]
-        if len(tps_target_files) > 0:   
+        if len(tps_target_files) > 0:
             t_index = pandas.date_range(start=begin- datetime.timedelta(seconds=5), end=end, freq='1s')
             exports = 0
             for f in tps_target_files:
@@ -285,7 +289,7 @@ if two_phase:
                     exports = exports + 1
                 else:
                     print('{} has no rows', f)
-            
+
             if exports > 0:
                 df2 = vaex.open('outputs/*-tps_target_*.txt.hdf5')
                 df2['pDate'] = df2['index']
@@ -296,11 +300,11 @@ if two_phase:
                 dat3.drop('tps_target', inplace=True)
                 dat3.drop('pDate', inplace=True)
                 dat2.join(dat3, inplace=True)
-                
+
                 its = dat2.to_items()
                 tps_target = make_tps_target_series_line(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]))
                 periods = extract_tps_target_periods(its, begin, end, (lambda its,idx: its[0][1][idx].astype(datetime.datetime)), (lambda its,idx: its[1][1][idx]), (lambda its,idx: its[3][1][idx]))
-                
+
                 tps_lines.append({"tps":tps_target, "title":"Loadgen target", "freq": 1, "ma": False})
 
         prev_lat99 = 0
@@ -326,6 +330,13 @@ if two_phase:
                 elbow_latmean.append(prev_latmean)
                 elbow_lat99.append(prev_lat99)
                 elbow_lat99999.append(prev_lat99999)
+    elif 'TRIM_SAMPLES' in environ :
+        ## Lob off (configurable) more "warm up" samples
+        trim_samples = int(environ['TRIM_SAMPLES'])
+        for i in range(len(tps_lines)):
+            tps_lines[i]["tps"] = tps_lines[i]["tps"][trim_samples:]
+        for i in range(len(lat_lines)):
+            lat_lines[i]["lats"] = lat_lines[i]["lats"][trim_samples:]
 
 if archiver_based:
     for output_file in output_files:
@@ -356,13 +367,7 @@ if 'TRIM_ZEROES_END' in environ and environ['TRIM_ZEROES_END'] == "1":
        while len(lat_lines[i]["lats"]) > 0 and int(lat_lines[i]["lats"][-1]) == 0:
             lat_lines[i]["lats"].pop()
 
-## Lob off (configurable) more "warm up" samples
-if 'TRIM_SAMPLES' in environ:
-    trim_samples = int(environ['TRIM_SAMPLES'])
-    for i in range(len(tps_lines)):
-        tps_lines[i]["tps"] = tps_lines[i]["tps"][trim_samples:]
-    for i in range(len(lat_lines)):
-        lat_lines[i]["lats"] = lat_lines[i]["lats"][trim_samples:]
+
 
 
 ## Create throughput histogram
@@ -480,7 +485,7 @@ for i, tps_line in enumerate(tps_lines):
         if len(colors) > j:
             color = colors[j]
         ax.plot(tps_time, tps_ma, label='{} ({}ms MA)'.format(tps_line["title"],tps_ma_ms), color=color)
-    
+
 
 
 max = max * 1.02
@@ -572,7 +577,7 @@ if len(elbow_tps) > 0:
         if len(markers) > i:
             marker = markers[i]
         ax.plot(elbow_tps, yy, label=titles[i], color=color, marker=marker)
-            
+
     max = max * 1.02
 
     ax.set_ylabel('Latency (ms)')
@@ -584,13 +589,13 @@ if len(elbow_tps) > 0:
     # TODO: Find proper way of finding peak TPS range. None of this is working
     # accurately
     # for yy in y:
-    #     delta_ma_tmp = [] 
+    #     delta_ma_tmp = []
     #     pf_x = x
     #     pf_y = yy
     #     while math.isnan(pf_y[-1]):
     #         pf_y = pf_y[:-1]
     #         pf_x = pf_x[:-1]
-    
+
     #     while math.isnan(pf_y[1]):
     #         pf_y = pf_y[1:]
     #         pf_x = pf_x[1:]
@@ -625,16 +630,16 @@ if len(elbow_tps) > 0:
     #                         peak_lb_idx = 0
     #                     if peak_ub_idx < 0:
     #                         peak_ub_idx = 0
-                        
+
     #                     peak_lb = pf_x[peak_lb_idx]
     #                     peak_ub = pf_x[peak_ub_idx]
     #                     peak_found = True
     #                 if delta_ma_above < 8:
     #                     peak_found = False
-        
+
     #     if peak_found:
     #         break
-    
+
     # if peak_ub > 0:
     #     ax.set_title('Latency/Throughput Elbow\nDetected peak {}-{} TX/s'.format(peak_lb, peak_ub))
 

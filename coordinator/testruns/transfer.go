@@ -61,7 +61,7 @@ var copyFiles = map[common.SystemRole][]string{
 		"tps_target_%IDX%.txt%%OPT",
 		"telemetry.bin%%OPT",
 	},
-	common.SystemRolePhaseTwoGen: {
+	common.SystemRoleParsecGen: {
 		"tx_samples_%IDX%.txt",
 		"telemetry.bin%%OPT",
 	},

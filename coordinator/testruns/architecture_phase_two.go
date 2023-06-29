@@ -8,20 +8,20 @@ import (
 	"github.com/mit-dci/opencbdc-tctl/common"
 )
 
-func (t *TestRunManager) IsPhaseTwo(architectureID string) bool {
-	return strings.HasPrefix(architectureID, "phase-two")
+func (t *TestRunManager) IsParsec(architectureID string) bool {
+	return strings.HasPrefix(architectureID, "parsec")
 }
 
-// RunBinariesPhaseTwo will orchestrate the running of all roles for a full
-// cycle test with the phase two architecture
-func (t *TestRunManager) RunBinariesPhaseTwo(
+// RunBinariesParsec will orchestrate the running of all roles for a full
+// cycle test with the PArSEC architecture
+func (t *TestRunManager) RunBinariesParsec(
 	tr *common.TestRun,
 	envs map[int32][]byte,
 	cmd chan *common.ExecutedCommand,
 	failures chan *common.ExecutedCommand,
 ) error {
 	// Build the sequence of commands to start
-	startSequence := t.CreateStartSequencePhaseTwo(tr)
+	startSequence := t.CreateStartSequenceParsec(tr)
 
 	// Execute the sequence of commands to start
 	allCmds, terminated, err := t.executeStartSequence(
@@ -76,7 +76,7 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	case <-time.After(timeout):
 	}
 
-	err = t.CleanupCommandsPhaseTwo(tr, allCmds, envs)
+	err = t.CleanupCommandsParsec(tr, allCmds, envs)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (t *TestRunManager) RunBinariesPhaseTwo(
 	return nil
 }
 
-func (t *TestRunManager) CleanupCommandsPhaseTwo(
+func (t *TestRunManager) CleanupCommandsParsec(
 	tr *common.TestRun,
 	allCmds []runningCommand,
 	envs map[int32][]byte,
@@ -109,7 +109,7 @@ func (t *TestRunManager) CleanupCommandsPhaseTwo(
 	t.WriteLog(tr, "Interrupting all loadgens")
 	err := t.BreakAllCmds(
 		tr,
-		t.FilterCommandsByRole(tr, allCmds, common.SystemRolePhaseTwoGen),
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleParsecGen),
 	)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func (t *TestRunManager) CleanupCommandsPhaseTwo(
 	t.WriteLog(tr, "Terminating all loadgens")
 	err = t.TerminateAllCmds(
 		tr,
-		t.FilterCommandsByRole(tr, allCmds, common.SystemRolePhaseTwoGen),
+		t.FilterCommandsByRole(tr, allCmds, common.SystemRoleParsecGen),
 	)
 	if err != nil {
 		return err
@@ -183,11 +183,11 @@ func (t *TestRunManager) CleanupCommandsPhaseTwo(
 	return nil
 }
 
-// CreateStartSequencePhaseTwo uses the test run configuration to determine in
+// CreateStartSequenceParsec uses the test run configuration to determine in
 // which sequence the agent roles should be started, and returns an array of
 // startSequenceEntry elements that are ordered in the sequence in which they
 // should be started up.
-func (t *TestRunManager) CreateStartSequencePhaseTwo(
+func (t *TestRunManager) CreateStartSequenceParsec(
 	tr *common.TestRun,
 ) []startSequenceEntry {
 	// Determine the start sequence
@@ -236,7 +236,7 @@ func (t *TestRunManager) CreateStartSequencePhaseTwo(
 
 	// Start all load generators
 	startSequence = append(startSequence, startSequenceEntry{
-		roles:       t.GetAllRolesSorted(tr, common.SystemRolePhaseTwoGen),
+		roles:       t.GetAllRolesSorted(tr, common.SystemRoleParsecGen),
 		timeout:     roleStartTimeout,
 		waitForPort: []PortIncrement{}, // Don't wait for anything - loadgens don't accept incoming
 	})
