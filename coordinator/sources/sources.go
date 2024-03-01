@@ -195,26 +195,97 @@ func (s *SourcesManager) Compile(
 		profilingOrDebugging,
 	)
 
-	cmd = exec.Command(
-		"bash",
-		filepath.Join(sourcesDir(), "scripts", "configure.sh"),
-	)
-	cmd.Dir = sourcesDir()
-	env := os.Environ()
-	if !profilingOrDebugging {
-		env = append(env, "BUILD_RELEASE=1")
-	}
-	cmd.Env = env
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("Configure failed: %v\n\n%v", err, string(out))
+	avoid_legacy_setup := true
+	var out []byte
+	var env []string
+	scriptsDir := filepath.Join(sourcesDir(), "scripts")
+	{
+		fp := filepath.Join(scriptsDir, "install-build-tools.sh")
+		_, err := os.Stat(fp)
+		if err == nil {
+			cmd = exec.Command("bash", fp)
+
+			cmd.Dir = sourcesDir()
+			env := os.Environ()
+			if !profilingOrDebugging {
+				env = append(env, "BUILD_RELEASE=1")
+			}
+			cmd.Env = env
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				avoid_legacy_setup = false
+				return fmt.Errorf("Build-environment setup failed: %v\n\n%v", err, string(out))
+			} else {
+				logging.Infof(
+					"[Compile %s-%t]: Build-environment setup complete",
+					hash,
+					profilingOrDebugging,
+				)
+			}
+		} else {
+			avoid_legacy_setup = false
+		}
 	}
 
-	logging.Infof(
-		"[Compile %s-%t]: Configure script complete",
-		hash,
-		profilingOrDebugging,
-	)
+	{
+		fp := filepath.Join(scriptsDir, "setup-dependencies.sh")
+		_, err := os.Stat(fp)
+		if err == nil {
+			cmd = exec.Command("bash", fp)
+
+			cmd.Dir = sourcesDir()
+			env := os.Environ()
+			if !profilingOrDebugging {
+				env = append(env, "BUILD_RELEASE=1")
+			}
+			cmd.Env = env
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				avoid_legacy_setup = false
+				return fmt.Errorf("Dependency installation failed: %v\n\n%v", err, string(out))
+			} else {
+				logging.Infof(
+					"[Compile %s-%t]: Dependency installation complete",
+					hash,
+					profilingOrDebugging,
+				)
+			}
+		} else {
+			avoid_legacy_setup = false
+		}
+	}
+
+	if !avoid_legacy_setup {
+		logging.Infof(
+			"[Compile %s-%t]: Attempting to use legacy configuration",
+			hash,
+			profilingOrDebugging,
+		)
+		fp := filepath.Join(scriptsDir, "configure.sh")
+		_, err := os.Stat(fp)
+		if err != nil {
+			return fmt.Errorf("Legacy configuration failed: %v\n\n%v", err, string(out))
+		}
+
+		cmd = exec.Command("bash", fp)
+
+		cmd.Dir = sourcesDir()
+		env := os.Environ()
+		if !profilingOrDebugging {
+			env = append(env, "BUILD_RELEASE=1")
+		}
+		cmd.Env = env
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("Legacy configuration failed: %v\n\n%v", err, string(out))
+		} else {
+			logging.Infof(
+				"[Compile %s-%t]: Legacy configuration complete",
+				hash,
+				profilingOrDebugging,
+			)
+		}
+	}
 
 	if progress != nil {
 		progress <- 50
