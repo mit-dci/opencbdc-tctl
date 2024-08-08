@@ -61,6 +61,7 @@ type TestRun struct {
 	TicketerLogLevel          string             `json:"ticketerLogLevel"          feFieldTitle:"Ticketer Log Level"              feFieldType:"loglevel"`
 	CoordinatorLogLevel       string             `json:"coordinatorLogLevel"       feFieldTitle:"Coordinator Log Level"           feFieldType:"loglevel"`
 	WatchtowerLogLevel        string             `json:"watchtowerLogLevel"        feFieldTitle:"Watchtower Log Level"            feFieldType:"loglevel"`
+	LoadGenLogLevel           string             `json:"loadGenLogLevel"           feFieldTitle:"Loadgen Log Level"               feFieldType:"loglevel"`
 	AtomizerTelemetryLevel    string             `json:"atomizerTelemetryLevel"    feFieldTitle:"Atomizer Telemetry Level"        feFieldType:"tellevel"`
 	ArchiverTelemetryLevel    string             `json:"archiverTelemetryLevel"    feFieldTitle:"Archiver Telemetry Level"        feFieldType:"tellevel"`
 	SentinelTelemetryLevel    string             `json:"sentinelTelemetryLevel"    feFieldTitle:"Sentinel Telemetry Level"        feFieldType:"tellevel"`

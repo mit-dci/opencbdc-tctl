@@ -321,6 +321,12 @@ func (t *TestRunManager) RoleLogLevel(
 		loglevel = tr.WatchtowerLogLevel
 	case common.SystemRoleCoordinator:
 		loglevel = tr.CoordinatorLogLevel
+	case common.SystemRoleAtomizerCliWatchtower:
+		fallthrough
+	case common.SystemRoleParsecGen:
+		fallthrough
+	case common.SystemRoleTwoPhaseGen:
+		loglevel = tr.LoadGenLogLevel
 	}
 	return loglevel
 }
